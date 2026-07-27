@@ -2,14 +2,32 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* TT Hoves Font Faces */
+@font-face {
+  font-family: "TT Hoves Thin";
+  src: url("https://framerusercontent.com/assets/dMwUr8eaLeeiltCQNCLZV3TcrE.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 250;
+  font-display: swap;
+}
 
-/*
- * Design system: warm editorial minimalism.
- *
- * Colors use oklch. Tokens are semantic — components reference
- * background, foreground, primary, etc., never raw values.
- */
+@font-face {
+  font-family: "TT Hoves Regular";
+  src: url("https://framerusercontent.com/assets/1EZK68rvs3NP8AuJVBVLJSYos.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TT Hoves Light";
+  src: url("https://framerusercontent.com/assets/Pwqicuzieh3Tg0EpGtkHBsYcShY.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -35,126 +53,41 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: "Karla", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant", ui-serif, Georgia, serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "TT Hoves Regular", sans-serif;
+  --font-light: "TT Hoves Light", sans-serif;
+  --font-thin: "TT Hoves Thin", sans-serif;
 }
 
 :root {
   --radius: 0.625rem;
 
-  /* Warm cream surface */
-  --background: oklch(0.982 0.008 85);
-  --foreground: oklch(0.24 0.025 65);
-
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.025 65);
-
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.025 65);
-
-  /* Terracotta accent */
-  --primary: oklch(0.56 0.14 50);
-  --primary-foreground: oklch(0.982 0.008 85);
-
-  --secondary: oklch(0.94 0.015 85);
-  --secondary-foreground: oklch(0.24 0.025 65);
-
-  --muted: oklch(0.91 0.012 85);
-  --muted-foreground: oklch(0.52 0.03 70);
-
-  --accent: oklch(0.74 0.1 75);
-  --accent-foreground: oklch(0.24 0.025 65);
-
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #111111;
+  --card-foreground: #ffffff;
+  --popover: #111111;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.12);
+  --muted-foreground: rgba(255, 255, 255, 0.7);
+  --accent: #1a1a1a;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-
-  --border: oklch(0.89 0.01 85);
-  --input: oklch(0.89 0.01 85);
-  --ring: oklch(0.56 0.14 50);
-
-  --chart-1: oklch(0.55 0.14 50);
-  --chart-2: oklch(0.74 0.1 75);
-  --chart-3: oklch(0.52 0.03 70);
-  --chart-4: oklch(0.65 0.08 160);
-  --chart-5: oklch(0.45 0.06 250);
-
-  --sidebar: oklch(0.97 0.01 85);
-  --sidebar-foreground: oklch(0.24 0.025 65);
-  --sidebar-primary: oklch(0.56 0.14 50);
-  --sidebar-primary-foreground: oklch(0.982 0.008 85);
-  --sidebar-accent: oklch(0.94 0.015 85);
-  --sidebar-accent-foreground: oklch(0.24 0.025 65);
-  --sidebar-border: oklch(0.89 0.01 85);
-  --sidebar-ring: oklch(0.56 0.14 50);
-}
-
-.dark {
-  --background: oklch(0.18 0.02 65);
-  --foreground: oklch(0.95 0.01 85);
-
-  --card: oklch(0.22 0.025 65);
-  --card-foreground: oklch(0.95 0.01 85);
-
-  --popover: oklch(0.22 0.025 65);
-  --popover-foreground: oklch(0.95 0.01 85);
-
-  --primary: oklch(0.7 0.12 55);
-  --primary-foreground: oklch(0.18 0.02 65);
-
-  --secondary: oklch(0.28 0.025 65);
-  --secondary-foreground: oklch(0.95 0.01 85);
-
-  --muted: oklch(0.28 0.025 65);
-  --muted-foreground: oklch(0.7 0.04 75);
-
-  --accent: oklch(0.35 0.04 70);
-  --accent-foreground: oklch(0.95 0.01 85);
-
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.7 0.12 55);
-
-  --chart-1: oklch(0.7 0.12 55);
-  --chart-2: oklch(0.74 0.1 75);
-  --chart-3: oklch(0.7 0.04 75);
-  --chart-4: oklch(0.65 0.08 160);
-  --chart-5: oklch(0.45 0.06 250);
-
-  --sidebar: oklch(0.22 0.025 65);
-  --sidebar-foreground: oklch(0.95 0.01 85);
-  --sidebar-primary: oklch(0.7 0.12 55);
-  --sidebar-primary-foreground: oklch(0.18 0.02 65);
-  --sidebar-accent: oklch(0.28 0.025 65);
-  --sidebar-accent-foreground: oklch(0.95 0.01 85);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.7 0.12 55);
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: rgba(255, 255, 255, 0.4);
 }
 
 @layer base {
   * {
+    box-sizing: border-box;
     border-color: var(--color-border);
   }
 
@@ -163,21 +96,16 @@
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
+    background-color: #000000;
+    color: #ffffff;
+    font-family: "TT Hoves Regular", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-serif);
-    font-weight: 500;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "TT Hoves Thin", sans-serif;
+    font-weight: 250;
   }
 }
 
@@ -185,4 +113,112 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .font-tt-thin {
+    font-family: "TT Hoves Thin", sans-serif;
+    font-weight: 250;
+  }
+
+  .font-tt-light {
+    font-family: "TT Hoves Light", sans-serif;
+    font-weight: 300;
+  }
+
+  .font-tt-regular {
+    font-family: "TT Hoves Regular", sans-serif;
+    font-weight: 400;
+  }
+
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-inner {
+    display: flex;
+    flex-shrink: 0;
+    animation: marquee-scroll 30s linear infinite;
+  }
+
+  @keyframes marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .case-study-showcase {
+    display: flex;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .case-study-showcase-inner {
+    display: flex;
+    gap: 16px;
+    flex-shrink: 0;
+    animation: showcase-scroll 40s linear infinite;
+  }
+
+  @keyframes showcase-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .glance-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .glance-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-tab {
+    font-family: "TT Hoves Regular", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: -0.42px;
+    padding: 16px 24px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .filter-tab:first-child {
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .filter-tab.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .filter-tab:hover {
+    color: #ffffff;
+  }
 }
+
+/* ─── Responsive ──────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Two-column grids become single column */
+  .about-grid,
+  .growth-grid,
+  .challenge-row,
+  .working-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Process steps */
+  .process-steps {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
