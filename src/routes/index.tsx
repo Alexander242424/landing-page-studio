@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useIsMobile } from "../hooks/use-mobile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,28 +15,23 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-/* ─── constants ─────────────────────────────────────── */
-
-const TT_THIN = '"TT Hoves Thin", sans-serif';
-const TT_LIGHT = '"TT Hoves Light", sans-serif';
-const TT_REGULAR = '"TT Hoves Regular", sans-serif';
+/* ─── image constants ────────────────────────────────── */
 
 const CASE_IMAGES = {
-  bankrollu: "https://framerusercontent.com/images/vRITaiEiDsdL2yC1in82xp0kydo.png?width=1400&height=880",
-  nespresso: "https://framerusercontent.com/images/rPU0Qjv0ttziUBWU5IgsdRdQ.jpg?width=1400&height=880",
-  tapmy: "https://framerusercontent.com/images/Ip1iXKcEXgJC1IL75ZdqitIxbWc.jpg?width=1400&height=880",
-  firestarter: "https://framerusercontent.com/images/zUXoFmhGfLcY1OSlORzKG7ZnXKE.jpg?width=1400&height=960",
-  boostra: "https://framerusercontent.com/images/WCs2WPTb9F0fANrHFADlOIzZs.jpg?width=1400&height=880",
-  tradevision: "https://framerusercontent.com/images/0kzcVOwqKIbN6JsYjUP1JAr1NE.jpg?width=1400&height=880",
-  extra1: "https://framerusercontent.com/images/gZPVeGM6Vrg0Jw2I60LIIY39qEQ.jpg?width=1400&height=880",
-  extra2: "https://framerusercontent.com/images/Tmhg35kU1fX4LEqzTWD6IbyaKEI.jpg?width=992&height=610",
+  bankrollu:   "https://framerusercontent.com/images/vRITaiEiDsdL2yC1in82xp0kydo.png",
+  nespresso:   "https://framerusercontent.com/images/rPU0Qjv0ttziUBWU5IgsdRdQ.jpg",
+  tapmy:       "https://framerusercontent.com/images/Ip1iXKcEXgJC1IL75ZdqitIxbWc.jpg",
+  firestarter: "https://framerusercontent.com/images/zUXoFmhGfLcY1OSlORzKG7ZnXKE.jpg",
+  boostra:     "https://framerusercontent.com/images/WCs2WPTb9F0fANrHFADlOIzZs.jpg",
+  tradevision: "https://framerusercontent.com/images/0kzcVOwqKIbN6JsYjUP1JAr1NE.jpg",
+  framework:   "https://framerusercontent.com/images/Tmhg35kU1fX4LEqzTWD6IbyaKEI.jpg",
 };
 
-/* ─── main page ─────────────────────────────────────── */
+/* ─── page root ──────────────────────────────────────── */
 
 function LandingPage() {
   return (
-    <div style={{ backgroundColor: "#000", color: "#fff", overflowX: "hidden" }}>
+    <div className="page-wrapper">
       <Navbar />
       <main>
         <HeroSection />
@@ -56,117 +50,53 @@ function LandingPage() {
   );
 }
 
-/* ─── 1. NAVBAR ─────────────────────────────────────── */
+/* ═══════════════════════════════════
+   1. NAVBAR
+   ═══════════════════════════════════ */
 
 function Navbar() {
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        backgroundColor: "#000",
-        display: "flex",
-        alignItems: "stretch",
-        justifyContent: "space-between",
-        borderBottom: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >
-      <a
-        href="/"
-        style={{
-          fontFamily: TT_REGULAR,
-          fontSize: "14px",
-          fontWeight: 400,
-          color: "#fff",
-          letterSpacing: "-0.42px",
-          textDecoration: "none",
-          padding: "16px 24px",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        UXLAB®
-      </a>
+    <nav className="site-nav">
+      <a href="/" className="nav-logo">UXLAB®</a>
 
-      <div style={{ display: "flex" }}>
-        {[
-          { label: "Solutions", href: "#solutions" },
-          { label: "Case Studies", href: "#cases" },
-          { label: "Let's talk", href: "mailto:hello@uxlab.digital" },
-        ].map(({ label, href }) => (
-          <a
-            key={label}
-            href={href}
-            style={{
-              fontFamily: TT_REGULAR,
-              fontSize: "14px",
-              fontWeight: 400,
-              color: "#fff",
-              letterSpacing: "-0.42px",
-              textDecoration: "none",
-              padding: "16px 20px 16px 24px",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              borderLeft: "1px solid rgba(255,255,255,0.1)",
-            }}
-          >
-            {label}
-            <ArrowIcon />
-          </a>
-        ))}
+      <div className="nav-links">
+        <a href="#solutions" className="nav-link nav-link--desktop-only">
+          Solutions <ArrowIcon />
+        </a>
+        <a href="#cases" className="nav-link nav-link--desktop-only">
+          Case Studies <ArrowIcon />
+        </a>
+        <a href="mailto:hello@uxlab.digital" className="nav-link">
+          Let's talk <ArrowIcon />
+        </a>
       </div>
     </nav>
   );
 }
 
-function ArrowIcon() {
+function ArrowIcon({ dark = false }: { dark?: boolean }) {
   return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M1.5 8.5L8.5 1.5M8.5 1.5H2.5M8.5 1.5V7.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="arrow-icon">
+      <path
+        d="M1.5 8.5L8.5 1.5M8.5 1.5H2.5M8.5 1.5V7.5"
+        stroke={dark ? "#000" : "#fff"}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-/* ─── 2. HERO ───────────────────────────────────────── */
+/* ═══════════════════════════════════
+   2. HERO
+   ═══════════════════════════════════ */
 
 function HeroSection() {
   return (
-    <section
-      style={{
-        position: "relative",
-        minHeight: "100dvh",
-        backgroundColor: "#000",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        paddingTop: "52px",
-        overflow: "hidden",
-      }}
-    >
-      {/* subtitle text — right side, upper */}
-      <div
-        style={{
-          position: "absolute",
-          top: "calc(52px + 80px)",
-          right: "24px",
-          textAlign: "right",
-          maxWidth: "340px",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "20px",
-            fontWeight: 300,
-            color: "#fff",
-            letterSpacing: "-0.6px",
-            lineHeight: "28.8px",
-          }}
-        >
+    <section className="hero">
+      <div className="hero-subtitle-wrap">
+        <p className="hero-subtitle">
           UXLAB® partners with product teams
           <br />
           to define and ship revenue-critical product experiences from
@@ -175,28 +105,14 @@ function HeroSection() {
         </p>
       </div>
 
-      {/* giant headline */}
-      <h1
-        style={{
-          fontFamily: TT_THIN,
-          fontSize: "clamp(80px, 19vw, 220px)",
-          fontWeight: 250,
-          color: "#fff",
-          letterSpacing: "clamp(-6px, -1.5vw, -15.5px)",
-          lineHeight: 1.2,
-          margin: 0,
-          padding: "0 0 0 0",
-          whiteSpace: "nowrap",
-          overflow: "visible",
-        }}
-      >
-        We Design Revenue
-      </h1>
+      <h1 className="hero-headline">We Design Revenue</h1>
     </section>
   );
 }
 
-/* ─── 3. CASE STUDY SHOWCASE ────────────────────────── */
+/* ═══════════════════════════════════
+   3. CASE STUDY SHOWCASE
+   ═══════════════════════════════════ */
 
 function CaseStudyShowcase() {
   const images = [
@@ -206,42 +122,16 @@ function CaseStudyShowcase() {
     CASE_IMAGES.firestarter,
     CASE_IMAGES.boostra,
     CASE_IMAGES.tradevision,
-    CASE_IMAGES.extra1,
-    CASE_IMAGES.extra2,
+    CASE_IMAGES.framework,
   ];
 
   return (
-    <section
-      style={{
-        backgroundColor: "#f0ede8",
-        overflow: "hidden",
-        paddingTop: "0",
-        paddingBottom: "0",
-      }}
-    >
+    <section className="showcase-section">
       <div className="case-study-showcase">
         <div className="case-study-showcase-inner">
           {[...images, ...images].map((src, i) => (
-            <div
-              key={i}
-              style={{
-                flexShrink: 0,
-                width: "clamp(280px, 30vw, 480px)",
-                height: "clamp(200px, 22vw, 340px)",
-                overflow: "hidden",
-              }}
-            >
-              <img
-                src={src}
-                alt=""
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-                loading="lazy"
-              />
+            <div key={i} className="showcase-item">
+              <img src={src} alt="" loading="lazy" />
             </div>
           ))}
         </div>
@@ -250,180 +140,64 @@ function CaseStudyShowcase() {
   );
 }
 
-/* ─── 4. FEATURED ENGAGEMENTS ───────────────────────── */
+/* ═══════════════════════════════════
+   4. FEATURED ENGAGEMENTS
+   ═══════════════════════════════════ */
 
 function FeaturedEngagements() {
-  const logos = [
-    { name: "Calendly", style: { fontFamily: TT_LIGHT, fontSize: "20px", letterSpacing: "-0.4px" } },
-    { name: "Stan", style: { fontFamily: TT_REGULAR, fontSize: "20px", fontWeight: 700, letterSpacing: "0px" } },
-    { name: "Forbes", style: { fontFamily: "Georgia, serif", fontSize: "20px", letterSpacing: "0px" } },
-    { name: "NESPRESSO", style: { fontFamily: TT_REGULAR, fontSize: "14px", letterSpacing: "2px" } },
-    { name: "softr", style: { fontFamily: TT_REGULAR, fontSize: "20px", letterSpacing: "-0.4px" } },
-  ];
-  const logosRow2 = [
-    { name: "ZARA", style: { fontFamily: TT_REGULAR, fontSize: "22px", letterSpacing: "4px" } },
-    { name: "Polymarket", style: { fontFamily: TT_REGULAR, fontSize: "18px", letterSpacing: "-0.4px" } },
-    { name: "easy®", style: { fontFamily: TT_REGULAR, fontSize: "20px", fontWeight: 700, letterSpacing: "-0.4px" } },
-    { name: "Forbes Travel Guide", style: { fontFamily: "Georgia, serif", fontSize: "14px", letterSpacing: "0px" } },
-    { name: "Pipedrive", style: { fontFamily: TT_REGULAR, fontSize: "18px", letterSpacing: "-0.4px" } },
-  ];
-
   return (
-    <section
-      style={{
-        backgroundColor: "#000",
-        padding: "80px 24px",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: TT_LIGHT,
-          fontSize: "20px",
-          fontWeight: 300,
-          color: "#fff",
-          letterSpacing: "-0.6px",
-          textAlign: "center",
-          marginBottom: "48px",
-        }}
-      >
-        Featured engagements
-      </p>
+    <section className="engagements-section">
+      <p className="engagements-label">Featured engagements</p>
 
-      {[logos, logosRow2].map((row, ri) => (
-        <div
-          key={ri}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "clamp(32px, 6vw, 80px)",
-            marginBottom: ri === 0 ? "40px" : 0,
-          }}
-        >
-          {row.map(({ name, style }) => (
-            <span
-              key={name}
-              style={{
-                ...style,
-                color: "rgba(255,255,255,0.85)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {name}
-            </span>
-          ))}
-        </div>
-      ))}
+      <div className="engagements-row">
+        <span className="logo-item logo-calendly">Calendly</span>
+        <span className="logo-item logo-stan">Stan</span>
+        <span className="logo-item logo-forbes">Forbes</span>
+        <span className="logo-item logo-nespresso">NESPRESSO</span>
+        <span className="logo-item logo-softr">softr</span>
+      </div>
+
+      <div className="engagements-row">
+        <span className="logo-item logo-zara">ZARA</span>
+        <span className="logo-item logo-polymarket">Polymarket</span>
+        <span className="logo-item logo-easy">easy®</span>
+        <span className="logo-item logo-ftg">Forbes Travel Guide</span>
+        <span className="logo-item logo-pipedrive">Pipedrive</span>
+      </div>
     </section>
   );
 }
 
-/* ─── 5. ABOUT + STATS ──────────────────────────────── */
+/* ═══════════════════════════════════
+   5. ABOUT + STATS
+   ═══════════════════════════════════ */
 
 function AboutStats() {
-  const isMobile = useIsMobile();
   return (
-    <section
-      style={{
-        backgroundColor: "#000",
-        padding: "80px 24px 80px",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gap: "48px",
-          alignItems: "start",
-          marginBottom: "64px",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "20px",
-            fontWeight: 300,
-            color: "#fff",
-            letterSpacing: "-0.6px",
-            lineHeight: "28.8px",
-          }}
-        >
-          Your growth starts here
-        </p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <p
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "20px",
-              fontWeight: 300,
-              color: "#fff",
-              letterSpacing: "-0.6px",
-              lineHeight: "28.8px",
-            }}
-          >
-            Since 2016, we have partnered with leading teams to define, design, and ship critical product experiences at scale.
+    <section className="about-section">
+      <div className="about-grid">
+        <p className="about-col-heading">Your growth starts here</p>
+        <div className="about-col-text">
+          <p className="about-paragraph">
+            Since 2016, we have partnered with leading teams to define, design, and ship
+            critical product experiences at scale.
           </p>
-          <p
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "20px",
-              fontWeight: 300,
-              color: "#fff",
-              letterSpacing: "-0.6px",
-              lineHeight: "28.8px",
-            }}
-          >
-            We embed directly into live products to shape core flows, features, and systems — from strategic direction to production-ready execution.
+          <p className="about-paragraph">
+            We embed directly into live products to shape core flows, features, and
+            systems — from strategic direction to production-ready execution.
           </p>
         </div>
       </div>
 
-      {/* Stats row */}
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)",
-          gap: "24px",
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-          paddingTop: "48px",
-        }}
-      >
+      <div className="stats-grid">
         {[
           { stat: "1.2B", label: "Global users reached" },
-          { stat: "156", label: "Products shipped" },
-          { stat: "2", label: "Weeks for the first results" },
+          { stat: "156",  label: "Products shipped" },
+          { stat: "2",    label: "Weeks for the first results" },
         ].map(({ stat, label }) => (
           <div key={stat}>
-            <div
-              style={{
-                fontFamily: TT_THIN,
-                fontSize: "clamp(48px, 8vw, 102px)",
-                fontWeight: 250,
-                color: "#fff",
-                letterSpacing: "-7.14px",
-                lineHeight: 1,
-                marginBottom: "12px",
-              }}
-            >
-              {stat}
-            </div>
-            <p
-              style={{
-                fontFamily: TT_LIGHT,
-                fontSize: "20px",
-                fontWeight: 300,
-                color: "rgba(255,255,255,0.7)",
-                letterSpacing: "-0.6px",
-                lineHeight: "28.8px",
-              }}
-            >
-              {label}
-            </p>
+            <div className="stat-number">{stat}</div>
+            <p className="stat-label">{label}</p>
           </div>
         ))}
       </div>
@@ -431,60 +205,28 @@ function AboutStats() {
   );
 }
 
-/* ─── 6. GROWTH FRAMEWORK ───────────────────────────── */
+/* ═══════════════════════════════════
+   6. GROWTH FRAMEWORK
+   ═══════════════════════════════════ */
 
 function GrowthFramework() {
-  const isMobile = useIsMobile();
   return (
-    <section
-      id="solutions"
-      style={{
-        backgroundColor: "#000",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          minHeight: isMobile ? "auto" : "600px",
-        }}
-      >
-        {/* Left text */}
-        <div style={{ padding: "64px 48px 64px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+    <section className="growth-section" id="solutions">
+      <div className="growth-grid">
+        {/* Left text column */}
+        <div className="growth-left">
           <div>
-            <h2
-              style={{
-                fontFamily: TT_THIN,
-                fontSize: "clamp(48px, 8vw, 102px)",
-                fontWeight: 250,
-                color: "#fff",
-                letterSpacing: "-7.14px",
-                lineHeight: 1,
-                marginBottom: "32px",
-              }}
-            >
+            <h2 className="growth-heading">
               Growth
               <br />
               Framework
             </h2>
-            <p
-              style={{
-                fontFamily: TT_LIGHT,
-                fontSize: "20px",
-                fontWeight: 300,
-                color: "#fff",
-                letterSpacing: "-0.6px",
-                lineHeight: "28.8px",
-                marginBottom: "40px",
-                maxWidth: "480px",
-              }}
-            >
-              We take ownership of growth-critical product experiences. From defining key moments to shipping production-ready solutions inside live products.
+            <p className="growth-desc">
+              We take ownership of growth-critical product experiences. From defining
+              key moments to shipping production-ready solutions inside live products.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <div className="growth-list">
               {[
                 "Product & Funnel investigation",
                 "Behavioural conversion modelling",
@@ -492,46 +234,26 @@ function GrowthFramework() {
                 "Production-ready UX solutions",
                 "A/B testing & post-release performance analysis",
               ].map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    fontFamily: TT_LIGHT,
-                    fontSize: "20px",
-                    fontWeight: 300,
-                    color: "#fff",
-                    letterSpacing: "-0.6px",
-                    lineHeight: "28.8px",
-                    padding: "16px 0",
-                    borderBottom: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
-                  <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "14px" }}>—</span>
+                <div key={item} className="growth-list-item">
+                  <span className="growth-list-dash">—</span>
                   {item}
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ marginTop: "40px" }}>
-            <TalkButton dark={false} />
+          <div className="growth-cta">
+            <TalkButton />
           </div>
         </div>
 
-        {/* Right image */}
-        <div style={{ position: "relative", overflow: "hidden" }}>
+        {/* Right image column */}
+        <div className="growth-right">
           <img
-            src={CASE_IMAGES.extra2}
+            src={CASE_IMAGES.framework}
             alt="Growth Framework"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-              filter: "brightness(0.7)",
-            }}
+            className="growth-image"
+            loading="lazy"
           />
         </div>
       </div>
@@ -539,47 +261,41 @@ function GrowthFramework() {
   );
 }
 
-/* ─── CTA Button ────────────────────────────────────── */
+/* ═══════════════════════════════════
+   SHARED: TALK BUTTON
+   ═══════════════════════════════════ */
 
-function TalkButton({ dark }: { dark: boolean }) {
+function TalkButton({ dark = false }: { dark?: boolean }) {
   return (
     <a
       href="mailto:hello@uxlab.digital"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "8px",
-        fontFamily: TT_REGULAR,
-        fontSize: "18px",
-        fontWeight: 400,
-        color: dark ? "#fff" : "#000",
-        letterSpacing: "-0.54px",
-        backgroundColor: dark ? "#000" : "#fff",
-        borderRadius: "100px",
-        padding: "12px 24px",
-        textDecoration: "none",
-        border: dark ? "1px solid rgba(255,255,255,0.2)" : "none",
-        lineHeight: "24px",
-        transition: "opacity 0.2s",
-      }}
+      className={`talk-btn${dark ? " talk-btn--dark" : ""}`}
     >
       Let's talk
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M2 12L12 2M12 2H3.5M12 2V10.5" stroke={dark ? "#fff" : "#000"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M2 12L12 2M12 2H3.5M12 2V10.5"
+          stroke={dark ? "#fff" : "#000"}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </a>
   );
 }
 
-/* ─── 7. SELECTED RESULTS ───────────────────────────── */
+/* ═══════════════════════════════════
+   7. SELECTED RESULTS
+   ═══════════════════════════════════ */
 
 const CASE_STUDIES = [
   {
     id: "bankrollu",
     image: CASE_IMAGES.bankrollu,
     stats: [
-      { value: "+ 40%", label: "User LTV" },
-      { value: "+27%", label: "Trial completion rate" },
+      { value: "+40%",  label: "User LTV" },
+      { value: "+27%",  label: "Trial completion rate" },
     ],
     headline: "4× Trial-to-Paid Conversion via experience-led design",
     company: "Bankrollu",
@@ -591,8 +307,8 @@ const CASE_STUDIES = [
     id: "nespresso",
     image: CASE_IMAGES.nespresso,
     stats: [
-      { value: "+18%", label: "Mobile conversion rate" },
-      { value: "+24%", label: "Drop-off reduction" },
+      { value: "+18%",  label: "Mobile conversion rate" },
+      { value: "+24%",  label: "Drop-off reduction" },
     ],
     headline: "+32% Checkout Completion Rate through experience-led optimization",
     company: "Nespresso",
@@ -605,7 +321,7 @@ const CASE_STUDIES = [
     image: CASE_IMAGES.tapmy,
     stats: [
       { value: "+100%", label: "+46% Activation rate" },
-      { value: "1.3B", label: "Global users reached" },
+      { value: "1.3B",  label: "Global users reached" },
     ],
     headline: "1,000 Paying Users in 3 Months via experience-led monetization",
     company: "Tapmy",
@@ -618,7 +334,7 @@ const CASE_STUDIES = [
     image: CASE_IMAGES.firestarter,
     stats: [
       { value: "+142%", label: "User activation" },
-      { value: "+66%", label: "Conversion rate" },
+      { value: "+66%",  label: "Conversion rate" },
     ],
     headline: "+142% in User Activation via experience-led onboarding",
     company: "Firestarter",
@@ -630,8 +346,8 @@ const CASE_STUDIES = [
     id: "boostra",
     image: CASE_IMAGES.boostra,
     stats: [
-      { value: "+41%", label: "Trial activation rate" },
-      { value: "+30%", label: "Average conversion uplift" },
+      { value: "+41%",  label: "Trial activation rate" },
+      { value: "+30%",  label: "Average conversion uplift" },
     ],
     headline: "+32% Trial-to-Paid Conversion via experience-led design",
     company: "Boostra",
@@ -666,7 +382,6 @@ const FILTER_TABS = [
 ];
 
 function SelectedResults() {
-  const isMobile = useIsMobile();
   const [activeFilter, setActiveFilter] = useState("Selected Cases");
 
   const filtered =
@@ -675,44 +390,14 @@ function SelectedResults() {
       : CASE_STUDIES.filter((c) => c.tags.includes(activeFilter));
 
   return (
-    <section
-      id="cases"
-      style={{
-        backgroundColor: "#000",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >
-      {/* Huge heading */}
-      <div style={{ overflow: "hidden", padding: "0 0 0 0" }}>
-        <h2
-          style={{
-            fontFamily: TT_THIN,
-            fontSize: "clamp(60px, 22vw, 248px)",
-            fontWeight: 250,
-            color: "#fff",
-            letterSpacing: "clamp(-3px, -1.5vw, -17.36px)",
-            lineHeight: 1,
-            margin: 0,
-            padding: "48px 0 0 0",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Selected
-          <br />
-          Results
-        </h2>
-      </div>
+    <section className="results-section" id="cases">
+      <h2 className="section-heading">
+        Selected
+        <br />
+        Results
+      </h2>
 
-      {/* Filter tabs */}
-      <div
-        style={{
-          display: "flex",
-          overflowX: "auto",
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          scrollbarWidth: "none",
-        }}
-      >
+      <div className="filter-bar">
         {FILTER_TABS.map((tab) => (
           <button
             key={tab}
@@ -724,139 +409,61 @@ function SelectedResults() {
         ))}
       </div>
 
-      {/* Case cards grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-        }}
-      >
-        {filtered.map((cs, i) => (
-          <CaseCard key={cs.id} data={cs} borderRight={i % 2 === 0} />
+      <div className="cases-grid">
+        {filtered.map((cs) => (
+          <CaseCard key={cs.id} data={cs} />
         ))}
       </div>
     </section>
   );
 }
 
-function CaseCard({ data, borderRight }: { data: (typeof CASE_STUDIES)[0]; borderRight: boolean }) {
+function CaseCard({ data }: { data: (typeof CASE_STUDIES)[0] }) {
   return (
-    <div
-      style={{
-        borderBottom: "1px solid rgba(255,255,255,0.1)",
-        borderRight: borderRight ? "1px solid rgba(255,255,255,0.1)" : "none",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Image */}
-      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "16/9" }}>
-        <img
-          src={data.image}
-          alt={data.company}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          loading="lazy"
-        />
-        {/* Read case study button */}
-        <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              fontFamily: TT_REGULAR,
-              fontSize: "18px",
-              fontWeight: 400,
-              color: "#000",
-              letterSpacing: "-0.54px",
-              backgroundColor: "#fff",
-              borderRadius: "100px",
-              padding: "10px 20px",
-              cursor: "pointer",
-            }}
-          >
-            Read Case Study
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M1.5 10.5L10.5 1.5M10.5 1.5H3M10.5 1.5V9" stroke="#000" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </div>
+    <article className="case-card">
+      <div className="case-image-wrap">
+        <img src={data.image} alt={data.company} loading="lazy" />
+        <span className="case-read-badge">
+          Read Case Study
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M1.5 10.5L10.5 1.5M10.5 1.5H3M10.5 1.5V9"
+              stroke="#000"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
       </div>
 
-      {/* Text content */}
-      <div style={{ padding: "32px 32px 40px" }}>
-        {/* Stats */}
-        <div style={{ display: "flex", gap: "40px", marginBottom: "24px" }}>
+      <div className="case-body">
+        <div className="case-stats">
           {data.stats.map(({ value, label }) => (
             <div key={value}>
-              <div
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "48px",
-                  fontWeight: 300,
-                  color: "#fff",
-                  letterSpacing: "-1.92px",
-                  lineHeight: 1,
-                  marginBottom: "4px",
-                }}
-              >
-                {value}
-              </div>
-              <div
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "20px",
-                  fontWeight: 300,
-                  color: "rgba(255,255,255,0.7)",
-                  letterSpacing: "-0.6px",
-                  lineHeight: "28.8px",
-                }}
-              >
-                {label}
-              </div>
+              <div className="case-stat-value">{value}</div>
+              <div className="case-stat-label">{label}</div>
             </div>
           ))}
         </div>
 
-        {/* Headline */}
-        <p
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "28px",
-            fontWeight: 300,
-            color: "#fff",
-            letterSpacing: "-1.12px",
-            lineHeight: "36px",
-            marginBottom: "20px",
-          }}
-        >
-          {data.headline}
-        </p>
+        <p className="case-headline">{data.headline}</p>
 
-        {/* Meta */}
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            fontFamily: TT_LIGHT,
-            fontSize: "14px",
-            fontWeight: 300,
-            color: "rgba(255,255,255,0.7)",
-            letterSpacing: "-0.56px",
-          }}
-        >
+        <div className="case-meta">
           <span>{data.company}</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span className="case-meta-dot">·</span>
           <span>{data.type}</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span className="case-meta-dot">·</span>
           <span>{data.date}</span>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
-/* ─── 8. CHALLENGES WE SOLVE ────────────────────────── */
+/* ═══════════════════════════════════
+   8. CHALLENGES WE SOLVE
+   ═══════════════════════════════════ */
 
 const CHALLENGES = [
   {
@@ -887,92 +494,26 @@ const CHALLENGES = [
 ];
 
 function ChallengesSection() {
-  const isMobile = useIsMobile();
   return (
-    <section
-      style={{
-        backgroundColor: "#000",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-        overflow: "hidden",
-      }}
-    >
-      {/* Giant heading */}
-      <div style={{ overflow: "hidden" }}>
-        <h2
-          style={{
-            fontFamily: TT_THIN,
-            fontSize: "clamp(60px, 22vw, 248px)",
-            fontWeight: 250,
-            color: "#fff",
-            letterSpacing: "clamp(-3px, -1.5vw, -17.36px)",
-            lineHeight: 1,
-            margin: 0,
-            padding: "48px 0 0 0",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Challenges
-          <br />
-          We Solve
-        </h2>
-      </div>
+    <section className="challenges-section">
+      <h2 className="section-heading">
+        Challenges
+        <br />
+        We Solve
+      </h2>
 
-      {/* Challenge items */}
-      <div style={{ marginTop: "0px" }}>
+      <div className="challenge-list">
         {CHALLENGES.map(({ num, title, desc }) => (
-          <div
-            key={num}
-            style={{
-              borderTop: "1px solid rgba(255,255,255,0.1)",
-              padding: isMobile ? "32px 24px" : "40px 24px",
-              display: "grid",
-              gridTemplateColumns: isMobile ? "40px 1fr" : "80px 1fr auto",
-              gap: isMobile ? "16px" : "32px",
-              alignItems: "start",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: TT_LIGHT,
-                fontSize: "14px",
-                fontWeight: 300,
-                color: "rgba(255,255,255,0.5)",
-                letterSpacing: "-0.42px",
-                paddingTop: "8px",
-              }}
-            >
-              {num}
-            </span>
-            <div>
-              <h3
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "clamp(24px, 4vw, 48px)",
-                  fontWeight: 300,
-                  color: "#fff",
-                  letterSpacing: "-1.92px",
-                  lineHeight: 1.1,
-                  marginBottom: "16px",
-                }}
-              >
-                {title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "20px",
-                  fontWeight: 300,
-                  color: "rgba(255,255,255,0.7)",
-                  letterSpacing: "-0.6px",
-                  lineHeight: "28.8px",
-                  maxWidth: "540px",
-                }}
-              >
-                {desc}
-              </p>
+          <div key={num} className="challenge-row">
+            <span className="challenge-num">{num}</span>
+
+            <div className="challenge-content">
+              <h3 className="challenge-title">{title}</h3>
+              <p className="challenge-desc">{desc}</p>
             </div>
-            <div style={{ paddingTop: "6px" }}>
-              <TalkButton dark={false} />
+
+            <div className="challenge-cta">
+              <TalkButton />
             </div>
           </div>
         ))}
@@ -981,7 +522,9 @@ function ChallengesSection() {
   );
 }
 
-/* ─── 9. PROCESS STEPS ──────────────────────────────── */
+/* ═══════════════════════════════════
+   9. PROCESS STEPS
+   ═══════════════════════════════════ */
 
 const STEPS = [
   { num: "01", label: "Project Kickoff" },
@@ -992,70 +535,19 @@ const STEPS = [
 ];
 
 function ProcessSection() {
-  const isMobile = useIsMobile();
   return (
-    <section
-      style={{
-        backgroundColor: "#000",
-        borderTop: "1px solid rgba(255,255,255,0.1)",
-        padding: "80px 24px",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        <h2
-          style={{
-            fontFamily: TT_THIN,
-            fontSize: "clamp(32px, 8vw, 102px)",
-            fontWeight: 250,
-            color: "#fff",
-            letterSpacing: "clamp(-2px, -0.7vw, -7.14px)",
-            lineHeight: 1.05,
-            marginBottom: "64px",
-            maxWidth: "900px",
-          }}
-        >
-          After shipping hundreds of products, there are a few key things we've learned are needed to do the best work
+    <section className="process-section">
+      <div className="process-inner">
+        <h2 className="process-heading">
+          After shipping hundreds of products, there are a few key things
+          we've learned are needed to do the best work
         </h2>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(5, 1fr)",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          {STEPS.map(({ num, label }, i) => (
-            <div
-              key={num}
-              style={{
-                padding: "32px 24px 32px 0",
-                borderRight: i < 4 ? "1px solid rgba(255,255,255,0.1)" : "none",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "14px",
-                  fontWeight: 300,
-                  color: "rgba(255,255,255,0.5)",
-                  letterSpacing: "-0.42px",
-                  marginBottom: "12px",
-                }}
-              >
-                {num}
-              </div>
-              <div
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "20px",
-                  fontWeight: 300,
-                  color: "#fff",
-                  letterSpacing: "-0.6px",
-                  lineHeight: "28.8px",
-                }}
-              >
-                {label}
-              </div>
+        <div className="process-grid">
+          {STEPS.map(({ num, label }) => (
+            <div key={num} className="process-step">
+              <div className="process-step-num">{num}</div>
+              <div className="process-step-label">{label}</div>
             </div>
           ))}
         </div>
@@ -1064,101 +556,27 @@ function ProcessSection() {
   );
 }
 
-/* ─── 10. WORKING MODELS ────────────────────────────── */
+/* ═══════════════════════════════════
+   10. WORKING MODELS
+   ═══════════════════════════════════ */
 
 function WorkingModels() {
-  const isMobile = useIsMobile();
   return (
-    <section
-      style={{
-        backgroundColor: "#f5f5f5",
-        padding: "0",
-        overflow: "hidden",
-      }}
-    >
-      {/* Giant heading */}
-      <div style={{ overflow: "hidden" }}>
-        <h2
-          style={{
-            fontFamily: TT_THIN,
-            fontSize: "clamp(60px, 22vw, 248px)",
-            fontWeight: 250,
-            color: "#000",
-            letterSpacing: "clamp(-3px, -1.5vw, -17.36px)",
-            lineHeight: 1,
-            margin: 0,
-            padding: "48px 0 0 0",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Working
-          <br />
-          Models
-        </h2>
-      </div>
+    <section className="models-section">
+      <h2 className="models-heading">
+        Working
+        <br />
+        Models
+      </h2>
 
-      {/* Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gap: "0",
-          padding: "0",
-          marginTop: "48px",
-        }}
-      >
+      <div className="models-grid">
         {/* Sprint */}
-        <div
-          style={{
-            backgroundColor: "#fff",
-            padding: "48px 40px 48px",
-            borderRight: "1px solid rgba(0,0,0,0.1)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0",
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "48px",
-              fontWeight: 300,
-              color: "#000",
-              letterSpacing: "-1.92px",
-              lineHeight: 1,
-              marginBottom: "12px",
-            }}
-          >
-            Sprint
-          </h3>
-          <p
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "20px",
-              fontWeight: 300,
-              color: "#000",
-              letterSpacing: "-0.6px",
-              lineHeight: "28.8px",
-              marginBottom: "8px",
-            }}
-          >
-            Core flow. Fixed scope. Revenue impact. (funnel, paywall, dedicated feature)
-          </p>
-          <p
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "20px",
-              fontWeight: 300,
-              color: "rgba(0,0,0,0.6)",
-              letterSpacing: "-0.6px",
-              lineHeight: "28.8px",
-              marginBottom: "32px",
-            }}
-          >
-            Duration: 2–3 weeks
-          </p>
+        <div className="model-card">
+          <h3 className="model-title">Sprint</h3>
+          <p className="model-desc">Core flow. Fixed scope. Revenue impact. (funnel, paywall, dedicated feature)</p>
+          <p className="model-duration">Duration: 2–3 weeks</p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0", borderTop: "1px solid rgba(0,0,0,0.1)", marginBottom: "40px" }}>
+          <div className="model-features">
             {[
               "Revenue flow breakdown",
               "Clear bottleneck resolution",
@@ -1166,119 +584,37 @@ function WorkingModels() {
               "A/B ready specs (events, success metrics)",
               "Dev-handoff (Figma + logic)",
             ].map((item) => (
-              <div
-                key={item}
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "20px",
-                  fontWeight: 300,
-                  color: "#000",
-                  letterSpacing: "-0.6px",
-                  lineHeight: "28.8px",
-                  padding: "14px 0",
-                  borderBottom: "1px solid rgba(0,0,0,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2.5 8L6.5 12L13.5 4" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              <div key={item} className="model-feature">
+                <CheckIcon />
                 {item}
               </div>
             ))}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
-            <a
-              href="mailto:hello@uxlab.digital"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                fontFamily: TT_REGULAR,
-                fontSize: "18px",
-                fontWeight: 400,
-                color: "#fff",
-                letterSpacing: "-0.54px",
-                backgroundColor: "#000",
-                borderRadius: "100px",
-                padding: "12px 24px",
-                textDecoration: "none",
-                lineHeight: "24px",
-              }}
-            >
+          <div className="model-footer">
+            <a href="mailto:hello@uxlab.digital" className="model-btn">
               Let's talk
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 12L12 2M12 2H3.5M12 2V10.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M2 12L12 2M12 2H3.5M12 2V10.5"
+                  stroke="#fff"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </a>
-            <span
-              style={{
-                fontFamily: TT_LIGHT,
-                fontSize: "16px",
-                fontWeight: 300,
-                color: "rgba(0,0,0,0.7)",
-                letterSpacing: "-0.48px",
-              }}
-            >
-              Fixed price: 15,000 USD (sprint)
-            </span>
+            <span className="model-price">Fixed price: 15,000 USD (sprint)</span>
           </div>
         </div>
 
         {/* Marathon */}
-        <div
-          style={{
-            backgroundColor: "#fff",
-            padding: "48px 40px 48px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "0",
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "48px",
-              fontWeight: 300,
-              color: "#000",
-              letterSpacing: "-1.92px",
-              lineHeight: 1,
-              marginBottom: "12px",
-            }}
-          >
-            Marathon
-          </h3>
-          <p
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "20px",
-              fontWeight: 300,
-              color: "#000",
-              letterSpacing: "-0.6px",
-              lineHeight: "28.8px",
-              marginBottom: "8px",
-            }}
-          >
-            System-level optimization for sustained growth. Product launch.
-          </p>
-          <p
-            style={{
-              fontFamily: TT_LIGHT,
-              fontSize: "20px",
-              fontWeight: 300,
-              color: "rgba(0,0,0,0.6)",
-              letterSpacing: "-0.6px",
-              lineHeight: "28.8px",
-              marginBottom: "32px",
-            }}
-          >
-            Duration: 6–12+ weeks
-          </p>
+        <div className="model-card">
+          <h3 className="model-title">Marathon</h3>
+          <p className="model-desc">System-level optimization for sustained growth. Product launch.</p>
+          <p className="model-duration">Duration: 6–12+ weeks</p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0", borderTop: "1px solid rgba(0,0,0,0.1)", marginBottom: "40px" }}>
+          <div className="model-features">
             {[
               "Deep system-level UX and revenue solutions",
               "End-to-end funnel and monetization optimization",
@@ -1286,65 +622,27 @@ function WorkingModels() {
               "Day-to-day iteration and performance tracking",
               "Scalable improvements designed for long-term growth",
             ].map((item) => (
-              <div
-                key={item}
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "20px",
-                  fontWeight: 300,
-                  color: "#000",
-                  letterSpacing: "-0.6px",
-                  lineHeight: "28.8px",
-                  padding: "14px 0",
-                  borderBottom: "1px solid rgba(0,0,0,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2.5 8L6.5 12L13.5 4" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              <div key={item} className="model-feature">
+                <CheckIcon />
                 {item}
               </div>
             ))}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
-            <a
-              href="mailto:hello@uxlab.digital"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                fontFamily: TT_REGULAR,
-                fontSize: "18px",
-                fontWeight: 400,
-                color: "#fff",
-                letterSpacing: "-0.54px",
-                backgroundColor: "#000",
-                borderRadius: "100px",
-                padding: "12px 24px",
-                textDecoration: "none",
-                lineHeight: "24px",
-              }}
-            >
+          <div className="model-footer">
+            <a href="mailto:hello@uxlab.digital" className="model-btn">
               Let's talk
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 12L12 2M12 2H3.5M12 2V10.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M2 12L12 2M12 2H3.5M12 2V10.5"
+                  stroke="#fff"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </a>
-            <span
-              style={{
-                fontFamily: TT_LIGHT,
-                fontSize: "16px",
-                fontWeight: 300,
-                color: "rgba(0,0,0,0.7)",
-                letterSpacing: "-0.48px",
-              }}
-            >
-              Starting from 10,000 USD / Mo
-            </span>
+            <span className="model-price">Starting from 10,000 USD / Mo</span>
           </div>
         </div>
       </div>
@@ -1352,7 +650,23 @@ function WorkingModels() {
   );
 }
 
-/* ─── 11. UXLAB AT A GLANCE ─────────────────────────── */
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="model-feature-check">
+      <path
+        d="M2.5 8L6.5 12L13.5 4"
+        stroke="#000"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════
+   11. UXLAB AT A GLANCE
+   ═══════════════════════════════════ */
 
 const GLANCE_CARDS = [
   {
@@ -1407,105 +721,26 @@ const GLANCE_CARDS = [
 
 function GlanceSection() {
   return (
-    <section
-      style={{
-        backgroundColor: "#f5f5f5",
-        borderTop: "1px solid rgba(0,0,0,0.1)",
-      }}
-    >
-      {/* Header row */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "32px 24px",
-          borderBottom: "1px solid rgba(0,0,0,0.1)",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "20px",
-            fontWeight: 300,
-            color: "#000",
-            letterSpacing: "-0.6px",
-          }}
-        >
-          UXLAB at a Glance
-        </span>
-        <a
-          href="mailto:hello@uxlab.digital"
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "20px",
-            fontWeight: 300,
-            color: "#000",
-            letterSpacing: "-0.6px",
-            textDecoration: "none",
-          }}
-        >
+    <section className="glance-section">
+      <div className="glance-header">
+        <span className="glance-title">UXLAB at a Glance</span>
+        <a href="mailto:hello@uxlab.digital" className="glance-email">
           hello@uxlab.digital
         </a>
       </div>
 
-      {/* Scrolling cards */}
-      <div
-        className="glance-scroll"
-        style={{ cursor: "grab" }}
-      >
+      <div className="glance-scroll">
         {GLANCE_CARDS.map(({ bg, textColor, mutedColor, title, stat, label }, i) => (
           <div
             key={i}
-            style={{
-              flexShrink: 0,
-              width: "clamp(280px, 28vw, 380px)",
-              backgroundColor: bg,
-              padding: "40px 32px",
-              borderRight: "1px solid rgba(0,0,0,0.08)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              minHeight: "380px",
-            }}
+            className="glance-card"
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            style={{ "--card-bg": bg, "--card-text": textColor, "--card-muted": mutedColor } as any}
           >
-            <p
-              style={{
-                fontFamily: TT_LIGHT,
-                fontSize: "20px",
-                fontWeight: 300,
-                color: textColor,
-                letterSpacing: "-0.6px",
-                lineHeight: "28.8px",
-              }}
-            >
-              {title}
-            </p>
-            <div>
-              <div
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "48px",
-                  fontWeight: 300,
-                  color: textColor,
-                  letterSpacing: "-1.92px",
-                  lineHeight: 1,
-                  marginBottom: "4px",
-                }}
-              >
-                {stat}
-              </div>
-              <div
-                style={{
-                  fontFamily: TT_LIGHT,
-                  fontSize: "14px",
-                  fontWeight: 300,
-                  color: mutedColor,
-                  letterSpacing: "-0.56px",
-                }}
-              >
-                {label}
-              </div>
+            <p className="glance-card-title">{title}</p>
+            <div className="glance-card-bottom">
+              <div className="glance-card-stat">{stat}</div>
+              <div className="glance-card-label">{label}</div>
             </div>
           </div>
         ))}
@@ -1514,109 +749,41 @@ function GlanceSection() {
   );
 }
 
-/* ─── 12. FOOTER ────────────────────────────────────── */
+/* ═══════════════════════════════════
+   12. FOOTER
+   ═══════════════════════════════════ */
 
 function Footer() {
   return (
-    <footer
-      style={{
-        backgroundColor: "#000",
-        color: "#fff",
-        overflow: "hidden",
-      }}
-    >
-      {/* Giant headline */}
-      <div style={{ overflow: "hidden", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-        <h2
-          style={{
-            fontFamily: TT_THIN,
-            fontSize: "clamp(48px, 10vw, 140px)",
-            fontWeight: 250,
-            color: "#fff",
-            letterSpacing: "clamp(-2px, -0.8vw, -9px)",
-            lineHeight: 1.1,
-            margin: 0,
-            padding: "64px 24px 48px",
-          }}
-        >
-          Do it once.
-          <br />
-          Do it right.
-        </h2>
-      </div>
+    <footer className="site-footer">
+      <h2 className="footer-headline">
+        Do it once.
+        <br />
+        Do it right.
+      </h2>
 
-      {/* Contact row */}
-      <div
-        style={{
-          padding: "32px 24px",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "20px",
-            fontWeight: 300,
-            color: "rgba(255,255,255,0.7)",
-            letterSpacing: "-0.6px",
-          }}
-        >
+      <div className="footer-contact">
+        <p className="footer-contact-text">
           Contact us:{" "}
-          <a
-            href="mailto:hello@uxlab.digital"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
+          <a href="mailto:hello@uxlab.digital" className="footer-contact-link">
             hello@uxlab.digital
           </a>
         </p>
       </div>
 
-      {/* Bottom row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "24px 24px",
-          flexWrap: "wrap",
-          gap: "16px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: TT_LIGHT,
-            fontSize: "14px",
-            fontWeight: 300,
-            color: "rgba(255,255,255,0.5)",
-            letterSpacing: "-0.42px",
-          }}
-        >
-          Terms of use ©16—26
-        </span>
+      <div className="footer-bottom">
+        <span className="footer-copyright">Terms of use ©16—26</span>
 
-        <nav style={{ display: "flex", gap: "0px" }}>
+        <nav className="footer-nav">
           {[
-            { label: "Solutions", href: "#solutions" },
-            { label: "Cases", href: "#cases" },
-            { label: "About", href: "#about" },
-            { label: "Instagram", href: "#" },
-            { label: "Linkedin", href: "#" },
-            { label: "X", href: "#" },
+            { label: "Solutions",  href: "#solutions" },
+            { label: "Cases",      href: "#cases" },
+            { label: "About",      href: "#about" },
+            { label: "Instagram",  href: "https://www.instagram.com/uxlab_digital/" },
+            { label: "Linkedin",   href: "https://www.linkedin.com/company/uxlabdigital/" },
+            { label: "X",          href: "https://x.com/Uxlab_Digital" },
           ].map(({ label, href }) => (
-            <a
-              key={label}
-              href={href}
-              style={{
-                fontFamily: TT_REGULAR,
-                fontSize: "14px",
-                fontWeight: 400,
-                color: "rgba(255,255,255,0.7)",
-                letterSpacing: "-0.42px",
-                textDecoration: "none",
-                padding: "8px 16px",
-                borderLeft: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
+            <a key={label} href={href} className="footer-nav-link">
               {label}
             </a>
           ))}

@@ -1,8 +1,13 @@
+/* ===================================================
+   UXLAB LANDING PAGE — STYLES
+   Breakpoints: mobile ≤709px | tablet 710–1023px | desktop ≥1024px
+   =================================================== */
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
-/* TT Hoves Font Faces */
+/* ── FONTS ──────────────────────────────────────────── */
 @font-face {
   font-family: "TT Hoves Thin";
   src: url("https://framerusercontent.com/assets/dMwUr8eaLeeiltCQNCLZV3TcrE.woff2") format("woff2");
@@ -10,7 +15,13 @@
   font-weight: 250;
   font-display: swap;
 }
-
+@font-face {
+  font-family: "TT Hoves Light";
+  src: url("https://framerusercontent.com/assets/Pwqicuzieh3Tg0EpGtkHBsYcShY.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
 @font-face {
   font-family: "TT Hoves Regular";
   src: url("https://framerusercontent.com/assets/1EZK68rvs3NP8AuJVBVLJSYos.woff2") format("woff2");
@@ -19,16 +30,10 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "TT Hoves Light";
-  src: url("https://framerusercontent.com/assets/Pwqicuzieh3Tg0EpGtkHBsYcShY.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-}
-
+/* ── TAILWIND CUSTOM VARIANT ─────────────────────────── */
 @custom-variant dark (&:is(.dark *));
 
+/* ── TAILWIND THEME ──────────────────────────────────── */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -62,6 +67,7 @@
   --font-thin: "TT Hoves Thin", sans-serif;
 }
 
+/* ── CSS CUSTOM PROPERTIES ───────────────────────────── */
 :root {
   --radius: 0.625rem;
 
@@ -83,18 +89,84 @@
   --border: rgba(255, 255, 255, 0.12);
   --input: rgba(255, 255, 255, 0.12);
   --ring: rgba(255, 255, 255, 0.4);
+
+  /* ── Typography: DESKTOP defaults (≥1024px) ────────── */
+  --fs-giant:        168px;
+  --ls-giant:        -11.76px;
+  --lh-giant:        0.95;
+
+  --fs-large:        80px;
+  --ls-large:        -5.6px;
+
+  --fs-num:          48px;
+  --ls-num:          -1.92px;
+
+  --fs-case-headline: 28px;
+  --ls-case-headline: -1.12px;
+
+  --fs-body:         20px;
+  --ls-body:         -0.6px;
+  --lh-body:         1.44;
+
+  --fs-nav:          14px;
+  --ls-nav:          -0.42px;
+
+  --fs-footer:       100px;
+  --ls-footer:       -7px;
+
+  /* ── Layout ──────────────────────────────────────────── */
+  --section-px:      24px;
+  --nav-h:           52px;
 }
 
+/* ── TABLET (710px – 1023px) ────────────────────────── */
+@media (min-width: 710px) and (max-width: 1023px) {
+  :root {
+    --fs-giant:         134px;
+    --ls-giant:         -9.38px;
+    --fs-large:         54px;
+    --ls-large:         -3.78px;
+    --fs-num:           38px;
+    --ls-num:           -1.52px;
+    --fs-case-headline: 24px;
+    --ls-case-headline: -0.96px;
+    --fs-body:          18px;
+    --ls-body:          -0.54px;
+    --fs-footer:        80px;
+    --ls-footer:        -5.6px;
+  }
+}
+
+/* ── MOBILE (≤709px) ────────────────────────────────── */
+@media (max-width: 709px) {
+  :root {
+    --fs-giant:         72px;
+    --ls-giant:         -5.04px;
+    --fs-large:         42px;
+    --ls-large:         -2.94px;
+    --fs-num:           28px;
+    --ls-num:           -1.12px;
+    --fs-case-headline: 20px;
+    --ls-case-headline: -0.8px;
+    --fs-body:          16px;
+    --ls-body:          -0.48px;
+    --fs-footer:        56px;
+    --ls-footer:        -3.92px;
+    --section-px:       16px;
+  }
+}
+
+/* ── BASE LAYER ──────────────────────────────────────── */
 @layer base {
   * {
     box-sizing: border-box;
     border-color: var(--color-border);
+    margin: 0;
+    padding: 0;
   }
-
   html {
     scroll-behavior: smooth;
   }
-
   body {
     background-color: #000000;
     color: #ffffff;
@@ -102,80 +174,43 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: "TT Hoves Thin", sans-serif;
-    font-weight: 250;
-  }
+  img, svg { display: block; }
+  a { text-decoration: none; }
 }
 
+/* ── UTILITIES ───────────────────────────────────────── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
+  .font-tt-thin   { font-family: "TT Hoves Thin", sans-serif; font-weight: 250; }
+  .font-tt-light  { font-family: "TT Hoves Light", sans-serif; font-weight: 300; }
+  .font-tt-regular{ font-family: "TT Hoves Regular", sans-serif; font-weight: 400; }
 
-  .font-tt-thin {
-    font-family: "TT Hoves Thin", sans-serif;
-    font-weight: 250;
-  }
-
-  .font-tt-light {
-    font-family: "TT Hoves Light", sans-serif;
-    font-weight: 300;
-  }
-
-  .font-tt-regular {
-    font-family: "TT Hoves Regular", sans-serif;
-    font-weight: 400;
-  }
-
-  .marquee {
-    display: flex;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .marquee-inner {
-    display: flex;
-    flex-shrink: 0;
-    animation: marquee-scroll 30s linear infinite;
-  }
-
-  @keyframes marquee-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
+  /* ── Showcase animation ── */
   .case-study-showcase {
     display: flex;
     overflow: hidden;
-    white-space: nowrap;
   }
-
   .case-study-showcase-inner {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     flex-shrink: 0;
     animation: showcase-scroll 40s linear infinite;
   }
-
   @keyframes showcase-scroll {
-    0% { transform: translateX(0); }
+    0%   { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
 
+  /* ── Glance horizontal scroll ── */
   .glance-scroll {
     display: flex;
     overflow-x: auto;
-    gap: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+  .glance-scroll::-webkit-scrollbar { display: none; }
 
-  .glance-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
+  /* ── Filter tabs ── */
   .filter-tab {
     font-family: "TT Hoves Regular", sans-serif;
     font-size: 14px;
@@ -186,39 +221,986 @@
     cursor: pointer;
     border: none;
     background: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     transition: color 0.2s;
     white-space: nowrap;
+    flex-shrink: 0;
   }
-
-  .filter-tab:first-child {
-    border-left: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  .filter-tab.active {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.06);
-  }
-
-  .filter-tab:hover {
-    color: #ffffff;
-  }
+  .filter-tab.active  { color: #fff; background: rgba(255,255,255,0.06); }
+  .filter-tab:hover   { color: #fff; }
 }
 
-/* ─── Responsive ──────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   COMPONENT STYLES
+   ═══════════════════════════════════════════════════════ */
 
-@media (max-width: 768px) {
-  /* Two-column grids become single column */
-  .about-grid,
-  .growth-grid,
-  .challenge-row,
-  .working-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Process steps */
-  .process-steps {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
+/* ── PAGE WRAPPER ────────────────────────────────────── */
+.page-wrapper {
+  background-color: #000;
+  color: #fff;
+  overflow-x: hidden;
 }
 
+/* ══════════════════════════════
+   1. NAVBAR
+   ══════════════════════════════ */
+.site-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: #000;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: var(--nav-h);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-logo {
+  font-family: "TT Hoves Regular", sans-serif;
+  font-size: var(--fs-nav);
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: var(--ls-nav);
+  text-decoration: none;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  align-items: stretch;
+}
+
+.nav-link {
+  font-family: "TT Hoves Regular", sans-serif;
+  font-size: var(--fs-nav);
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: var(--ls-nav);
+  text-decoration: none;
+  text-transform: uppercase;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav-link--desktop-only {
+  /* visible by default, hidden on mobile */
+}
+
+/* ══════════════════════════════
+   2. HERO
+   ══════════════════════════════ */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-top: var(--nav-h);
+  overflow: hidden;
+}
+
+.hero-subtitle-wrap {
+  position: absolute;
+  top: calc(var(--nav-h) + 120px);
+  right: var(--section-px);
+  text-align: right;
+  max-width: 340px;
+}
+
+.hero-subtitle {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+.hero-headline {
+  font-family: "TT Hoves Thin", sans-serif;
+  /* Fluid: scales from 134px at 710px up to 220px at 1440px */
+  font-size: clamp(134px, 15.28vw, 220px);
+  font-weight: 250;
+  color: #fff;
+  /* em-based so it scales proportionally with font-size */
+  letter-spacing: -0.07em;
+  line-height: 0.95;
+  margin: 0;
+  padding: 0 var(--section-px) 40px;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════
+   3. CASE STUDY SHOWCASE STRIP
+   ══════════════════════════════ */
+.showcase-section {
+  background: #f0ede8;
+  overflow: hidden;
+  padding: 0;
+}
+
+.showcase-item {
+  flex-shrink: 0;
+  width: 400px;
+  height: 280px;
+  overflow: hidden;
+}
+
+.showcase-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ══════════════════════════════
+   4. FEATURED ENGAGEMENTS
+   ══════════════════════════════ */
+.engagements-section {
+  background: #000;
+  padding: 80px var(--section-px);
+}
+
+.engagements-label {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.engagements-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 5vw, 80px);
+  margin-bottom: 40px;
+}
+.engagements-row:last-child { margin-bottom: 0; }
+
+/* Individual logo typography */
+.logo-item {
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  line-height: 1;
+}
+.logo-calendly   { font-family: "TT Hoves Light", sans-serif;   font-size: 20px; letter-spacing: -0.4px; }
+.logo-stan       { font-family: "TT Hoves Regular", sans-serif; font-size: 20px; font-weight: 700; }
+.logo-forbes     { font-family: Georgia, serif;                  font-size: 20px; }
+.logo-nespresso  { font-family: "TT Hoves Regular", sans-serif; font-size: 14px; letter-spacing: 2px; }
+.logo-softr      { font-family: "TT Hoves Regular", sans-serif; font-size: 20px; letter-spacing: -0.4px; }
+.logo-zara       { font-family: "TT Hoves Regular", sans-serif; font-size: 22px; letter-spacing: 4px; }
+.logo-polymarket { font-family: "TT Hoves Regular", sans-serif; font-size: 18px; letter-spacing: -0.4px; }
+.logo-easy       { font-family: "TT Hoves Regular", sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+.logo-ftg        { font-family: Georgia, serif;                  font-size: 14px; }
+.logo-pipedrive  { font-family: "TT Hoves Regular", sans-serif; font-size: 18px; letter-spacing: -0.4px; }
+
+/* ══════════════════════════════
+   5. ABOUT + STATS
+   ══════════════════════════════ */
+.about-section {
+  background: #000;
+  padding: 80px var(--section-px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-bottom: 64px;
+  max-width: 1200px;
+}
+
+.about-col-heading {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+.about-col-text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about-paragraph {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 48px;
+  max-width: 1200px;
+}
+
+.stat-number {
+  font-family: "TT Hoves Thin", sans-serif;
+  font-size: var(--fs-large);
+  font-weight: 250;
+  color: #fff;
+  letter-spacing: var(--ls-large);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.stat-label {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+/* ══════════════════════════════
+   6. GROWTH FRAMEWORK
+   ══════════════════════════════ */
+.growth-section {
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.growth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 600px;
+}
+
+.growth-left {
+  padding: 64px 48px 64px var(--section-px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.growth-heading {
+  font-family: "TT Hoves Thin", sans-serif;
+  font-size: var(--fs-large);
+  font-weight: 250;
+  color: #fff;
+  letter-spacing: var(--ls-large);
+  line-height: 1;
+  margin-bottom: 32px;
+}
+
+.growth-desc {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+  margin-bottom: 40px;
+  max-width: 480px;
+}
+
+.growth-list {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 0;
+}
+
+.growth-list-item {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.growth-list-dash {
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.growth-cta {
+  margin-top: 40px;
+}
+
+.growth-right {
+  position: relative;
+  overflow: hidden;
+}
+
+.growth-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.7);
+}
+
+/* ══════════════════════════════
+   SHARED: SECTION HEADING (giant)
+   ══════════════════════════════ */
+.section-heading {
+  font-family: "TT Hoves Thin", sans-serif;
+  font-size: clamp(134px, 15.28vw, 220px);
+  font-weight: 250;
+  color: #fff;
+  letter-spacing: -0.07em;
+  line-height: 0.95;
+  margin: 0;
+  padding: 48px 0 32px var(--section-px);
+  white-space: nowrap;
+}
+
+.section-heading--dark {
+  color: #000;
+}
+
+/* ══════════════════════════════
+   7. SELECTED RESULTS
+   ══════════════════════════════ */
+.results-section {
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.filter-bar {
+  display: flex;
+  overflow-x: auto;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.cases-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.case-card {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+}
+.case-card:nth-child(odd) {
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.case-image-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+.case-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.case-read-badge {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "TT Hoves Regular", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: -0.54px;
+  background: #fff;
+  border-radius: 100px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.case-body {
+  padding: 32px 32px 40px;
+}
+
+.case-stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 24px;
+}
+
+.case-stat-value {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-num);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-num);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.case-stat-label {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+.case-headline {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-case-headline);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-case-headline);
+  line-height: 1.28;
+  margin-bottom: 20px;
+}
+
+.case-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: -0.56px;
+}
+
+.case-meta-dot {
+  color: rgba(255,255,255,0.3);
+}
+
+/* ══════════════════════════════
+   8. CHALLENGES WE SOLVE
+   ══════════════════════════════ */
+.challenges-section {
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.challenge-list {
+  /* container for all challenge rows */
+}
+
+.challenge-row {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 40px var(--section-px);
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  grid-template-areas: "num content btn";
+  gap: 32px;
+  align-items: start;
+}
+
+.challenge-num {
+  grid-area: num;
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: -0.42px;
+  padding-top: 8px;
+}
+
+.challenge-content {
+  grid-area: content;
+}
+
+.challenge-title {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-num);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-num);
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.challenge-desc {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+  max-width: 540px;
+}
+
+.challenge-cta {
+  grid-area: btn;
+  padding-top: 6px;
+}
+
+/* ══════════════════════════════
+   9. PROCESS STEPS
+   ══════════════════════════════ */
+.process-section {
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 80px var(--section-px);
+}
+
+.process-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.process-heading {
+  font-family: "TT Hoves Thin", sans-serif;
+  font-size: var(--fs-large);
+  font-weight: 250;
+  color: #fff;
+  letter-spacing: var(--ls-large);
+  line-height: 1.1;
+  margin-bottom: 64px;
+  max-width: 1000px;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.process-step {
+  padding: 32px 24px 32px 0;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.process-step:last-child {
+  border-right: none;
+}
+
+.process-step-num {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: -0.42px;
+  margin-bottom: 12px;
+}
+
+.process-step-label {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+/* ══════════════════════════════
+   10. WORKING MODELS
+   ══════════════════════════════ */
+.models-section {
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.models-heading {
+  font-family: "TT Hoves Thin", sans-serif;
+  font-size: clamp(134px, 15.28vw, 220px);
+  font-weight: 250;
+  color: #000;
+  letter-spacing: -0.07em;
+  line-height: 0.95;
+  margin: 0;
+  padding: 48px 0 0 var(--section-px);
+  white-space: nowrap;
+  /* cards have their own margin-top: 48px */
+}
+
+.models-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 48px;
+}
+
+.model-card {
+  background: #fff;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+}
+.model-card:first-child {
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.model-title {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-num);
+  font-weight: 300;
+  color: #000;
+  letter-spacing: var(--ls-num);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.model-desc {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #000;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+  margin-bottom: 8px;
+}
+
+.model-duration {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: rgba(0,0,0,0.6);
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+  margin-bottom: 32px;
+}
+
+.model-features {
+  flex: 1;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  margin-bottom: 40px;
+}
+
+.model-feature {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #000;
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.model-feature-check {
+  flex-shrink: 0;
+  color: #000;
+}
+
+.model-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.model-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "TT Hoves Regular", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: -0.54px;
+  background: #000;
+  border-radius: 100px;
+  padding: 12px 24px;
+  text-decoration: none;
+  line-height: 24px;
+}
+
+.model-price {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(0,0,0,0.7);
+  letter-spacing: -0.48px;
+}
+
+/* ══════════════════════════════
+   11. UXLAB AT A GLANCE
+   ══════════════════════════════ */
+.glance-section {
+  background: #f5f5f5;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.glance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px var(--section-px);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.glance-title {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #000;
+  letter-spacing: var(--ls-body);
+}
+
+.glance-email {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: #000;
+  letter-spacing: var(--ls-body);
+  text-decoration: none;
+}
+
+.glance-card {
+  flex-shrink: 0;
+  width: clamp(280px, 28vw, 380px);
+  background: var(--card-bg, #111);
+  padding: 40px 32px;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+}
+
+.glance-card-title {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: var(--card-text, #fff);
+  letter-spacing: var(--ls-body);
+  line-height: var(--lh-body);
+}
+
+.glance-card-bottom {}
+
+.glance-card-stat {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-num);
+  font-weight: 300;
+  color: var(--card-text, #fff);
+  letter-spacing: var(--ls-num);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.glance-card-label {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--card-muted, rgba(255,255,255,0.7));
+  letter-spacing: -0.56px;
+}
+
+/* ══════════════════════════════
+   12. FOOTER
+   ══════════════════════════════ */
+.site-footer {
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+}
+
+.footer-headline {
+  font-family: "TT Hoves Thin", sans-serif;
+  font-size: var(--fs-footer);
+  font-weight: 250;
+  color: #fff;
+  letter-spacing: var(--ls-footer);
+  line-height: 1.05;
+  margin: 0;
+  padding: 64px var(--section-px) 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-contact {
+  padding: 32px var(--section-px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-contact-text {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: var(--ls-body);
+}
+
+.footer-contact-link {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px var(--section-px);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-copyright {
+  font-family: "TT Hoves Light", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: -0.42px;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.footer-nav-link {
+  font-family: "TT Hoves Regular", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: -0.42px;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ══════════════════════════════
+   SHARED: BUTTONS
+   ══════════════════════════════ */
+.talk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "TT Hoves Regular", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.54px;
+  line-height: 24px;
+  border-radius: 100px;
+  padding: 12px 24px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  border: none;
+  /* light default: white bg, black text */
+  background: #fff;
+  color: #000;
+}
+
+.talk-btn--dark {
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE OVERRIDES
+   ═══════════════════════════════════════════════════════ */
+
+/* ── TABLET (710px – 1023px) ── */
+@media (min-width: 710px) and (max-width: 1023px) {
+  .showcase-item { width: 300px; height: 210px; }
+  .growth-left   { padding: 48px 32px 48px var(--section-px); }
+  .about-grid    { gap: 32px; }
+  .case-body     { padding: 24px 24px 32px; }
+  .challenge-row { padding: 32px var(--section-px); gap: 24px; }
+}
+
+/* ── MOBILE (≤709px) ── */
+@media (max-width: 709px) {
+  /* NAV */
+  .nav-link--desktop-only { display: none; }
+
+  /* HERO */
+  .hero-subtitle-wrap {
+    right: var(--section-px);
+    left: var(--section-px);
+    top: calc(var(--nav-h) + 48px);
+    text-align: center;
+    max-width: none;
+  }
+  .hero-headline {
+    font-size: 72px;
+    letter-spacing: -5.04px;
+    padding-bottom: 24px;
+  }
+  .section-heading {
+    font-size: 72px;
+    letter-spacing: -5.04px;
+  }
+  .models-heading {
+    font-size: 72px;
+    letter-spacing: -5.04px;
+  }
+
+  /* SHOWCASE */
+  .showcase-item { width: 240px; height: 170px; }
+
+  /* ENGAGEMENTS */
+  .engagements-row { flex-wrap: wrap; gap: 20px 28px; }
+
+  /* ABOUT */
+  .about-grid  { grid-template-columns: 1fr; }
+  .stats-grid  { grid-template-columns: 1fr 1fr; }
+
+  /* GROWTH */
+  .growth-grid { grid-template-columns: 1fr; }
+  .growth-right { height: 280px; }
+  .growth-left  { padding: 40px var(--section-px) 32px; }
+
+  /* CASES */
+  .cases-grid { grid-template-columns: 1fr; }
+  .case-card:nth-child(odd) { border-right: none; }
+  .case-body { padding: 24px var(--section-px) 32px; }
+  .case-stats { gap: 24px; flex-wrap: wrap; }
+
+  /* CHALLENGES */
+  .challenge-row {
+    grid-template-columns: 40px 1fr;
+    grid-template-areas:
+      "num content"
+      ".   btn";
+    gap: 16px;
+    padding: 32px var(--section-px);
+  }
+  .challenge-cta { margin-top: 0; }
+
+  /* PROCESS */
+  .process-grid { grid-template-columns: repeat(2, 1fr); }
+  .process-step { border-right: 1px solid rgba(255,255,255,0.1); }
+  .process-step:nth-child(even) { border-right: none; }
+  .process-step:last-child      { border-right: none; }
+
+  /* WORKING MODELS */
+  .models-grid { grid-template-columns: 1fr; }
+  .model-card:first-child {
+    border-right: none;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+  .model-card { padding: 40px var(--section-px); }
+
+  /* FOOTER */
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .footer-nav-link { padding: 8px 12px; }
+}
