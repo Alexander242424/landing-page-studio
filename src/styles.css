@@ -1,1206 +1,602 @@
-/* ===================================================
-   UXLAB LANDING PAGE — STYLES
-   Breakpoints: mobile ≤709px | tablet 710–1023px | desktop ≥1024px
-   =================================================== */
+/* ─────────────────────────────────────────────────────────
+   UXLAB — Landing page  
+   Design tokens aligned with getboostra.com visual system
+   ───────────────────────────────────────────────────────── */
 
-@import "tailwindcss" source(none);
-@source "../src";
-@import "tw-animate-css";
-
-/* ── FONTS ──────────────────────────────────────────── */
+/* ── Fonts ──────────────────────────────────────────────── */
 @font-face {
-  font-family: "TT Hoves Thin";
-  src: url("https://framerusercontent.com/assets/dMwUr8eaLeeiltCQNCLZV3TcrE.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 250;
-  font-display: swap;
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik-pro/AeonikPro-Thin.otf") format("opentype");
+  font-weight: 200; font-style: normal; font-display: swap;
 }
 @font-face {
-  font-family: "TT Hoves Light";
-  src: url("https://framerusercontent.com/assets/Pwqicuzieh3Tg0EpGtkHBsYcShY.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik-pro/AeonikPro-Light.otf") format("opentype");
+  font-weight: 300; font-style: normal; font-display: swap;
 }
 @font-face {
-  font-family: "TT Hoves Regular";
-  src: url("https://framerusercontent.com/assets/1EZK68rvs3NP8AuJVBVLJSYos.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik-pro/AeonikPro-Regular.otf") format("opentype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik-pro/AeonikPro-Medium.otf") format("opentype");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik-pro/AeonikPro-Bold.otf") format("opentype");
+  font-weight: 700; font-style: normal; font-display: swap;
 }
 
-/* ── TAILWIND CUSTOM VARIANT ─────────────────────────── */
-@custom-variant dark (&:is(.dark *));
-
-/* ── TAILWIND THEME ──────────────────────────────────── */
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
-  --font-sans: "TT Hoves Regular", sans-serif;
-  --font-light: "TT Hoves Light", sans-serif;
-  --font-thin: "TT Hoves Thin", sans-serif;
-}
-
-/* ── CSS CUSTOM PROPERTIES ───────────────────────────── */
-:root {
-  --radius: 0.625rem;
-
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: #111111;
-  --card-foreground: #ffffff;
-  --popover: #111111;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
-  --muted: rgba(255, 255, 255, 0.12);
-  --muted-foreground: rgba(255, 255, 255, 0.7);
-  --accent: #1a1a1a;
-  --accent-foreground: #ffffff;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: rgba(255, 255, 255, 0.4);
-
-  /* ── Typography: DESKTOP defaults (≥1024px) ────────── */
-  --fs-giant:        168px;
-  --ls-giant:        -11.76px;
-  --lh-giant:        0.95;
-
-  --fs-large:        80px;
-  --ls-large:        -5.6px;
-
-  --fs-num:          48px;
-  --ls-num:          -1.92px;
-
-  --fs-case-headline: 28px;
-  --ls-case-headline: -1.12px;
-
-  --fs-body:         20px;
-  --ls-body:         -0.6px;
-  --lh-body:         1.44;
-
-  --fs-nav:          14px;
-  --ls-nav:          -0.42px;
-
-  --fs-footer:       100px;
-  --ls-footer:       -7px;
-
-  /* ── Layout ──────────────────────────────────────────── */
-  --section-px:      24px;
-  --nav-h:           52px;
-}
-
-/* ── TABLET (710px – 1023px) ────────────────────────── */
-@media (min-width: 710px) and (max-width: 1023px) {
-  :root {
-    --fs-giant:         134px;
-    --ls-giant:         -9.38px;
-    --fs-large:         54px;
-    --ls-large:         -3.78px;
-    --fs-num:           38px;
-    --ls-num:           -1.52px;
-    --fs-case-headline: 24px;
-    --ls-case-headline: -0.96px;
-    --fs-body:          18px;
-    --ls-body:          -0.54px;
-    --fs-footer:        80px;
-    --ls-footer:        -5.6px;
-  }
-}
-
-/* ── MOBILE (≤709px) ────────────────────────────────── */
-@media (max-width: 709px) {
-  :root {
-    --fs-giant:         72px;
-    --ls-giant:         -5.04px;
-    --fs-large:         42px;
-    --ls-large:         -2.94px;
-    --fs-num:           28px;
-    --ls-num:           -1.12px;
-    --fs-case-headline: 20px;
-    --ls-case-headline: -0.8px;
-    --fs-body:          16px;
-    --ls-body:          -0.48px;
-    --fs-footer:        56px;
-    --ls-footer:        -3.92px;
-    --section-px:       16px;
-  }
-}
-
-/* ── BASE LAYER ──────────────────────────────────────── */
-@layer base {
-  * {
-    box-sizing: border-box;
-    border-color: var(--color-border);
-    margin: 0;
-    padding: 0;
-  }
-  html {
-    scroll-behavior: smooth;
-  }
-  body {
-    background-color: #000000;
-    color: #ffffff;
-    font-family: "TT Hoves Regular", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  img, svg { display: block; }
-  a { text-decoration: none; }
-}
-
-/* ── UTILITIES ───────────────────────────────────────── */
-@layer utilities {
-  .text-balance { text-wrap: balance; }
-  .font-tt-thin   { font-family: "TT Hoves Thin", sans-serif; font-weight: 250; }
-  .font-tt-light  { font-family: "TT Hoves Light", sans-serif; font-weight: 300; }
-  .font-tt-regular{ font-family: "TT Hoves Regular", sans-serif; font-weight: 400; }
-
-  /* ── Showcase animation ── */
-  .case-study-showcase {
-    display: flex;
-    overflow: hidden;
-  }
-  .case-study-showcase-inner {
-    display: flex;
-    gap: 12px;
-    flex-shrink: 0;
-    animation: showcase-scroll 40s linear infinite;
-  }
-  @keyframes showcase-scroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  /* ── Glance horizontal scroll ── */
-  .glance-scroll {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .glance-scroll::-webkit-scrollbar { display: none; }
-
-  /* ── Filter tabs ── */
-  .filter-tab {
-    font-family: "TT Hoves Regular", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.6);
-    letter-spacing: -0.42px;
-    padding: 16px 24px;
-    cursor: pointer;
-    border: none;
-    background: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    transition: color 0.2s;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .filter-tab.active  { color: #fff; background: rgba(255,255,255,0.06); }
-  .filter-tab:hover   { color: #fff; }
-}
-
-/* ═══════════════════════════════════════════════════════
-   COMPONENT STYLES
-   ═══════════════════════════════════════════════════════ */
-
-/* ── PAGE WRAPPER ────────────────────────────────────── */
-.page-wrapper {
-  background-color: #000;
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  background: #0b0b0f;
   color: #fff;
+  font-family: "Aeonik Pro", system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
+img { display: block; max-width: 100%; object-fit: cover; }
+a   { text-decoration: none; color: inherit; }
+button { background: none; border: none; cursor: pointer; font-family: inherit; }
+h1,h2,h3,h4,h5,h6 { font-weight: inherit; margin: 0; }
 
-/* ══════════════════════════════
-   1. NAVBAR
-   ══════════════════════════════ */
-.site-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  background: #000;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  height: var(--nav-h);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
+/* ── Page wrapper ───────────────────────────────────────── */
+.ux-page { width: 100%; max-width: 1920px; margin: 0 auto; background: #0b0b0f; }
 
-.nav-logo {
-  font-family: "TT Hoves Regular", sans-serif;
-  font-size: var(--fs-nav);
+/* ── TYPOGRAPHY ─────────────────────────────────────────── */
+
+.ux-text-body {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 16px;
   font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
   color: #fff;
-  letter-spacing: var(--ls-nav);
-  text-decoration: none;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
+}
+@media (min-width: 710px)  { .ux-text-body { font-size: 18px; } }
+@media (min-width: 1200px) { .ux-text-body { font-size: 18px; } }
+
+.ux-text-muted       { color: rgba(255,255,255,0.55); }
+.ux-text-muted-desc  { color: rgba(255,255,255,0.65); }
+.ux-text-black       { color: #0b0b0f; }
+.ux-text-center      { text-align: center; }
+
+/* Spacing helpers */
+.ux-mb-8         { margin-bottom: 8px; }
+.ux-mb-20        { margin-bottom: 20px; }
+.ux-mb-32        { margin-bottom: 32px; }
+.ux-mb-40        { margin-bottom: 40px; }
+.ux-mb-stats     { margin-bottom: 36px; }
+.ux-mb-logos-label { margin-bottom: 24px; }
+.ux-mt-40        { margin-top: 40px; }
+
+/* ── SECTION helpers ─────────────────────────────────────── */
+.ux-section--pad-top {
+  padding-top: 96px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+@media (min-width: 710px)  { .ux-section--pad-top { padding-left: 24px; padding-right: 24px; } }
+@media (min-width: 1200px) { .ux-section--pad-top { padding-top: 148px; } }
+@media (min-width: 1920px) { .ux-section--pad-top { padding-top: 248px; } }
+
+.ux-section--pad { padding: 96px 16px; }
+@media (min-width: 710px)  { .ux-section--pad { padding: 96px 24px; } }
+@media (min-width: 1200px) { .ux-section--pad { padding: 148px 24px; } }
+@media (min-width: 1920px) { .ux-section--pad { padding: 248px 24px; } }
+
+.ux-section        { padding-left: 16px; padding-right: 16px; }
+@media (min-width: 710px) { .ux-section { padding-left: 24px; padding-right: 24px; } }
+
+.ux-section--border-top { border-top: 1px solid rgba(255,255,255,0.1); }
+
+/* ── NAV ─────────────────────────────────────────────────── */
+.ux-nav {
+  position: sticky; top: 0; z-index: 100;
+  width: 100%; display: flex; align-items: center;
+  height: 60px; padding: 0 24px;
+  background: rgba(11,11,15,0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.ux-nav__logo {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 17px; font-weight: 500; letter-spacing: -0.03em; color: #fff;
   flex-shrink: 0;
 }
-
-.nav-links {
-  display: flex;
-  align-items: stretch;
+.ux-nav__links {
+  display: none; align-items: center; gap: 32px; flex: 1; justify-content: center;
 }
-
-.nav-link {
-  font-family: "TT Hoves Regular", sans-serif;
-  font-size: var(--fs-nav);
-  font-weight: 400;
-  color: #fff;
-  letter-spacing: var(--ls-nav);
-  text-decoration: none;
-  text-transform: uppercase;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border-left: 1px solid rgba(255,255,255,0.1);
-  white-space: nowrap;
-  flex-shrink: 0;
+@media (min-width: 768px) { .ux-nav__links { display: flex; } }
+.ux-nav__link {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.65);
+  letter-spacing: -0.01em; transition: color 0.2s;
 }
-
-.nav-link--desktop-only {
-  /* visible by default, hidden on mobile */
+.ux-nav__link:hover { color: #fff; }
+.ux-nav__actions {
+  display: flex; align-items: center; gap: 12px; margin-left: auto;
 }
+.ux-nav__login {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.65);
+  letter-spacing: -0.01em; transition: color 0.2s;
+}
+.ux-nav__login:hover { color: #fff; }
+.ux-nav__cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 14px; font-weight: 500; letter-spacing: -0.01em;
+  color: #fff; background: #004bff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 100px;
+  padding: 8px 18px;
+  box-shadow: inset 0px 0px 10px rgba(255,255,255,0.35);
+  transition: opacity 0.2s;
+}
+.ux-nav__cta:hover { opacity: 0.85; }
 
-/* ══════════════════════════════
-   2. HERO
-   ══════════════════════════════ */
-.hero {
+/* ── HERO ────────────────────────────────────────────────── */
+.ux-hero {
   position: relative;
-  min-height: 100dvh;
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding-top: var(--nav-h);
-  overflow: hidden;
-}
-
-.hero-subtitle-wrap {
-  position: absolute;
-  top: calc(var(--nav-h) + 120px);
-  right: var(--section-px);
-  text-align: right;
-  max-width: 340px;
-}
-
-.hero-subtitle {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-}
-
-.hero-headline {
-  font-family: "TT Hoves Thin", sans-serif;
-  /* Fluid: scales from 134px at 710px up to 220px at 1440px */
-  font-size: clamp(134px, 15.28vw, 220px);
-  font-weight: 250;
-  color: #fff;
-  /* em-based so it scales proportionally with font-size */
-  letter-spacing: -0.07em;
-  line-height: 0.95;
-  margin: 0;
-  padding: 0 var(--section-px) 40px;
-  white-space: nowrap;
-}
-
-/* ══════════════════════════════
-   3. CASE STUDY SHOWCASE STRIP
-   ══════════════════════════════ */
-.showcase-section {
-  background: #f0ede8;
-  overflow: hidden;
-  padding: 0;
-}
-
-.showcase-item {
-  flex-shrink: 0;
-  width: 400px;
-  height: 280px;
-  overflow: hidden;
-}
-
-.showcase-item img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ══════════════════════════════
-   4. FEATURED ENGAGEMENTS
-   ══════════════════════════════ */
-.engagements-section {
-  background: #000;
-  padding: 80px var(--section-px);
-}
-
-.engagements-label {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-body);
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.engagements-row {
+  min-height: 100dvh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  gap: clamp(24px, 5vw, 80px);
-  margin-bottom: 40px;
-}
-.engagements-row:last-child { margin-bottom: 0; }
-
-/* Individual logo typography */
-.logo-item {
-  color: rgba(255,255,255,0.85);
-  white-space: nowrap;
-  line-height: 1;
-}
-.logo-calendly   { font-family: "TT Hoves Light", sans-serif;   font-size: 20px; letter-spacing: -0.4px; }
-.logo-stan       { font-family: "TT Hoves Regular", sans-serif; font-size: 20px; font-weight: 700; }
-.logo-forbes     { font-family: Georgia, serif;                  font-size: 20px; }
-.logo-nespresso  { font-family: "TT Hoves Regular", sans-serif; font-size: 14px; letter-spacing: 2px; }
-.logo-softr      { font-family: "TT Hoves Regular", sans-serif; font-size: 20px; letter-spacing: -0.4px; }
-.logo-zara       { font-family: "TT Hoves Regular", sans-serif; font-size: 22px; letter-spacing: 4px; }
-.logo-polymarket { font-family: "TT Hoves Regular", sans-serif; font-size: 18px; letter-spacing: -0.4px; }
-.logo-easy       { font-family: "TT Hoves Regular", sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
-.logo-ftg        { font-family: Georgia, serif;                  font-size: 14px; }
-.logo-pipedrive  { font-family: "TT Hoves Regular", sans-serif; font-size: 18px; letter-spacing: -0.4px; }
-
-/* ══════════════════════════════
-   5. ABOUT + STATS
-   ══════════════════════════════ */
-.about-section {
-  background: #000;
-  padding: 80px var(--section-px);
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
-  margin-bottom: 64px;
-  max-width: 1200px;
-}
-
-.about-col-heading {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-}
-
-.about-col-text {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.about-paragraph {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 48px;
-  max-width: 1200px;
-}
-
-.stat-number {
-  font-family: "TT Hoves Thin", sans-serif;
-  font-size: var(--fs-large);
-  font-weight: 250;
-  color: #fff;
-  letter-spacing: var(--ls-large);
-  line-height: 1;
-  margin-bottom: 12px;
-}
-
-.stat-label {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-}
-
-/* ══════════════════════════════
-   6. GROWTH FRAMEWORK
-   ══════════════════════════════ */
-.growth-section {
-  background: #000;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  align-items: center;
   overflow: hidden;
+  padding: 80px 24px 100px;
+  text-align: center;
 }
 
-.growth-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 600px;
+/* Gradient glow background */
+.ux-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,75,255,0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(90,0,180,0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.growth-left {
-  padding: 64px 48px 64px var(--section-px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.ux-hero__content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 32px;
+  max-width: 680px;
 }
 
-.growth-heading {
-  font-family: "TT Hoves Thin", sans-serif;
-  font-size: var(--fs-large);
-  font-weight: 250;
-  color: #fff;
-  letter-spacing: var(--ls-large);
-  line-height: 1;
-  margin-bottom: 32px;
-}
-
-.growth-desc {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
+.ux-hero__headline {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: clamp(40px, 7vw, 72px);
   font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   color: #fff;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-  margin-bottom: 40px;
+}
+
+.ux-hero__sub {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 18px; font-weight: 400; line-height: 1.55;
+  letter-spacing: -0.02em; color: rgba(255,255,255,0.6);
   max-width: 480px;
 }
 
-.growth-list {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin-bottom: 0;
+/* URL input row */
+.ux-hero__input-row {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; max-width: 560px;
+  background: #fff;
+  border-radius: 100px;
+  padding: 6px 6px 6px 20px;
+  box-shadow: 0px 8px 32px rgba(0,75,255,0.18), 0px 2px 8px rgba(0,0,0,0.12);
 }
-
-.growth-list-item {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.ux-hero__input {
+  flex: 1; min-width: 0;
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: #0b0b0f; background: transparent; border: none; outline: none;
+  letter-spacing: -0.01em;
 }
-
-.growth-list-dash {
-  color: rgba(255,255,255,0.3);
-  font-size: 14px;
+.ux-hero__input::placeholder { color: rgba(0,0,0,0.38); }
+.ux-hero__submit {
   flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+  color: #fff; background: #004bff;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 100px;
+  padding: 10px 22px;
+  box-shadow: inset 0px 0px 10px rgba(255,255,255,0.4);
+  transition: opacity 0.2s; cursor: pointer;
+}
+.ux-hero__submit:hover { opacity: 0.88; }
+
+.ux-hero__trust {
+  display: flex; align-items: center; gap: 8px;
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 13px; font-weight: 400;
+  color: rgba(255,255,255,0.45); letter-spacing: -0.01em;
 }
 
-.growth-cta {
-  margin-top: 40px;
+/* ── SHOWCASE (marquee) ─────────────────────────────────── */
+.ux-showcase { width: 100%; overflow: hidden; }
+.ux-showcase__track {
+  display: flex; flex-direction: row; gap: 12px;
+  animation: ux-marquee 36s linear infinite; will-change: transform;
+}
+.ux-showcase__item {
+  flex-shrink: 0; width: clamp(280px, 30vw, 540px);
+  aspect-ratio: 1.89 / 1; overflow: hidden; border-radius: 6px;
+}
+.ux-showcase__item img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes ux-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
-.growth-right {
-  position: relative;
-  overflow: hidden;
+/* ── LOGOS ───────────────────────────────────────────────── */
+.ux-logos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(50px, 1fr));
+  gap: 0 16px; width: 100%;
 }
+@media (min-width: 710px) {
+  .ux-logos-grid { grid-template-columns: repeat(5, minmax(50px, 1fr)); gap: 0 24px; }
+}
+.ux-logo-cell {
+  height: 120px; display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+@media (min-width: 710px) { .ux-logo-cell { height: 160px; } }
+.ux-logo { max-width: 80%; }
 
-.growth-image {
+/* ── ABOUT ───────────────────────────────────────────────── */
+.ux-about-heading {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 36px; font-weight: 300;
+  line-height: 1.1; letter-spacing: -0.04em; color: #fff;
+}
+@media (min-width: 710px)  { .ux-about-heading { font-size: 52px; } }
+@media (min-width: 1200px) { .ux-about-heading { font-size: 72px; } }
+@media (min-width: 1920px) { .ux-about-heading { font-size: 96px; } }
+
+.ux-about-row {
+  display: flex; flex-direction: column; gap: 24px;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: brightness(0.7);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 36px; padding-bottom: 0;
 }
-
-/* ══════════════════════════════
-   SHARED: SECTION HEADING (giant)
-   ══════════════════════════════ */
-.section-heading {
-  font-family: "TT Hoves Thin", sans-serif;
-  font-size: clamp(134px, 15.28vw, 220px);
-  font-weight: 250;
-  color: #fff;
-  letter-spacing: -0.07em;
-  line-height: 0.95;
-  margin: 0;
-  padding: 48px 0 32px var(--section-px);
-  white-space: nowrap;
+@media (min-width: 710px) {
+  .ux-about-row { flex-direction: row; gap: 24px; align-items: flex-start; }
 }
+.ux-about-label { flex: 0 0 33%; }
+.ux-about-right { flex: 1; display: flex; flex-direction: column; }
 
-.section-heading--dark {
-  color: #000;
+.ux-stats-row {
+  display: flex; flex-direction: column; gap: 24px; width: 100%;
+  padding-top: 36px; padding-bottom: 96px;
 }
+@media (min-width: 710px) { .ux-stats-row { flex-direction: row; gap: 24px; padding-bottom: 196px; } }
+@media (min-width: 1200px) { .ux-stats-row { padding-bottom: 248px; } }
 
-/* ══════════════════════════════
-   7. SELECTED RESULTS
-   ══════════════════════════════ */
-.results-section {
-  background: #000;
+.ux-stat {
+  flex: 1; display: flex; flex-direction: column; gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;
+}
+@media (min-width: 710px) {
+  .ux-stat { border-top: none; padding-top: 0; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 24px; }
+  .ux-stat:first-child { border-left: none; padding-left: 0; }
+}
+.ux-stat__num {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 40px; font-weight: 200;
+  line-height: 1; letter-spacing: -0.06em; color: #fff;
+}
+@media (min-width: 710px)  { .ux-stat__num { font-size: 54px; } }
+@media (min-width: 1200px) { .ux-stat__num { font-size: 72px; } }
+
+/* ── GROWTH FRAMEWORK ────────────────────────────────────── */
+.ux-growth {
+  padding: 96px 16px;
+  display: flex; flex-direction: column; gap: 32px;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
+@media (min-width: 710px)  { .ux-growth { padding: 96px 24px; flex-direction: row; gap: 48px; align-items: flex-start; } }
+@media (min-width: 1200px) { .ux-growth { padding: 148px 24px; } }
+@media (min-width: 1920px) { .ux-growth { padding: 248px 24px; } }
 
-.filter-bar {
-  display: flex;
-  overflow-x: auto;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.filter-bar::-webkit-scrollbar { display: none; }
+.ux-growth__left { flex: 0 0 100%; }
+@media (min-width: 710px) { .ux-growth__left { flex: 0 0 50%; } }
+.ux-growth__right { flex: 1; min-width: 0; overflow: hidden; border-radius: 8px; }
+.ux-growth__right img { width: 100%; height: 100%; object-fit: cover; }
 
-.cases-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.ux-heading-lg {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 36px; font-weight: 300;
+  line-height: 1.05; letter-spacing: -0.04em; color: #fff;
 }
+@media (min-width: 710px)  { .ux-heading-lg { font-size: 52px; } }
+@media (min-width: 1200px) { .ux-heading-lg { font-size: 72px; } }
 
-.case-card {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  flex-direction: column;
-}
-.case-card:nth-child(odd) {
-  border-right: 1px solid rgba(255,255,255,0.1);
-}
-
-.case-image-wrap {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-}
-.case-image-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.case-read-badge {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: "TT Hoves Regular", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  color: #000;
-  letter-spacing: -0.54px;
-  background: #fff;
-  border-radius: 100px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.case-body {
-  padding: 32px 32px 40px;
-}
-
-.case-stats {
-  display: flex;
-  gap: 40px;
-  margin-bottom: 24px;
-}
-
-.case-stat-value {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-num);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-num);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.case-stat-label {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-}
-
-.case-headline {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-case-headline);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-case-headline);
-  line-height: 1.28;
-  margin-bottom: 20px;
-}
-
-.case-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: -0.56px;
-}
-
-.case-meta-dot {
-  color: rgba(255,255,255,0.3);
-}
-
-/* ══════════════════════════════
-   8. CHALLENGES WE SOLVE
-   ══════════════════════════════ */
-.challenges-section {
-  background: #000;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  overflow: hidden;
-}
-
-.challenge-list {
-  /* container for all challenge rows */
-}
-
-.challenge-row {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 40px var(--section-px);
-  display: grid;
-  grid-template-columns: 80px 1fr auto;
-  grid-template-areas: "num content btn";
-  gap: 32px;
-  align-items: start;
-}
-
-.challenge-num {
-  grid-area: num;
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: -0.42px;
-  padding-top: 8px;
-}
-
-.challenge-content {
-  grid-area: content;
-}
-
-.challenge-title {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-num);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-num);
-  line-height: 1.1;
-  margin-bottom: 16px;
-}
-
-.challenge-desc {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-  max-width: 540px;
-}
-
-.challenge-cta {
-  grid-area: btn;
-  padding-top: 6px;
-}
-
-/* ══════════════════════════════
-   9. PROCESS STEPS
-   ══════════════════════════════ */
-.process-section {
-  background: #000;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 80px var(--section-px);
-}
-
-.process-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.process-heading {
-  font-family: "TT Hoves Thin", sans-serif;
-  font-size: var(--fs-large);
-  font-weight: 250;
-  color: #fff;
-  letter-spacing: var(--ls-large);
-  line-height: 1.1;
-  margin-bottom: 64px;
-  max-width: 1000px;
-}
-
-.process-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+.ux-list { display: flex; flex-direction: column; }
+.ux-list__item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
+.ux-list__dash { opacity: 0.35; flex-shrink: 0; }
 
-.process-step {
-  padding: 32px 24px 32px 0;
-  border-right: 1px solid rgba(255,255,255,0.1);
+/* ── CTA buttons ─────────────────────────────────────────── */
+.ux-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 14px; font-weight: 500; letter-spacing: -0.01em; line-height: 1;
+  padding: 10px 20px; border-radius: 100px; transition: opacity 0.2s;
 }
-.process-step:last-child {
-  border-right: none;
+.ux-btn:hover { opacity: 0.8; }
+.ux-btn--dark  {
+  background: #004bff; color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: inset 0px 0px 10px rgba(255,255,255,0.35);
 }
-
-.process-step-num {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: -0.42px;
-  margin-bottom: 12px;
+.ux-btn--light {
+  background: rgba(255,255,255,0.1); color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
 }
-
-.process-step-label {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #fff;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
+.ux-btn--pricing {
+  background: #004bff; color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: inset 0px 0px 10px rgba(255,255,255,0.35);
 }
 
-/* ══════════════════════════════
-   10. WORKING MODELS
-   ══════════════════════════════ */
-.models-section {
-  background: #f5f5f5;
-  overflow: hidden;
+/* ── GIANT HEADING ───────────────────────────────────────── */
+.ux-giant-heading {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 72px; font-weight: 200;
+  line-height: 0.92; letter-spacing: -0.06em; color: #fff;
+  white-space: normal; overflow: visible;
+}
+@media (min-width: 710px)  { .ux-giant-heading { font-size: 120px; white-space: nowrap; } }
+@media (min-width: 1200px) { .ux-giant-heading { font-size: 160px; } }
+@media (min-width: 1920px) { .ux-giant-heading { font-size: 240px; } }
+.ux-giant-heading--dark { color: #0b0b0f; }
+
+.ux-giant-heading-wrap {
+  width: 100%; overflow: hidden;
+  padding: 64px 16px 0;
+}
+@media (min-width: 710px)  { .ux-giant-heading-wrap { padding: 64px 24px 0; } }
+@media (min-width: 1200px) { .ux-giant-heading-wrap { padding: 96px 24px 0; } }
+.ux-giant-heading-wrap--dark { background: #f5f4f0; }
+
+/* ── SELECTED RESULTS ────────────────────────────────────── */
+.ux-filters {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 24px 16px;
+}
+@media (min-width: 710px) { .ux-filters { padding: 32px 24px; } }
+.ux-filter-btn {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 12px; font-weight: 400; letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 100px;
+  padding: 6px 14px; cursor: pointer; transition: all 0.2s;
+}
+.ux-filter-btn:hover { color: #fff; border-color: rgba(255,255,255,0.45); }
+.ux-filter-btn.active { color: #0b0b0f; background: #fff; border-color: #fff; }
+
+.ux-cases-grid { display: grid; grid-template-columns: 1fr; width: 100%; }
+@media (min-width: 710px) { .ux-cases-grid { grid-template-columns: 1fr 1fr; } }
+
+.ux-case {
+  padding: 16px; border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex; flex-direction: column; gap: 20px;
+}
+@media (min-width: 710px) { .ux-case { padding: 24px; } }
+.ux-case--border-right { border-right: 1px solid rgba(255,255,255,0.1); }
+
+.ux-case__img-wrap {
+  position: relative; width: 100%; aspect-ratio: 1.6;
+  overflow: hidden; border-radius: 6px; background: #1a1a22;
+}
+.ux-case__img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.ux-read-btn {
+  position: absolute; bottom: 12px; right: 12px;
+  background: rgba(0,0,0,0.55); color: #fff; backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18); border-radius: 100px;
+  padding: 7px 14px;
+  font-family: "Aeonik Pro", sans-serif; font-size: 11px; letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 6px;
+}
+.ux-case__body { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.ux-case__stats { display: flex; gap: 20px; flex-wrap: wrap; }
+.ux-case__stat  { display: flex; flex-direction: column; gap: 4px; }
+.ux-case__stat-num {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 36px; font-weight: 200;
+  line-height: 1; letter-spacing: -0.05em; color: #fff;
+}
+@media (min-width: 710px) { .ux-case__stat-num { font-size: 48px; } }
+.ux-case__stat-label {
+  font-family: "Aeonik Pro", sans-serif; font-size: 12px; font-weight: 400;
+  color: rgba(255,255,255,0.5); letter-spacing: -0.01em;
+}
+.ux-case__headline {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 18px; font-weight: 400; line-height: 1.3; letter-spacing: -0.03em; color: #fff;
+}
+@media (min-width: 710px)  { .ux-case__headline { font-size: 22px; } }
+@media (min-width: 1200px) { .ux-case__headline { font-size: 26px; } }
+.ux-case__meta {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  font-family: "Aeonik Pro", sans-serif; font-size: 11px; font-weight: 400;
+  letter-spacing: -0.01em; color: rgba(255,255,255,0.45); text-transform: uppercase;
+}
+.ux-dot { opacity: 0.35; }
+
+/* ── CHALLENGES ──────────────────────────────────────────── */
+.ux-challenges {
+  padding: 0 16px 64px;
+  display: flex; flex-direction: column;
+}
+@media (min-width: 710px) { .ux-challenges { padding: 0 24px 96px; } }
+.ux-challenge {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 24px 0; border-top: 1px solid rgba(255,255,255,0.1);
+}
+@media (min-width: 710px) {
+  .ux-challenge { flex-direction: row; gap: 24px; align-items: flex-start; padding: 36px 0; }
+}
+.ux-challenge__num {
+  font-family: "Aeonik Pro", sans-serif; font-size: 12px; font-weight: 400;
+  letter-spacing: -0.01em; color: rgba(255,255,255,0.35); flex-shrink: 0;
+}
+@media (min-width: 710px) { .ux-challenge__num { width: 40px; padding-top: 4px; } }
+.ux-challenge__content { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.ux-challenge__title {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 26px; font-weight: 300; line-height: 1.1; letter-spacing: -0.03em; color: #fff;
+}
+@media (min-width: 710px)  { .ux-challenge__title { font-size: 36px; } }
+@media (min-width: 1200px) { .ux-challenge__title { font-size: 50px; } }
+.ux-challenge__cta { flex-shrink: 0; }
+@media (min-width: 710px) { .ux-challenge__cta { padding-top: 4px; } }
+
+/* ── PROCESS ─────────────────────────────────────────────── */
+.ux-heading-process {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 26px; font-weight: 300; line-height: 1.2;
+  letter-spacing: -0.03em; color: #fff; margin-bottom: 40px;
+}
+@media (min-width: 710px)  { .ux-heading-process { font-size: 38px; max-width: 600px; margin-bottom: 56px; } }
+@media (min-width: 1200px) { .ux-heading-process { font-size: 52px; max-width: 700px; margin-bottom: 64px; } }
+
+.ux-steps { display: flex; flex-direction: column; gap: 24px; }
+@media (min-width: 710px) { .ux-steps { flex-direction: row; gap: 0; } }
+.ux-step {
+  flex: 1; display: flex; flex-direction: column; gap: 10px;
+  padding-bottom: 24px;
+}
+@media (min-width: 710px) { .ux-step { padding: 0 24px 0 0; } }
+.ux-step--border-right { border-bottom: 1px solid rgba(255,255,255,0.1); }
+@media (min-width: 710px) {
+  .ux-step--border-right { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 24px; }
+}
+.ux-step__num {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 36px; font-weight: 200; line-height: 1; letter-spacing: -0.05em; color: #fff;
+}
+@media (min-width: 710px) { .ux-step__num { font-size: 48px; } }
+.ux-step__label { font-family: "Aeonik Pro", sans-serif; font-size: 16px; font-weight: 400; color: #fff; margin-top: 6px; }
+.ux-step__desc  { color: rgba(255,255,255,0.5); font-size: 14px; line-height: 1.55; }
+
+/* ── PRICING (WORKING MODELS) ────────────────────────────── */
+.ux-pricing { width: 100%; background: #f5f4f0; }
+.ux-pricing__cards {
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 32px 16px 64px;
+}
+@media (min-width: 710px)  { .ux-pricing__cards { flex-direction: row; gap: 24px; padding: 48px 24px 96px; } }
+@media (min-width: 1200px) { .ux-pricing__cards { padding: 64px 24px 148px; } }
+.ux-pricing-card {
+  flex: 1; background: #eceae5; border-radius: 12px;
+  padding: 28px 24px; display: flex; flex-direction: column;
+  min-height: 420px;
+}
+@media (min-width: 710px) { .ux-pricing-card { padding: 36px 32px; min-height: 480px; } }
+.ux-pricing-card__title {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 52px; font-weight: 200; line-height: 1; letter-spacing: -0.05em; color: #0b0b0f;
+  margin-bottom: 14px;
+}
+@media (min-width: 710px)  { .ux-pricing-card__title { font-size: 68px; margin-bottom: 16px; } }
+@media (min-width: 1200px) { .ux-pricing-card__title { font-size: 88px; } }
+
+.ux-pricing-card .ux-text-body { color: #0b0b0f; }
+.ux-text-muted-dark { color: rgba(0,0,0,0.5); }
+.ux-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+.ux-feature  { display: flex; align-items: flex-start; gap: 10px; }
+.ux-feature .ux-text-body { color: #0b0b0f; font-size: 14px; }
+@media (min-width: 710px) { .ux-feature .ux-text-body { font-size: 16px; } }
+.ux-pricing-card__footer { display: flex; align-items: center; gap: 16px; margin-top: auto; flex-wrap: wrap; }
+.ux-pricing-card__price {
+  font-family: "Aeonik Pro", sans-serif; font-size: 13px; font-weight: 400;
+  color: rgba(0,0,0,0.5); letter-spacing: -0.01em;
 }
 
-.models-heading {
-  font-family: "TT Hoves Thin", sans-serif;
-  font-size: clamp(134px, 15.28vw, 220px);
-  font-weight: 250;
-  color: #000;
-  letter-spacing: -0.07em;
-  line-height: 0.95;
-  margin: 0;
-  padding: 48px 0 0 var(--section-px);
-  white-space: nowrap;
-  /* cards have their own margin-top: 48px */
+/* ── GLANCE ──────────────────────────────────────────────── */
+.ux-glance { background: #f5f4f0; padding: 96px 0 0; }
+@media (min-width: 1200px) { .ux-glance { padding: 148px 0 0; } }
+.ux-glance__header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 16px 28px; border-bottom: 1px solid rgba(0,0,0,0.1);
 }
-
-.models-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin-top: 48px;
+@media (min-width: 710px) { .ux-glance__header { padding: 0 24px 36px; } }
+.ux-link-plain { color: inherit; }
+.ux-glance__row {
+  display: flex; flex-direction: row; width: 100%;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 }
-
-.model-card {
-  background: #fff;
-  padding: 48px 40px;
-  display: flex;
-  flex-direction: column;
-}
-.model-card:first-child {
-  border-right: 1px solid rgba(0,0,0,0.1);
-}
-
-.model-title {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-num);
-  font-weight: 300;
-  color: #000;
-  letter-spacing: var(--ls-num);
-  line-height: 1;
-  margin-bottom: 12px;
-}
-
-.model-desc {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #000;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-  margin-bottom: 8px;
-}
-
-.model-duration {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: rgba(0,0,0,0.6);
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-  margin-bottom: 32px;
-}
-
-.model-features {
-  flex: 1;
-  border-top: 1px solid rgba(0,0,0,0.1);
-  margin-bottom: 40px;
-}
-
-.model-feature {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #000;
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.model-feature-check {
-  flex-shrink: 0;
-  color: #000;
-}
-
-.model-footer {
-  display: flex;
-  align-items: center;
+.ux-glance-card {
+  flex-shrink: 0; width: 260px; min-height: 340px;
+  padding: 24px 20px; display: flex; flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  scroll-snap-align: start; border-right: 1px solid rgba(0,0,0,0.08);
+}
+@media (min-width: 710px) { .ux-glance-card { width: 280px; min-height: 380px; padding: 28px 24px; } }
+.ux-glance-card:last-child { border-right: none; }
+.ux-glance-card__title {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 16px; font-weight: 400; line-height: 1.45; letter-spacing: -0.02em;
+}
+.ux-glance-card__stat {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 48px; font-weight: 200; line-height: 1; letter-spacing: -0.05em;
+}
+.ux-glance-card__label {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: -0.01em; margin-top: 4px;
 }
 
-.model-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: "TT Hoves Regular", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  color: #fff;
-  letter-spacing: -0.54px;
-  background: #000;
-  border-radius: 100px;
-  padding: 12px 24px;
-  text-decoration: none;
-  line-height: 24px;
+/* ── FOOTER ──────────────────────────────────────────────── */
+.ux-footer { background: #f5f4f0; padding: 0 16px 64px; }
+@media (min-width: 710px) { .ux-footer { padding: 0 24px 96px; } }
+.ux-footer__headline-wrap { padding-top: 48px; padding-bottom: 48px; }
+@media (min-width: 710px) { .ux-footer__headline-wrap { padding-top: 64px; padding-bottom: 64px; } }
+.ux-footer__headline {
+  font-family: "Aeonik Pro", sans-serif;
+  font-size: 64px; font-weight: 200; line-height: 0.95; letter-spacing: -0.06em; color: #0b0b0f;
 }
-
-.model-price {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: 16px;
-  font-weight: 300;
-  color: rgba(0,0,0,0.7);
-  letter-spacing: -0.48px;
+@media (min-width: 710px)  { .ux-footer__headline { font-size: 110px; } }
+@media (min-width: 1200px) { .ux-footer__headline { font-size: 160px; } }
+@media (min-width: 1920px) { .ux-footer__headline { font-size: 240px; } }
+.ux-footer__contact { padding: 20px 0; border-top: 1px solid rgba(0,0,0,0.1); }
+.ux-footer__contact .ux-text-body { color: rgba(0,0,0,0.6); }
+.ux-link-white { color: #0b0b0f; text-decoration: underline; }
+.ux-footer__bottom {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  justify-content: space-between; align-items: center;
+  padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1);
 }
-
-/* ══════════════════════════════
-   11. UXLAB AT A GLANCE
-   ══════════════════════════════ */
-.glance-section {
-  background: #f5f5f5;
-  border-top: 1px solid rgba(0,0,0,0.1);
+.ux-footer__copy {
+  font-family: "Aeonik Pro", sans-serif; font-size: 11px; font-weight: 400;
+  color: rgba(0,0,0,0.4); letter-spacing: -0.01em;
 }
-
-.glance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 32px var(--section-px);
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+.ux-footer__nav { display: flex; gap: 16px; flex-wrap: wrap; }
+@media (min-width: 710px) { .ux-footer__nav { gap: 24px; } }
+.ux-footer__nav-link {
+  font-family: "Aeonik Pro", sans-serif; font-size: 12px; font-weight: 400;
+  color: rgba(0,0,0,0.5); letter-spacing: -0.01em;
 }
-
-.glance-title {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #000;
-  letter-spacing: var(--ls-body);
-}
-
-.glance-email {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: #000;
-  letter-spacing: var(--ls-body);
-  text-decoration: none;
-}
-
-.glance-card {
-  flex-shrink: 0;
-  width: clamp(280px, 28vw, 380px);
-  background: var(--card-bg, #111);
-  padding: 40px 32px;
-  border-right: 1px solid rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 380px;
-}
-
-.glance-card-title {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: var(--card-text, #fff);
-  letter-spacing: var(--ls-body);
-  line-height: var(--lh-body);
-}
-
-.glance-card-bottom {}
-
-.glance-card-stat {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-num);
-  font-weight: 300;
-  color: var(--card-text, #fff);
-  letter-spacing: var(--ls-num);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.glance-card-label {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  color: var(--card-muted, rgba(255,255,255,0.7));
-  letter-spacing: -0.56px;
-}
-
-/* ══════════════════════════════
-   12. FOOTER
-   ══════════════════════════════ */
-.site-footer {
-  background: #000;
-  color: #fff;
-  overflow: hidden;
-}
-
-.footer-headline {
-  font-family: "TT Hoves Thin", sans-serif;
-  font-size: var(--fs-footer);
-  font-weight: 250;
-  color: #fff;
-  letter-spacing: var(--ls-footer);
-  line-height: 1.05;
-  margin: 0;
-  padding: 64px var(--section-px) 48px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.footer-contact {
-  padding: 32px var(--section-px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.footer-contact-text {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: var(--fs-body);
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: var(--ls-body);
-}
-
-.footer-contact-link {
-  color: #fff;
-  text-decoration: none;
-}
-
-.footer-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px var(--section-px);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.footer-copyright {
-  font-family: "TT Hoves Light", sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: -0.42px;
-}
-
-.footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.footer-nav-link {
-  font-family: "TT Hoves Regular", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: rgba(255,255,255,0.7);
-  letter-spacing: -0.42px;
-  text-decoration: none;
-  padding: 8px 16px;
-  border-left: 1px solid rgba(255,255,255,0.1);
-}
-
-/* ══════════════════════════════
-   SHARED: BUTTONS
-   ══════════════════════════════ */
-.talk-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: "TT Hoves Regular", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  letter-spacing: -0.54px;
-  line-height: 24px;
-  border-radius: 100px;
-  padding: 12px 24px;
-  text-decoration: none;
-  transition: opacity 0.2s;
-  cursor: pointer;
-  border: none;
-  /* light default: white bg, black text */
-  background: #fff;
-  color: #000;
-}
-
-.talk-btn--dark {
-  background: #000;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-/* ═══════════════════════════════════════════════════════
-   RESPONSIVE OVERRIDES
-   ═══════════════════════════════════════════════════════ */
-
-/* ── TABLET (710px – 1023px) ── */
-@media (min-width: 710px) and (max-width: 1023px) {
-  .showcase-item { width: 300px; height: 210px; }
-  .growth-left   { padding: 48px 32px 48px var(--section-px); }
-  .about-grid    { gap: 32px; }
-  .case-body     { padding: 24px 24px 32px; }
-  .challenge-row { padding: 32px var(--section-px); gap: 24px; }
-}
-
-/* ── MOBILE (≤709px) ── */
-@media (max-width: 709px) {
-  /* NAV */
-  .nav-link--desktop-only { display: none; }
-
-  /* HERO */
-  .hero-subtitle-wrap {
-    right: var(--section-px);
-    left: var(--section-px);
-    top: calc(var(--nav-h) + 48px);
-    text-align: center;
-    max-width: none;
-  }
-  .hero-headline {
-    font-size: 72px;
-    letter-spacing: -5.04px;
-    padding-bottom: 24px;
-  }
-  .section-heading {
-    font-size: 72px;
-    letter-spacing: -5.04px;
-  }
-  .models-heading {
-    font-size: 72px;
-    letter-spacing: -5.04px;
-  }
-
-  /* SHOWCASE */
-  .showcase-item { width: 240px; height: 170px; }
-
-  /* ENGAGEMENTS */
-  .engagements-row { flex-wrap: wrap; gap: 20px 28px; }
-
-  /* ABOUT */
-  .about-grid  { grid-template-columns: 1fr; }
-  .stats-grid  { grid-template-columns: 1fr 1fr; }
-
-  /* GROWTH */
-  .growth-grid { grid-template-columns: 1fr; }
-  .growth-right { height: 280px; }
-  .growth-left  { padding: 40px var(--section-px) 32px; }
-
-  /* CASES */
-  .cases-grid { grid-template-columns: 1fr; }
-  .case-card:nth-child(odd) { border-right: none; }
-  .case-body { padding: 24px var(--section-px) 32px; }
-  .case-stats { gap: 24px; flex-wrap: wrap; }
-
-  /* CHALLENGES */
-  .challenge-row {
-    grid-template-columns: 40px 1fr;
-    grid-template-areas:
-      "num content"
-      ".   btn";
-    gap: 16px;
-    padding: 32px var(--section-px);
-  }
-  .challenge-cta { margin-top: 0; }
-
-  /* PROCESS */
-  .process-grid { grid-template-columns: repeat(2, 1fr); }
-  .process-step { border-right: 1px solid rgba(255,255,255,0.1); }
-  .process-step:nth-child(even) { border-right: none; }
-  .process-step:last-child      { border-right: none; }
-
-  /* WORKING MODELS */
-  .models-grid { grid-template-columns: 1fr; }
-  .model-card:first-child {
-    border-right: none;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-  }
-  .model-card { padding: 40px var(--section-px); }
-
-  /* FOOTER */
-  .footer-bottom { flex-direction: column; align-items: flex-start; }
-  .footer-nav-link { padding: 8px 12px; }
-}
+.ux-footer__nav-link:hover { color: #0b0b0f; }
