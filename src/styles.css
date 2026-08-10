@@ -722,7 +722,7 @@ ul {
   letter-spacing: -0.014rem;
   line-height: 1.14;
   /* Bottom copy band: padding-bottom + ~5 lines of description */
-  --rj-hero-bottom-band: calc(2.8rem + 2.1rem * 1.25 * 5);
+  --rj-hero-bottom-band: calc(2.8rem + 1.55rem * 1.25 * 5);
 }
 
 .rj-hero__headline-stage {
@@ -847,9 +847,9 @@ ul {
 .rj-hero__description {
   max-width: min(55.1rem, 70.5%);
   margin: 0;
-  font-size: 2.1rem;
+  font-size: 1.55rem;
   font-weight: 300;
-  letter-spacing: -0.021rem;
+  letter-spacing: -0.016rem;
   line-height: 1.25;
 }
 
