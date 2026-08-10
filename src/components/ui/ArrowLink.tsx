@@ -19,7 +19,11 @@ export function ArrowLink({
 }: ArrowLinkProps) {
   return (
     <a
-      className={cn("rj-arrow", underlined && "rj-arrow--underlined", className)}
+      className={cn(
+        "rj-arrow",
+        underlined && "rj-arrow--underlined rj-link-active-full-small",
+        className,
+      )}
       {...props}
     >
       <span className="rj-arrow__icon rj-arrow__icon--b" aria-hidden="true">

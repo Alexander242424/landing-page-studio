@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
+import { ChallengesSection } from "@/components/home/ChallengesSection";
+import { GlanceSection } from "@/components/home/GlanceSection";
+import { HomeIntro } from "@/components/home/HomeIntro";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { Container } from "@/components/layout/Container";
 import { Grid, GridItem } from "@/components/layout/Grid";
@@ -14,7 +17,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "UXLAB landing hero and header matched to Rejouice: Suisse Intl, Lenis, GSAP ScrollTrigger parallax.",
+          "UXLAB landing: Rejouice-matched hero, intro, glance carousel, and Framer Challenges We Solve.",
       },
     ],
   }),
@@ -37,28 +40,9 @@ function HomePage() {
 
       <main>
         <HeroReel />
-
-        <section className="rj-page__panel" id="about">
-          <Section>
-            <Container>
-              <Grid>
-                <GridItem span={6}>
-                  <Text as="p" variant="caption" muted className="mb-rj-4">
-                    After the reel
-                  </Text>
-                  <Text as="h2" variant="heading">
-                    Tomorrow&apos;s brands, today.
-                  </Text>
-                  <Text as="p" variant="body" muted className="mt-rj-4 max-w-[48ch]">
-                    We turn founders&apos; visions into remarkable brands by combining
-                    strategy, design, and performance marketing — layout geometry
-                    matched to rejouice.com, branded as UXLAB.
-                  </Text>
-                </GridItem>
-              </Grid>
-            </Container>
-          </Section>
-        </section>
+        <HomeIntro />
+        <GlanceSection />
+        <ChallengesSection />
 
         <Section id="work">
           <Container>

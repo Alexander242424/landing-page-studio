@@ -1,18 +1,17 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Logo } from "@/components/brand/Logo";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /**
- * Rejouice hero-reel: oversized brand mark + dual taglines + scroll cue,
- * then full-viewport showreel with scrubbed parallax on the mark and video.
+ * Rejouice hero-reel: oversized display headline + dual taglines + scroll cue,
+ * then full-viewport showreel with scrubbed parallax on the headline and video.
  */
 export function HeroReel() {
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLHeadingElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const videoWrapRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -95,14 +94,9 @@ export function HeroReel() {
   return (
     <section ref={rootRef} className="rj-hero-reel" id="hero" aria-label="Hero">
       <div ref={heroRef} className="rj-hero">
-        <div ref={logoRef} className="rj-hero__logo">
-          <Logo
-            href="#hero"
-            className="rj-hero__logo-link"
-            markClassName="rj-logo__mark--hero"
-            title="UXLAB"
-          />
-        </div>
+        <h1 ref={logoRef} className="rj-hero__logo rj-hero__headline">
+          The Growth product performance agency.
+        </h1>
 
         <div className="rj-hero__bottom">
           <div className="rj-hero__taglines">
