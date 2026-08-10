@@ -28,14 +28,26 @@ export function useSmoothScroll() {
   return useContext(SmoothScrollContext);
 }
 
+function prefersNativeTouchScroll() {
+  if (typeof window === "undefined") return false;
+  // Touch / coarse pointers: native scroll only — Lenis RAF + ST updates fight finger scroll.
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+}
+
 /**
  * Lenis + GSAP ScrollTrigger sync matching Rejouice
  * (lerp 0.1, scrubbed hero parallax driven by Lenis scroll).
+ * On touch devices Lenis is skipped so ScrollTrigger rides native scroll.
  */
 export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
+    if (prefersNativeTouchScroll()) {
+      setLenis(null);
+      return;
+    }
+
     const instance = new Lenis({
       lerp: 0.1,
       smoothWheel: true,

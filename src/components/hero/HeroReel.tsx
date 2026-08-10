@@ -5,17 +5,21 @@ import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const MOBILE_MQ = "(max-width: 1023px)";
+const DESKTOP_MQ = "(min-width: 1024px)";
+
 /**
  * Rejouice-matched hero + showreel:
- * - Awards char reveal on 2-line static headline (Grow revenue… / right UX solutions.)
+ * - Awards char reveal on 2-line static headline
  * - Description + scroll-cue entrance
- * - Scrubbed headline + reel clip-path grow + video parallax
- * - Showreel label: mix-blend difference, permanent underline, pointer
+ * - Scrubbed headline (+ mobile description) parallax, reel clip-path grow + video parallax
+ * - Mobile uses a lighter animation budget to avoid touch scroll jitter
  */
 export function HeroReel() {
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
@@ -26,6 +30,7 @@ export function HeroReel() {
   useEffect(() => {
     const hero = heroRef.current;
     const logo = logoRef.current;
+    const bottom = bottomRef.current;
     const description = descriptionRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
@@ -79,56 +84,128 @@ export function HeroReel() {
         });
       }
 
-      gsap
-        .timeline({
+      const mm = gsap.matchMedia();
+
+      // Mobile: subtle dual-speed parallax; skip clip-path scrub (main jank source).
+      mm.add(MOBILE_MQ, () => {
+        gsap.set(frame, { clipPath: "inset(0% round 0rem)" });
+
+        const heroTl = gsap.timeline({
           scrollTrigger: {
             trigger: hero,
-            scrub: true,
+            // Soft scrub damps finger-sample noise without feeling laggy.
+            scrub: 0.45,
             start: "top top",
             end: "bottom top",
             invalidateOnRefresh: true,
           },
-        })
-        .fromTo(
+        });
+
+        // Headline lags (smaller y); bottom/description leads (larger y).
+        heroTl.fromTo(
           logo,
           { y: 0 },
           {
-            y: () => hero.offsetHeight * 0.5,
+            y: () => hero.offsetHeight * 0.16,
             duration: 1,
             ease: "none",
+            force3D: true,
           },
+          0,
         );
 
-      // Appear + grow (Rejouice home-video style), on the hero showreel.
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: reel,
-            scrub: true,
-            start: "top bottom",
-            end: "top top",
-          },
-        })
-        .fromTo(
-          frame,
-          { clipPath: "inset(12% round 2.4rem)" },
-          { clipPath: "inset(0% round 0rem)", ease: "none", duration: 1 },
-        );
+        if (bottom) {
+          heroTl.fromTo(
+            bottom,
+            { y: 0 },
+            {
+              y: () => hero.offsetHeight * 0.34,
+              duration: 1,
+              ease: "none",
+              force3D: true,
+            },
+            0,
+          );
+        }
 
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: reel,
-            scrub: true,
-            start: "top bottom",
-            end: "bottom top",
-          },
-        })
-        .fromTo(
+        // Mild video drift only — ±50% + clip-path fought native touch scroll.
+        gsap.fromTo(
           videoWrap,
-          { yPercent: -50 },
-          { yPercent: 50, ease: "none", duration: 1 },
+          { yPercent: -10 },
+          {
+            yPercent: 10,
+            ease: "none",
+            force3D: true,
+            scrollTrigger: {
+              trigger: reel,
+              scrub: 0.45,
+              start: "top bottom",
+              end: "bottom top",
+            },
+          },
         );
+
+        return () => {
+          const clear = [logo, videoWrap, frame];
+          if (bottom) clear.push(bottom);
+          gsap.set(clear, { clearProps: "transform,clipPath" });
+        };
+      });
+
+      // Desktop: keep full Rejouice scrub budget.
+      mm.add(DESKTOP_MQ, () => {
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: hero,
+              scrub: true,
+              start: "top top",
+              end: "bottom top",
+              invalidateOnRefresh: true,
+            },
+          })
+          .fromTo(
+            logo,
+            { y: 0 },
+            {
+              y: () => hero.offsetHeight * 0.5,
+              duration: 1,
+              ease: "none",
+            },
+          );
+
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: reel,
+              scrub: true,
+              start: "top bottom",
+              end: "top top",
+            },
+          })
+          .fromTo(
+            frame,
+            { clipPath: "inset(12% round 2.4rem)" },
+            { clipPath: "inset(0% round 0rem)", ease: "none", duration: 1 },
+          );
+
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: reel,
+              scrub: true,
+              start: "top bottom",
+              end: "bottom top",
+            },
+          })
+          .fromTo(
+            videoWrap,
+            { yPercent: -50 },
+            { yPercent: 50, ease: "none", duration: 1 },
+          );
+      });
+
+      cleanups.push(() => mm.revert());
     }, rootRef);
 
     const play = () => {
@@ -137,13 +214,14 @@ export function HeroReel() {
     play();
     video?.addEventListener("loadeddata", play);
 
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("resize", refresh);
-    requestAnimationFrame(refresh);
+    // Avoid ScrollTrigger.refresh on mobile address-bar resize (layout thrash).
+    const onOrientation = () => ScrollTrigger.refresh();
+    window.addEventListener("orientationchange", onOrientation);
+    requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
       video?.removeEventListener("loadeddata", play);
-      window.removeEventListener("resize", refresh);
+      window.removeEventListener("orientationchange", onOrientation);
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
@@ -164,7 +242,7 @@ export function HeroReel() {
           </h1>
         </div>
 
-        <div className="rj-hero__bottom">
+        <div ref={bottomRef} className="rj-hero__bottom">
           <div className="rj-hero__taglines">
             <p ref={descriptionRef} className="rj-hero__tagline rj-hero__description">
               We grow your product and revenue by boosting user experience,

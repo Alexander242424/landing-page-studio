@@ -6,6 +6,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Rejouice home-video: clip-path inset(10%) → inset(0%) scrubbed on scroll.
+ * Mobile skips clip-path scrub (expensive / jittery on touch).
  */
 export function HomeVideoSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -19,16 +20,24 @@ export function HomeVideoSection() {
     if (!root || !wrap) return;
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrap,
-          start: "top bottom",
-          end: "40% 50%",
-          scrub: true,
-        },
+      const mm = gsap.matchMedia();
+
+      mm.add("(max-width: 1023px)", () => {
+        gsap.set(wrap, { clipPath: "inset(0%)" });
       });
-      tl.set(wrap, { clipPath: "inset(10%)" });
-      tl.to(wrap, { clipPath: "inset(0%)", ease: "none" });
+
+      mm.add("(min-width: 1024px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: wrap,
+            start: "top bottom",
+            end: "40% 50%",
+            scrub: true,
+          },
+        });
+        tl.set(wrap, { clipPath: "inset(10%)" });
+        tl.to(wrap, { clipPath: "inset(0%)", ease: "none" });
+      });
     }, root);
 
     const play = () => {
@@ -37,13 +46,13 @@ export function HomeVideoSection() {
     play();
     video?.addEventListener("loadeddata", play);
 
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("resize", refresh);
-    requestAnimationFrame(refresh);
+    const onOrientation = () => ScrollTrigger.refresh();
+    window.addEventListener("orientationchange", onOrientation);
+    requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
       video?.removeEventListener("loadeddata", play);
-      window.removeEventListener("resize", refresh);
+      window.removeEventListener("orientationchange", onOrientation);
       ctx.revert();
     };
   }, []);

@@ -707,11 +707,12 @@ ul {
 
 .rj-hero {
   position: relative;
-  /* Mobile: first screen is 80% of the viewport */
-  height: 80svh;
-  height: 80dvh;
-  min-height: 80svh;
-  min-height: 80dvh;
+  /* Mobile: 90% viewport. Prefer svh last — dvh resizes with the
+     address bar mid-scroll and was a primary source of hero jitter. */
+  height: 90dvh;
+  height: 90svh;
+  min-height: 90dvh;
+  min-height: 90svh;
   overflow: hidden;
   padding-inline: 1rem;
   color: var(--rj-white);
@@ -817,6 +818,7 @@ ul {
   position: absolute;
   right: 0;
   bottom: 0;
+  will-change: transform;
   left: 0;
   display: flex;
   justify-content: center;
@@ -860,6 +862,7 @@ ul {
 
 .rj-reel {
   position: relative;
+  /* Stable svh — avoid dvh thrash while the URL bar collapses */
   height: 100svh;
   height: calc(var(--rj-svh, 1svh) * 100);
   overflow: hidden;
@@ -876,13 +879,23 @@ ul {
 }
 
 .rj-reel__videos {
-  will-change: transform;
+  transform: translateZ(0);
 }
 
 .rj-reel__video-frame {
   overflow: hidden;
-  will-change: clip-path;
-  clip-path: inset(12% round 2.4rem);
+  clip-path: inset(0% round 0rem);
+}
+
+@media (min-width: 1024px) {
+  .rj-reel__videos {
+    will-change: transform;
+  }
+
+  .rj-reel__video-frame {
+    will-change: clip-path;
+    clip-path: inset(12% round 2.4rem);
+  }
 }
 
 .rj-reel__video {
@@ -1873,7 +1886,7 @@ body.rj-scroll-dark {
   font-size: 1.45rem;
   font-weight: 300;
   letter-spacing: -0.02rem;
-  line-height: 1.55rem;
+  line-height: 1.5;
   color: var(--rj-black);
   text-wrap: pretty;
 }
@@ -1962,7 +1975,7 @@ body.rj-scroll-dark {
     max-width: 42rem;
     font-size: 1.8rem;
     letter-spacing: -0.02rem;
-    line-height: 2.2rem;
+    line-height: 1.5;
   }
 
   .rj-challenges__cta {
@@ -2004,7 +2017,7 @@ body.rj-scroll-dark {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(24px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
+  bottom: calc(4px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -2026,6 +2039,8 @@ body.rj-scroll-dark {
     transform 0.45s var(--rj-ask-ease),
     grid-template-rows 0.45s var(--rj-ask-ease);
   pointer-events: none;
+  /* Do not clip the chip row — horizontal scroll lives on .rj-ask__row */
+  overflow: visible;
 }
 
 .rj-ask.is-open .rj-ask__tips {
@@ -2033,13 +2048,23 @@ body.rj-scroll-dark {
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
-}
-
-.rj-ask__tips > .rj-ask__row {
   overflow: hidden;
-  min-height: 0;
 }
 
+/* Grid collapse needs min-height:0; allow x-scroll (not overflow:hidden) */
+.rj-ask__tips > .rj-ask__row {
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.rj-ask__tips > .rj-ask__row::-webkit-scrollbar {
+  display: none;
+}
+
+.rj-ask:not(.is-open) .rj-ask__tips .rj-ask__row,
 .rj-ask:not(.is-open) .rj-ask__tips .rj-ask__chip {
   pointer-events: auto;
 }
@@ -2553,6 +2578,7 @@ body.rj-scroll-dark {
   line-height: 1.2;
   transition: background 0.25s ease, border-color 0.25s ease;
   pointer-events: auto;
+  flex-shrink: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2654,12 +2680,18 @@ body.rj-scroll-dark {
 .rj-ask__btn--send {
   background: color-mix(in srgb, var(--rj-white) 14%, transparent);
   color: var(--rj-white);
-  opacity: 0.45;
+  opacity: 0.85;
 }
 
 .rj-ask__btn--send:disabled {
   cursor: default;
-  opacity: 0.45;
+  opacity: 0.85;
+  color: var(--rj-white);
+}
+
+.rj-ask__btn--send:disabled .rj-ask__icon--send {
+  color: var(--rj-white);
+  opacity: 1;
 }
 
 .rj-ask__btn--send.is-ready:not(:disabled) {
@@ -2701,6 +2733,7 @@ body.rj-scroll-dark {
 .rj-ask__icon--send {
   width: 20px;
   height: 20px;
+  color: inherit;
 }
 
 .rj-ask__value {
@@ -2748,7 +2781,7 @@ body.rj-scroll-dark {
 @media (width <= 767px) {
   .rj-ask {
     --rj-ask-width: min(540px, calc(100vw - 20px));
-    bottom: calc(16px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(4px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
   }
 
   .rj-ask__chat {
@@ -2766,12 +2799,14 @@ body.rj-scroll-dark {
   .rj-ask__row {
     flex-wrap: nowrap;
     justify-content: flex-start;
+    align-items: center;
     gap: 8px;
     margin-bottom: 8px;
-    width: calc(100% + 12px);
+    width: 100%;
     padding-inline: 2px;
     overflow-x: auto;
     overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     pointer-events: auto;
   }
@@ -2801,6 +2836,11 @@ body.rj-scroll-dark {
   .rj-ask__icon {
     width: 16px;
     height: 16px;
+  }
+
+  .rj-ask__icon--send {
+    width: 18px;
+    height: 18px;
   }
 
   .rj-ask__input {
@@ -2864,10 +2904,10 @@ body.rj-scroll-dark {
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
-  height: 25rem;
+  height: auto;
   /* Mobile gutter is 0.4rem — process needs real top air under the divider */
   padding-top: 2.4rem;
-  overflow: hidden;
+  overflow: visible;
   transition: width var(--transition-duration, 0.6s);
 }
 
@@ -2919,8 +2959,10 @@ body.rj-scroll-dark {
 }
 
 .rj-process__description {
+  position: static;
   max-width: 50rem;
-  opacity: 0;
+  opacity: 1;
+  color: var(--rj-fg);
 }
 
 .rj-process__description-text {
@@ -2975,6 +3017,7 @@ body.rj-scroll-dark {
     min-height: 31.3rem;
     height: 20vw;
     padding: var(--rj-grid-gutter);
+    overflow: hidden;
   }
 
   .rj-process__item.is-active {
@@ -3207,8 +3250,14 @@ body.rj-scroll-dark {
 
 .rj-home-video__wrap {
   width: 100%;
-  will-change: clip-path;
-  clip-path: inset(10%);
+  clip-path: inset(0%);
+}
+
+@media (min-width: 1024px) {
+  .rj-home-video__wrap {
+    will-change: clip-path;
+    clip-path: inset(10%);
+  }
 }
 
 .rj-home-video__media {

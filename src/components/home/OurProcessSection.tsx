@@ -100,17 +100,11 @@ export function OurProcessSection() {
         const titleText = item.querySelector<HTMLElement>(
           ".rj-process__item-title-text",
         );
-        const description = item.querySelector<HTMLElement>(
-          ".rj-process__description",
-        );
-
-        const desktopHover = window.matchMedia("(min-width: 1200px)").matches;
 
         if (line) gsap.set(line, { scaleX: 0, scaleY: 0 });
         if (number) gsap.set(number, { autoAlpha: 0 });
         if (titleText) gsap.set(titleText, { y: "105%" });
-        // Desktop: opacity is driven by .is-active hover CSS (Metalab).
-        if (description && !desktopHover) gsap.set(description, { autoAlpha: 0 });
+        // Descriptions: always visible below 1200px (CSS); desktop via .is-active hover.
 
         ScrollTrigger.create({
           trigger: item,
@@ -122,9 +116,6 @@ export function OurProcessSection() {
             if (line) gsap.to(line, { scaleX: 1, scaleY: 1, duration, ease });
             if (titleText) gsap.to(titleText, { y: 0, duration, ease });
             if (number) gsap.to(number, { autoAlpha: 1, duration, ease });
-            if (description && !desktopHover) {
-              gsap.to(description, { autoAlpha: 1, duration, ease });
-            }
           },
         });
       });
