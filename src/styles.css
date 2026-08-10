@@ -707,12 +707,12 @@ ul {
 
 .rj-hero {
   position: relative;
-  /* Mobile: 90% viewport. Prefer svh last — dvh resizes with the
+  /* Mobile: 80% viewport. Prefer svh last — dvh resizes with the
      address bar mid-scroll and was a primary source of hero jitter. */
-  height: 90dvh;
-  height: 90svh;
-  min-height: 90dvh;
-  min-height: 90svh;
+  height: 80dvh;
+  height: 80svh;
+  min-height: 80dvh;
+  min-height: 80svh;
   overflow: hidden;
   padding-inline: 1rem;
   color: var(--rj-white);
