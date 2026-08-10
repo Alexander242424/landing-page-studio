@@ -162,7 +162,7 @@ export function HeroReel() {
             aria-hidden="true"
           >
             <path
-              fill="#fff"
+              fill="currentColor"
               fillRule="evenodd"
               d="M21 35.12c0-5.566 6.121-8.964 10.871-6.058l53.727 32.875c4.535 2.778 4.535 9.348 0 12.125l-53.727 32.875c-4.75 2.906-10.871-.492-10.871-6.058z"
               clipRule="evenodd"

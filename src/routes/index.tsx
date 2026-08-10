@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
+import { HeroReel } from "@/components/hero/HeroReel";
 import { Container } from "@/components/layout/Container";
 import { Grid, GridItem } from "@/components/layout/Grid";
 import { Section } from "@/components/layout/Section";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Text } from "@/components/typography/Text";
 
 export const Route = createFileRoute("/")({
@@ -12,11 +14,11 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "UXLAB design system tokens extracted from Rejouice: Suisse Intl, color, grid, and Lenis smooth scroll.",
+          "UXLAB landing hero and header matched to Rejouice: Suisse Intl, Lenis, GSAP ScrollTrigger parallax.",
       },
     ],
   }),
-  component: DesignSystemPage,
+  component: HomePage,
 });
 
 const COLORS = [
@@ -28,90 +30,37 @@ const COLORS = [
   { name: "Muted Alt", swatch: "rj-swatch--muted-alt", hex: "#9CA3AF" },
 ] as const;
 
-const TYPE_SAMPLES = [
-  { variant: "display" as const, label: "Display · 6.2rem / 300", sample: "Tomorrow's Brands" },
-  { variant: "title" as const, label: "Title · 4rem / 300", sample: "Our approach." },
-  { variant: "heading" as const, label: "Heading · 2.8rem / 300", sample: "Strategy, Design, Performance." },
-  { variant: "subhead" as const, label: "Subhead · 2.6rem / 300", sample: "Quality over quantity." },
-  { variant: "lead" as const, label: "Lead · 2rem / 300", sample: "We partner with five clients a year." },
-  {
-    variant: "body" as const,
-    label: "Body · 1.6rem / 400",
-    sample: "Emotional connection and sustainable growth are the two essentials.",
-  },
-  { variant: "caption" as const, label: "Caption · 1.4rem / 400", sample: "San Diego, USA · Paris, France" },
-];
-
-function DesignSystemPage() {
+function HomePage() {
   return (
-    <div className="theme-dark rj-atmosphere min-h-screen">
-      <header className="rj-header">
-        <div className="rj-header__inner">
-          <Logo />
-          <nav className="rj-nav" aria-label="Design system">
-            <a href="#typography">Typography</a>
-            <a href="#color">Color</a>
-            <a href="#grid">Grid</a>
-            <a href="#scroll">Scroll</a>
-          </nav>
-        </div>
-      </header>
+    <div className="theme-dark rj-page min-h-screen">
+      <SiteHeader />
 
       <main>
-        <Section variant="hero" id="hero">
-          <Container>
-            <Grid>
-              <GridItem span={6}>
-                <Text as="p" variant="caption" muted className="mb-rj-4">
-                  Design system · Rejouice tokens
-                </Text>
-                <Text as="h1" variant="display">
-                  UXLAB
-                </Text>
-                <Text as="p" variant="lead" muted className="mt-rj-4 max-w-[36ch]">
-                  Type, color, grid, and Lenis inertia scroll — extracted from
-                  rejouice.com and wired as reusable tokens.
-                </Text>
-              </GridItem>
-            </Grid>
-          </Container>
-        </Section>
+        <HeroReel />
 
-        <hr className="rj-rule" />
+        <section className="rj-page__panel" id="about">
+          <Section>
+            <Container>
+              <Grid>
+                <GridItem span={6}>
+                  <Text as="p" variant="caption" muted className="mb-rj-4">
+                    After the reel
+                  </Text>
+                  <Text as="h2" variant="heading">
+                    Tomorrow&apos;s brands, today.
+                  </Text>
+                  <Text as="p" variant="body" muted className="mt-rj-4 max-w-[48ch]">
+                    We turn founders&apos; visions into remarkable brands by combining
+                    strategy, design, and performance marketing — layout geometry
+                    matched to rejouice.com, branded as UXLAB.
+                  </Text>
+                </GridItem>
+              </Grid>
+            </Container>
+          </Section>
+        </section>
 
-        <Section id="typography">
-          <Container>
-            <Grid>
-              <GridItem span={4}>
-                <Text as="h2" variant="heading">
-                  Typography
-                </Text>
-                <Text as="p" variant="body" muted className="mt-rj-3">
-                  Suisse Intl Light (300) and Regular (400), matching Rejouice
-                  @font-face weights. Root rem calibrated to 10px at lg.
-                </Text>
-              </GridItem>
-              <GridItem span={6}>
-                <div className="flex flex-col gap-rj-6">
-                  {TYPE_SAMPLES.map((row) => (
-                    <div key={row.variant} className="flex flex-col gap-rj-2">
-                      <Text as="p" variant="caption" muted>
-                        {row.label}
-                      </Text>
-                      <Text as="p" variant={row.variant}>
-                        {row.sample}
-                      </Text>
-                    </div>
-                  ))}
-                </div>
-              </GridItem>
-            </Grid>
-          </Container>
-        </Section>
-
-        <hr className="rj-rule" />
-
-        <Section id="color">
+        <Section id="work">
           <Container>
             <Grid>
               <GridItem span={4}>
@@ -119,8 +68,8 @@ function DesignSystemPage() {
                   Color
                 </Text>
                 <Text as="p" variant="body" muted className="mt-rj-3">
-                  Near-monochrome system: pure black/white with surface and muted
-                  greys from computed styles on rejouice.com.
+                  Exact Rejouice hex values: white text on black hero, muted
+                  #8F8F8F, glass #FFFFFF21, mobile menu #101010.
                 </Text>
               </GridItem>
               <GridItem span={6}>
@@ -144,57 +93,26 @@ function DesignSystemPage() {
 
         <hr className="rj-rule" />
 
-        <Section id="grid">
-          <Container>
-            <Grid>
-              <GridItem span={4}>
-                <Text as="h2" variant="heading">
-                  Grid &amp; layout
-                </Text>
-                <Text as="p" variant="body" muted className="mt-rj-3">
-                  6 columns / 0.4rem gutter / 1rem margin on small screens; 12
-                  columns / 2rem gutter / 4rem margin from 768px — Rejouice
-                  --grid-* tokens.
-                </Text>
-              </GridItem>
-              <GridItem span={6}>
-                <div className="rj-grid">
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <div key={i} className="rj-grid-demo-cell">
-                      {i + 1}
-                    </div>
-                  ))}
-                </div>
-              </GridItem>
-            </Grid>
-          </Container>
-        </Section>
-
-        <hr className="rj-rule" />
-
-        <Section id="scroll">
+        <Section id="services">
           <Container>
             <Grid>
               <GridItem span={6}>
                 <Text as="h2" variant="heading">
-                  Scroll
+                  Scroll &amp; motion
                 </Text>
                 <Text as="p" variant="lead" muted className="mt-rj-4 max-w-[40ch]">
-                  Lenis smooth wheel with lerp 0.1 — the same library and feel
-                  Rejouice ships (data-lenis-prevent on overlays, RAF-driven
-                  ticker).
-                </Text>
-                <Text as="p" variant="body" muted className="mt-rj-4 max-w-[48ch]">
-                  Scroll this page to feel the inertia. Keep going — the type
-                  scale below gives the scroll room to show itself.
+                  Lenis lerp 0.1 synced to GSAP ScrollTrigger — hero mark drifts
+                  at 50% of hero height; reel video parallaxes yPercent -50 → 50.
                 </Text>
               </GridItem>
               <GridItem span={6}>
                 <div className="flex flex-col gap-rj-4">
                   <Logo size="lg" />
                   <Text as="p" variant="caption" muted>
-                    Brand mark from witty-quicker-606444.framer.app ·
-                    public/brand/uxlab-logo.svg
+                    Brand mark · public/brand/uxlab-logo.svg
+                  </Text>
+                  <Text as="p" variant="caption" muted>
+                    Hero video · public/video/hero.mp4
                   </Text>
                 </div>
               </GridItem>
@@ -202,10 +120,10 @@ function DesignSystemPage() {
           </Container>
         </Section>
 
-        <Section variant="tight">
+        <Section id="contact" variant="tight">
           <Container>
             <div className="flex flex-col gap-rj-8 py-rj-10">
-              {Array.from({ length: 4 }, (_, i) => (
+              {Array.from({ length: 3 }, (_, i) => (
                 <Text key={i} as="p" variant="title" muted>
                   Momentum {String(i + 1).padStart(2, "0")}
                 </Text>
