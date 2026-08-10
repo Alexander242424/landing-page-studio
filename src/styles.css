@@ -2034,7 +2034,9 @@ ul {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: min(52vh, 420px);
+  /* Mobile-first: ~90% of the screen */
+  max-height: 90dvh;
+  height: 90dvh;
   border-radius: 22px;
   border: 1px solid var(--rj-ask-bar-edge);
   background: var(--rj-ask-bar);
@@ -2493,6 +2495,13 @@ ul {
   box-shadow: none;
 }
 
+@media (min-width: 768px) {
+  .rj-ask__chat {
+    height: auto;
+    max-height: 480px;
+  }
+}
+
 @media (width <= 767px) {
   .rj-ask {
     --rj-ask-width: min(540px, calc(100vw - 20px));
@@ -2500,7 +2509,9 @@ ul {
   }
 
   .rj-ask__chat {
-    max-height: min(48vh, 360px);
+    /* Keep chat under the input bar / safe area */
+    max-height: calc(90dvh - 7.2rem);
+    height: calc(90dvh - 7.2rem);
     border-radius: 20px;
   }
 
