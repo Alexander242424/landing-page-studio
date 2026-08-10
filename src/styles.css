@@ -721,6 +721,8 @@ ul {
   font-style: normal;
   letter-spacing: -0.014rem;
   line-height: 1.14;
+  /* Bottom copy band: padding-bottom + ~5 lines of description */
+  --rj-hero-bottom-band: calc(2.8rem + 2.1rem * 1.25 * 5);
 }
 
 .rj-hero__headline-stage {
@@ -731,6 +733,9 @@ ul {
   justify-content: center;
   overflow: hidden;
   padding-inline: 1rem;
+  /* Mobile: optical center between header and bottom description */
+  padding-top: var(--rj-header-height);
+  padding-bottom: var(--rj-hero-bottom-band);
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -770,6 +775,8 @@ ul {
 @media (min-width: 1024px) {
   .rj-hero__headline-stage {
     padding-inline: 4rem;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .rj-hero__headline,
