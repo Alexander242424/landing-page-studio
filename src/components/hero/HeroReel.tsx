@@ -167,9 +167,8 @@ export function HeroReel() {
         <div className="rj-hero__bottom">
           <div className="rj-hero__taglines">
             <p ref={descriptionRef} className="rj-hero__tagline rj-hero__description">
-              We grow your revenue by boosting product performance, user
-              experience, journeys, and metrics that drive conversion,
-              activation, retention, and LTV.
+              We grow your product and revenue by boosting user experience,
+              journeys, and metrics that drive conversion, activation, trials.
             </p>
           </div>
           <div className="rj-hero__controls">

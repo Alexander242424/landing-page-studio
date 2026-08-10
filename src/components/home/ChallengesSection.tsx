@@ -18,7 +18,7 @@ const CHALLENGES: Challenge[] = [
     video: "/challenges/c1.mp4",
   },
   {
-    title: "End-to-end product design",
+    title: "AI native product design & development",
     body: "Holistic design and redesign of products from structure and flows to interaction and visual systems, built for scale and monetization.",
     video: "/challenges/c3.mp4",
   },

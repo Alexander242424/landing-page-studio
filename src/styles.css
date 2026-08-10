@@ -707,8 +707,11 @@ ul {
 
 .rj-hero {
   position: relative;
-  min-height: 76.5svh;
-  min-height: calc(var(--rj-svh, 1svh) * 76.5);
+  /* Mobile: first screen is 80% of the viewport */
+  height: 80svh;
+  height: 80dvh;
+  min-height: 80svh;
+  min-height: 80dvh;
   overflow: hidden;
   padding-inline: 1rem;
   color: var(--rj-white);
@@ -819,7 +822,7 @@ ul {
   justify-content: center;
   align-items: flex-end;
   padding-inline: 1rem;
-  padding-bottom: 1.1rem;
+  padding-bottom: 2.8rem;
 }
 
 .rj-hero__taglines {
@@ -844,7 +847,7 @@ ul {
 .rj-hero__controls {
   position: absolute;
   right: 1rem;
-  bottom: 1.1rem;
+  bottom: 2.8rem;
   display: flex;
   align-items: flex-end;
 }
@@ -937,6 +940,9 @@ ul {
 
 @media (min-width: 1024px) {
   .rj-hero {
+    height: auto;
+    min-height: 76.5svh;
+    min-height: calc(var(--rj-svh, 1svh) * 76.5);
     padding-inline: 4rem;
     font-size: 1.6rem;
     font-weight: 300;
@@ -1171,7 +1177,7 @@ ul {
 .rj-intro__tagline {
   display: flex;
   flex-direction: column;
-  padding: 2.9rem 1rem;
+  padding: 8.7rem 1rem 2.9rem;
 }
 
 .rj-intro__tagline-inner {
@@ -1255,7 +1261,7 @@ ul {
 
 @media (min-width: 1024px) {
   .rj-intro__tagline {
-    padding: 6rem 4rem;
+    padding: 18rem 4rem 6rem;
   }
 
   .rj-intro__space {
@@ -1825,13 +1831,14 @@ ul {
 
 .rj-challenges__body {
   margin: 0;
-  max-width: 60%;
+  max-width: 100%;
   font-family: var(--rj-font-sans);
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   font-weight: 300;
-  letter-spacing: -0.016rem;
-  line-height: 1.75rem;
+  letter-spacing: -0.02rem;
+  line-height: 1.55rem;
   color: var(--rj-black);
+  text-wrap: pretty;
 }
 
 .rj-challenges__cta {
@@ -1903,7 +1910,7 @@ ul {
   }
 
   .rj-challenges__meta {
-    width: 60%;
+    width: 100%;
   }
 
   .rj-challenges__title {
@@ -1913,10 +1920,11 @@ ul {
   }
 
   .rj-challenges__body {
-    width: 60%;
-    font-size: 2rem;
+    width: 100%;
+    max-width: 42rem;
+    font-size: 1.8rem;
     letter-spacing: -0.02rem;
-    line-height: 2.4rem;
+    line-height: 2.2rem;
   }
 
   .rj-challenges__cta {
@@ -1932,11 +1940,6 @@ ul {
 @media (max-width: 709px) {
   .rj-challenges {
     padding-block: 10rem;
-  }
-
-  .rj-challenges__body {
-    max-width: 100%;
-    width: 100%;
   }
 
   .rj-challenges__cta {
@@ -2679,7 +2682,7 @@ ul {
   margin-bottom: auto;
   font-family: var(--rj-font-sans);
   font-weight: 300;
-  font-size: 2.2rem;
+  font-size: 1.4rem;
   line-height: 1.2;
   letter-spacing: var(--rj-tracking-lead);
 }
@@ -2696,10 +2699,10 @@ ul {
   padding-right: var(--rj-grid-gutter);
   overflow: hidden;
   font-family: var(--rj-font-sans);
-  font-weight: 400;
-  font-size: 1.8rem;
-  line-height: 1.3;
-  letter-spacing: var(--rj-tracking-body);
+  font-weight: 300;
+  font-size: 3.2rem;
+  line-height: 1.15;
+  letter-spacing: var(--rj-tracking-lead);
 }
 
 .rj-process__item-title-text {
@@ -2733,12 +2736,12 @@ ul {
   }
 
   .rj-process__number {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 300;
   }
 
   .rj-process__item-title {
-    font-size: 2rem;
+    font-size: 3.6rem;
     font-weight: 300;
     letter-spacing: var(--rj-tracking-lead);
   }
@@ -2812,10 +2815,34 @@ ul {
   font-weight: 400;
 }
 
+.rj-approach__title-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 8rem var(--rj-grid-margin) 4rem;
+}
+
+.rj-approach__headline {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-family: var(--rj-font-sans);
+  font-weight: 300;
+  font-style: normal;
+  font-size: 12vw;
+  letter-spacing: -0.0456em;
+  line-height: 0.82;
+  color: var(--rj-fg);
+}
+
+.rj-approach__headline .rj-text-reveal__line {
+  text-align: center !important;
+}
+
 .rj-approach__lead {
   display: flex;
   flex-direction: column;
-  padding: 2.9rem 1rem 5.2rem;
+  padding: 0 1rem 5.2rem;
 }
 
 .rj-approach__lead-inner {
@@ -2892,8 +2919,9 @@ ul {
 }
 
 .rj-approach__title-text {
+  margin: 0;
   font-size: inherit;
-  font-weight: inherit;
+  font-weight: 300;
   letter-spacing: inherit;
   line-height: inherit;
 }
@@ -2908,6 +2936,7 @@ ul {
 
 .rj-approach__body-text {
   margin: 0;
+  font-weight: 300;
 }
 
 @media (min-width: 768px) {
@@ -2929,8 +2958,18 @@ ul {
     font-weight: 300;
   }
 
+  .rj-approach__title-row {
+    padding: 12rem 4rem 6rem;
+  }
+
+  .rj-approach__headline {
+    font-size: min(7.2vw, 136px);
+    letter-spacing: -0.045em;
+    line-height: 0.8;
+  }
+
   .rj-approach__lead {
-    padding: 6rem 4rem 10.6rem;
+    padding: 0 4rem 10.6rem;
   }
 
   .rj-approach__lead-space {
@@ -3081,25 +3120,13 @@ ul {
 .rj-footer__locale {
   margin: 0;
   padding: 0;
-  border: 0;
-  background: none;
-  appearance: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
   font-family: inherit;
   font-size: 1.2rem;
   font-weight: 300;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--rj-black);
-}
-
-.rj-footer__locale-chevron {
-  font-size: 0.9rem;
-  line-height: 1;
-  transform: translateY(-1px);
+  pointer-events: none;
 }
 
 .rj-footer__label {
@@ -3173,9 +3200,6 @@ ul {
     transform: translateX(0.3rem);
   }
 
-  .rj-footer__locale:hover {
-    color: var(--rj-fg-muted);
-  }
 }
 
 .rj-footer__socials {
@@ -3256,7 +3280,7 @@ ul {
 .rj-faq {
   background: var(--rj-bg);
   color: var(--rj-fg);
-  padding: 4rem 1rem 10rem;
+  padding: 12rem 1rem 18rem;
   font-family: var(--rj-font-sans);
 }
 
@@ -3329,6 +3353,7 @@ ul {
   height: 2rem;
   flex: none;
   color: var(--rj-black);
+  stroke-width: 1.15;
 }
 
 .rj-faq__question {
@@ -3352,7 +3377,7 @@ ul {
 
 @media (min-width: 1024px) {
   .rj-faq {
-    padding: 6rem 4rem 12rem;
+    padding: 16rem 4rem 22rem;
   }
 
   .rj-faq__headline-wrap {

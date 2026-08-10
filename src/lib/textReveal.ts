@@ -118,7 +118,9 @@ export function createTextReveal(
   gsap.set(words, { clearProps: "all" });
 
   const container = animateLinkScale
-    ? (element.closest(".rj-intro__content") as HTMLElement | null) ?? element
+    ? (element.closest(
+        ".rj-intro__content, .rj-approach__lead-content",
+      ) as HTMLElement | null) ?? element
     : element;
 
   gsap.set(container, { autoAlpha: 0 });

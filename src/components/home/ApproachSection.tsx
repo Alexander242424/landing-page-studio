@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { createTextReveal } from "@/lib/textReveal";
+import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,25 +28,34 @@ const ITEMS = [
 ] as const;
 
 /**
- * Rejouice “Our approach” — intro-style lead + key-value block.
+ * Rejouice “Our approach” — awards headline + lead + key-value block.
  */
 export function ApproachSection() {
   const rootRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const leadRef = useRef<HTMLParagraphElement>(null);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   useEffect(() => {
     const root = rootRef.current;
+    const headline = headlineRef.current;
     const lead = leadRef.current;
-    if (!root || !lead) return;
+    if (!root || !headline || !lead) return;
 
     const cleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
       cleanups.push(
+        createAwardsCharReveal(headline, {
+          start: "top 85%",
+        }),
+      );
+
+      cleanups.push(
         createTextReveal(lead, {
           trigger: lead.closest(".rj-approach__lead-content") ?? lead,
           animateLinkScale: true,
+          start: "top 92%",
         }),
       );
 
@@ -86,6 +95,15 @@ export function ApproachSection() {
       id="approach"
       aria-label="Our approach"
     >
+      <div className="rj-approach__title-row">
+        <h2
+          ref={headlineRef}
+          className="rj-approach__headline rj-awards-title"
+        >
+          Our approach
+        </h2>
+      </div>
+
       <div className="rj-approach__lead">
         <div className="rj-approach__lead-inner">
           <div className="rj-approach__lead-space" aria-hidden="true" />

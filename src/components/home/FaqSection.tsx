@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Accordion,
   AccordionContent,
@@ -6,6 +8,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { createAwardsCharReveal } from "@/lib/textReveal";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FAQS = [
   {
@@ -42,11 +46,44 @@ export function FaqSection() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
+    const root = rootRef.current;
     const headline = headlineRef.current;
-    if (!headline) return;
-    return createAwardsCharReveal(headline, {
-      start: "top 85%",
-    });
+    if (!root || !headline) return;
+
+    const cleanups: Array<() => void> = [];
+
+    const ctx = gsap.context(() => {
+      cleanups.push(
+        createAwardsCharReveal(headline, {
+          start: "top 85%",
+        }),
+      );
+
+      const items = root.querySelectorAll(".rj-faq__item");
+      items.forEach((item, index) => {
+        gsap.fromTo(
+          item,
+          { autoAlpha: 0, y: 24 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.85,
+            delay: Math.min(index * 0.06, 0.3),
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 92%",
+              once: true,
+            },
+          },
+        );
+      });
+    }, root);
+
+    return () => {
+      cleanups.forEach((fn) => fn());
+      ctx.revert();
+    };
   }, []);
 
   return (

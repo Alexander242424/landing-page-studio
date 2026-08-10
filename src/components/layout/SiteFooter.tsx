@@ -36,12 +36,7 @@ export function SiteFooter() {
           <p className="rj-footer__tagline">
             Growth through product performance.
           </p>
-          <button type="button" className="rj-footer__locale">
-            Poland, Warsaw
-            <span className="rj-footer__locale-chevron" aria-hidden="true">
-              ▴
-            </span>
-          </button>
+          <p className="rj-footer__locale">Poland, Warsaw</p>
         </div>
 
         <div className="rj-footer__col">
