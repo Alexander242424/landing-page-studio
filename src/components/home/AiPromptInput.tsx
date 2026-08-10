@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { Logo } from "@/components/brand/Logo";
+import { OPEN_LEAD_CHAT_EVENT } from "@/lib/askChat";
 import { generateWithGeminiFlash } from "@/lib/ai.functions";
 import { UXLAB_SYSTEM_PROMPT } from "@/lib/uxlabKnowledge";
 
@@ -34,6 +35,25 @@ type ChatMessage = {
   text: string;
   fileName?: string;
   streaming?: boolean;
+};
+
+/** Scripted “Let’s talk” lead capture. */
+type LeadStep = "email" | "goal" | "company" | "done";
+
+const LEAD = {
+  intro:
+    "Great — let’s connect you with an expert. What’s the best email to reach you?",
+  emailRetry: "Please share a valid email so we can reach you.",
+  goal: "Thanks. What’s your main goal right now?",
+  company: "Got it. Which company are you with?",
+  done: "Perfect. An expert from UXLAB will reach out within 12 hours.",
+} as const;
+
+const LEAD_PLACEHOLDER: Record<LeadStep, string> = {
+  email: "Your email…",
+  goal: "Your goal…",
+  company: "Company name…",
+  done: "Ask anything…",
 };
 
 function PlusIcon() {
@@ -117,7 +137,11 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Progressive reveal — Apple-smooth, not a hard dump. */
+function looksLikeEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+/** Progressive reveal — ~2× slower / finer than before. */
 async function revealAssistantText(
   fullText: string,
   onFrame: (partial: string) => void,
@@ -133,17 +157,39 @@ async function revealAssistantText(
   let i = 0;
   while (i < text.length) {
     if (signal.cancelled) return;
-    const chunk = text.length > 280 ? 3 : text.length > 120 ? 2 : 1;
+    // Prefer 1 char; only nudge to 2 on very long replies so it stays fluid
+    const chunk = text.length > 480 ? 2 : 1;
     i = Math.min(i + chunk, text.length);
     onFrame(text.slice(0, i));
+    const ch = text[i - 1];
     const pause =
-      text[i - 1] === "." || text[i - 1] === "?" || text[i - 1] === "!"
-        ? 28
-        : text[i - 1] === ","
-          ? 14
-          : 7 + Math.random() * 10;
+      ch === "." || ch === "?" || ch === "!"
+        ? 56 + Math.random() * 18
+        : ch === "," || ch === ";" || ch === ":"
+          ? 28 + Math.random() * 12
+          : ch === "\n"
+            ? 40 + Math.random() * 16
+            : 14 + Math.random() * 18;
     await sleep(pause);
   }
+}
+
+function ThinkingIndicator() {
+  return (
+    <div
+      className="rj-ask__thinking"
+      role="status"
+      aria-live="polite"
+      aria-label="Thinking"
+    >
+      <span className="rj-ask__thinking-label">Thinking</span>
+      <span className="rj-ask__thinking-dots" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
+    </div>
+  );
 }
 
 function useTypewriterPlaceholder(paused: boolean) {
@@ -208,6 +254,7 @@ function useTypewriterPlaceholder(paused: boolean) {
 /**
  * Fixed bottom Apple-style ask bar + chat panel (same width as input).
  * Gemini 3 Flash via Lovable gateway, grounded on UXLAB.
+ * “Let’s talk” runs a scripted lead capture (email → goal → company).
  */
 export function AiPromptInput() {
   const inputId = useId();
@@ -215,6 +262,8 @@ export function AiPromptInput() {
   const fileRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const revealRef = useRef({ cancelled: false });
+  const leadStepRef = useRef<LeadStep | null>(null);
+  const leadAnswersRef = useRef({ email: "", goal: "", company: "" });
 
   const [value, setValue] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -222,11 +271,22 @@ export function AiPromptInput() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
+  const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
 
+  const inLead = leadStep !== null && leadStep !== "done";
   const canSend = Boolean(value.trim() || file) && !pending;
   const animationPaused =
     open || focused || Boolean(value.trim()) || Boolean(file);
-  const placeholder = useTypewriterPlaceholder(animationPaused);
+  const rotatingPlaceholder = useTypewriterPlaceholder(animationPaused);
+  const placeholder = open
+    ? leadStep
+      ? LEAD_PLACEHOLDER[leadStep]
+      : "Ask anything…"
+    : rotatingPlaceholder;
+
+  useEffect(() => {
+    leadStepRef.current = leadStep;
+  }, [leadStep]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -238,6 +298,110 @@ export function AiPromptInput() {
     return () => {
       revealRef.current.cancelled = true;
     };
+  }, []);
+
+  async function pushScriptedReply(text: string) {
+    const assistantId = uid();
+    setPending(true);
+    await sleep(520 + Math.random() * 280);
+    if (revealRef.current.cancelled) {
+      setPending(false);
+      return;
+    }
+
+    setPending(false);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: assistantId,
+        role: "assistant",
+        text: "",
+        streaming: true,
+      },
+    ]);
+
+    await revealAssistantText(
+      text,
+      (partial) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId ? { ...m, text: partial } : m,
+          ),
+        );
+      },
+      revealRef.current,
+    );
+
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === assistantId ? { ...m, streaming: false } : m,
+      ),
+    );
+  }
+
+  async function startLeadFlow() {
+    revealRef.current.cancelled = true;
+    await sleep(0);
+    revealRef.current = { cancelled: false };
+
+    leadAnswersRef.current = { email: "", goal: "", company: "" };
+    setLeadStep("email");
+    setPending(false);
+    setValue("");
+    clearFile();
+    setMessages([]);
+    setOpen(true);
+
+    await pushScriptedReply(LEAD.intro);
+  }
+
+  async function handleLeadReply(prompt: string) {
+    const step = leadStepRef.current;
+    if (!step || step === "done") return;
+
+    const userMsg: ChatMessage = {
+      id: uid(),
+      role: "user",
+      text: prompt,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setOpen(true);
+
+    if (step === "email") {
+      if (!looksLikeEmail(prompt)) {
+        await pushScriptedReply(LEAD.emailRetry);
+        return;
+      }
+      leadAnswersRef.current.email = prompt.trim();
+      setLeadStep("goal");
+      await pushScriptedReply(LEAD.goal);
+      return;
+    }
+
+    if (step === "goal") {
+      leadAnswersRef.current.goal = prompt.trim();
+      setLeadStep("company");
+      await pushScriptedReply(LEAD.company);
+      return;
+    }
+
+    if (step === "company") {
+      leadAnswersRef.current.company = prompt.trim();
+      setLeadStep("done");
+      await pushScriptedReply(LEAD.done);
+      // Lead complete — further messages fall through to Gemini
+      setLeadStep(null);
+      leadStepRef.current = null;
+    }
+  }
+
+  useEffect(() => {
+    const onOpenLead = () => {
+      void startLeadFlow();
+    };
+    window.addEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
+    return () => window.removeEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable listener; startLeadFlow closes over latest refs
   }, []);
 
   function clearFile() {
@@ -335,20 +499,32 @@ export function AiPromptInput() {
 
     const prompt = value.trim();
     const attachedName = file?.name;
-    pushExchange(prompt, attachedName);
     setValue("");
     clearFile();
+
+    const step = leadStepRef.current;
+    if (step && step !== "done") {
+      void handleLeadReply(prompt || (attachedName ? attachedName : ""));
+      return;
+    }
+
+    pushExchange(prompt, attachedName);
   }
 
   function onTip(tip: string) {
-    setOpen(true);
     setValue("");
     clearFile();
+    if (tip === "Talk to an expert") {
+      void startLeadFlow();
+      return;
+    }
+    setOpen(true);
     pushExchange(tip);
   }
 
   function closeChat() {
     revealRef.current.cancelled = true;
+    setPending(false);
     setOpen(false);
   }
 
@@ -397,7 +573,7 @@ export function AiPromptInput() {
           </div>
 
           <div ref={listRef} className="rj-ask__chat-messages">
-            {messages.length === 0 ? (
+            {messages.length === 0 && !pending ? (
               <div className="rj-ask__msg rj-ask__msg--assistant rj-ask__msg--enter">
                 <div className="rj-ask__bubble">
                   How can we help grow your product?
@@ -431,10 +607,8 @@ export function AiPromptInput() {
 
             {pending ? (
               <div className="rj-ask__msg rj-ask__msg--assistant rj-ask__msg--enter">
-                <div className="rj-ask__bubble rj-ask__bubble--pending">
-                  <span />
-                  <span />
-                  <span />
+                <div className="rj-ask__bubble rj-ask__bubble--thinking">
+                  <ThinkingIndicator />
                 </div>
               </div>
             ) : null}
@@ -474,6 +648,7 @@ export function AiPromptInput() {
           className="rj-ask__btn"
           aria-label="Add attachment"
           onClick={() => fileRef.current?.click()}
+          disabled={inLead}
         >
           <PlusIcon />
         </button>
@@ -485,13 +660,20 @@ export function AiPromptInput() {
           <input
             id={inputId}
             className="rj-ask__input"
-            type="text"
+            type={leadStep === "email" ? "email" : "text"}
+            inputMode={leadStep === "email" ? "email" : "text"}
+            autoComplete={
+              leadStep === "email"
+                ? "email"
+                : leadStep === "company"
+                  ? "organization"
+                  : "off"
+            }
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder={open ? "Ask anything…" : placeholder}
-            autoComplete="off"
+            placeholder={placeholder}
           />
         </div>
 

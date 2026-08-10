@@ -2,6 +2,7 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
+import { openLeadChat } from "@/lib/askChat";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -89,7 +90,7 @@ export function SiteHeader() {
   const onConnectClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     setActiveHref("#contact");
-    scrollToHref("#contact");
+    openLeadChat();
   };
 
   return (
