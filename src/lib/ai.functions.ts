@@ -1,14 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
-import { streamText } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import {
   GEMINI_FLASH_MODEL,
   createLovableAiGatewayProvider,
 } from "./ai-gateway.server";
 
+const ChatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1),
+});
+
 const GenerateInput = z.object({
   prompt: z.string().min(1),
   system: z.string().optional(),
+  history: z.array(ChatMessageSchema).max(24).optional(),
 });
 
 /** One-shot text generation with Gemini 3 Flash through the Lovable AI Gateway. */
@@ -19,11 +25,20 @@ export const generateWithGeminiFlash = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
 
     const gateway = createLovableAiGatewayProvider(apiKey);
-    const result = streamText({
+    const history = data.history ?? [];
+
+    const result = await generateText({
       model: gateway(GEMINI_FLASH_MODEL),
-      ...(data.system ? { system: data.system } : {}),
-      prompt: data.prompt,
+      system: data.system,
+      messages: [
+        ...history.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        { role: "user" as const, content: data.prompt },
+      ],
+      temperature: 0.55,
     });
 
-    return { text: await result.text };
+    return { text: result.text };
   });

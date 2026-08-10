@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLink } from "@/components/ui/ArrowLink";
@@ -14,358 +14,166 @@ type GlanceWidget = {
   size: WidgetSize;
   theme: WidgetTheme;
   title: ReactNode;
-  subtitle?: string;
-  logos?: string[];
+  /** Brand mark bottom-right. */
+  logo: string;
+  /**
+   * Native logo ink. White/"light" assets invert on light cards;
+   * black/"dark" assets stay as-is on light cards.
+   */
+  logoInk?: "light" | "dark";
   backgroundImage?: string;
   backgroundVideo?: string;
   link?: { href: string; label: string };
-  drive?: { title: string; subtitle: string; value: number };
-  scroller?: string[];
-  offices?: boolean;
 };
 
-const BRAND_LOGOS = [
-  "/glance/tensr.svg",
-  "/glance/moxion.svg",
-  "/glance/rivian.svg",
-  "/glance/hyperframe.svg",
-  "/glance/oura.svg",
-  "/glance/rappi.svg",
-];
-
-const AWARD_LOGOS = [
-  "/glance/fwa.svg",
-  "/glance/awwards.svg",
-  "/glance/behance.svg",
-  "/glance/webby.svg",
-];
-
-const INDUSTRIES = [
-  "Technology",
-  "Finance",
-  "E-commerce",
-  "BioTech",
-  "Automotive",
-  "Healthcare",
-  "Real Estate",
-  "Fashion",
-  "Energy",
-  "Retail",
-  "Manufacturing",
-  "Software",
-  "Consumer Goods",
-  "Transportation",
-  "Hospitality",
-  "Defense",
-  "Logistics",
-];
-
-const WIDGETS: GlanceWidget[] = [
-  {
-    id: "brands",
-    size: "small",
-    theme: "dark",
-    title: (
-      <p>
-        60 brands
-        <br />
-        <em>successfully launched since 2013.</em>
-      </p>
-    ),
-    logos: BRAND_LOGOS,
-  },
-  {
-    id: "industries",
-    size: "full",
-    theme: "dark",
-    title: null,
-    scroller: INDUSTRIES,
-    backgroundImage: "/glance/oura.jpg",
-  },
-  {
-    id: "awards",
-    size: "small",
-    theme: "light",
-    title: (
-      <p>
-        70+ industry-recognized
-        <br />
-        awards.
-      </p>
-    ),
-    logos: AWARD_LOGOS,
-  },
-  {
-    id: "ecommerce",
-    size: "full",
-    theme: "dark",
-    title: (
-      <p>
-        E-commerce
-        <br />
-        <em>10+ years of expertise</em>
-      </p>
-    ),
-    backgroundImage: "/glance/pergola.jpg",
-  },
-  {
-    id: "models",
-    size: "small",
-    theme: "dark",
-    title: (
-      <p>
-        2 Engagement Models
-        <br />
-        <em>Classic / Venture</em>
-      </p>
-    ),
-    link: { href: "#services", label: "Learn more" },
-  },
-  {
-    id: "ltv",
-    size: "small",
-    theme: "light",
-    title: null,
-    drive: {
-      title: "Driving 150%",
-      subtitle: "LTV:CAC in average",
-      value: 15,
-    },
-  },
+/** Heights alternate — no two neighbors share the same size (incl. loop seam). */
+const CASES: GlanceWidget[] = [
   {
     id: "rivian",
     size: "medium",
     theme: "dark",
     title: (
       <p>
-        Catalyzed ~71,000
+        +71,000 pre-orders
         <br />
-        pre-orders <em>after brand reveal</em>
-        <br />
-        (approximately $5.68 billion).
+        <em>after brand reveal — ~$5.68B.</em>
       </p>
     ),
-    logos: ["/glance/rivian.svg"],
+    logo: "/glance/rivian.svg",
+    logoInk: "light",
     backgroundVideo: "/glance/rivian.mp4",
+    link: { href: "#solutions", label: "Case Study" },
   },
   {
-    id: "business",
+    id: "oura",
+    size: "full",
+    theme: "dark",
+    title: (
+      <p>
+        Category-defining wearables
+        <br />
+        <em>brand & product experience.</em>
+      </p>
+    ),
+    logo: "/glance/oura.svg",
+    logoInk: "light",
+    backgroundImage: "/glance/oura-case.jpg",
+    link: { href: "#solutions", label: "Case Study" },
+  },
+  {
+    id: "tensr",
     size: "small",
-    theme: "light",
+    theme: "dark",
+    title: (
+      <p>
+        +1799% activations
+        <br />
+        <em>performance-led redesign.</em>
+      </p>
+    ),
+    logo: "/glance/tensr.svg",
+    logoInk: "light",
+    backgroundVideo: "/glance/work-01.mp4",
+    link: { href: "#solutions", label: "Case Study" },
+  },
+  {
+    id: "moxion",
+    size: "full",
+    theme: "dark",
+    title: (
+      <p>
+        +395% conversion rate
+        <br />
+        <em>in 3 weeks.</em>
+      </p>
+    ),
+    logo: "/glance/moxion.svg",
+    logoInk: "light",
+    backgroundImage: "/glance/moxion.jpg",
+    link: { href: "#solutions", label: "Case Study" },
+  },
+  {
+    id: "hyperframe",
+    size: "small",
+    theme: "dark",
+    title: (
+      <p>
+        +150% LTV:CAC
+        <br />
+        <em>across launch funnels.</em>
+      </p>
+    ),
+    logo: "/glance/hyperframe.svg",
+    logoInk: "light",
+    backgroundVideo: "/glance/work-02.mp4",
+    link: { href: "#solutions", label: "Case Study" },
+  },
+  {
+    id: "rivian-still",
+    size: "medium",
+    theme: "dark",
+    title: (
+      <p>
+        Market-defining launch
+        <br />
+        <em>strategy, design, performance.</em>
+      </p>
+    ),
+    logo: "/glance/rivian.svg",
+    logoInk: "light",
+    backgroundImage: "/glance/rivian.jpg",
+    link: { href: "#solutions", label: "Case Study" },
+  },
+  {
+    id: "noovo",
+    size: "full",
+    theme: "dark",
+    title: (
+      <p>
+        End-to-end brand system
+        <br />
+        <em>from launch to scale.</em>
+      </p>
+    ),
+    logo: "/glance/noovo.svg",
+    logoInk: "dark",
+    backgroundImage: "/glance/pergola.jpg",
+    link: { href: "#solutions", label: "Case Study" },
+  },
+  {
+    id: "rappi",
+    size: "small",
+    theme: "dark",
     title: (
       <p>
         $5M+ in new business
         <br />
-        <em>generated within 90 days of launch</em>
+        <em>in 90 days.</em>
       </p>
     ),
-    logos: ["/glance/noovo.svg"],
-    link: { href: "#work", label: "Case Study" },
-  },
-  {
-    id: "offices",
-    size: "full",
-    theme: "light",
-    title: null,
-    offices: true,
+    logo: "/glance/rappi.svg",
+    logoInk: "light",
+    backgroundVideo: "/glance/work-03.mp4",
+    link: { href: "#solutions", label: "Case Study" },
   },
 ];
 
-function LogoSwitcher({ logos }: { logos: string[] }) {
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    if (logos.length <= 1) return;
-    const id = window.setInterval(() => {
-      setActive((i) => (i + 1) % logos.length);
-    }, 1800);
-    return () => window.clearInterval(id);
-  }, [logos.length]);
-
+function LogoMark({ src }: { src: string }) {
   return (
     <div className="rj-glance__logos">
-      {logos.map((src, i) => (
-        <div
-          key={src}
-          className={cn(
-            "rj-glance__logo",
-            i === active && "is-active",
-            i === (active === 0 ? logos.length - 1 : active - 1) && "is-last",
-          )}
-        >
-          <img src={src} alt="" draggable={false} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function IndustryScroller({ titles }: { titles: string[] }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-
-    const opacityFor = (mod: number) => {
-      if (mod === 1) return "1";
-      if (mod === 2) return "0.66";
-      if (mod === 3) return "0.33";
-      return "0";
-    };
-
-    const paint = () => {
-      const nodes = root.querySelectorAll<HTMLElement>(".rj-glance__scroller-title");
-      nodes.forEach((node, i) => {
-        const mod =
-          ((i + offsetRef.current) % titles.length + titles.length) %
-          titles.length;
-        node.style.setProperty("--rj-scroll-y", `${(mod - 1) * 100}%`);
-        node.style.setProperty("--rj-scroll-opacity", opacityFor(mod));
-      });
-    };
-
-    paint();
-    const id = window.setInterval(() => {
-      offsetRef.current -= 1;
-      paint();
-    }, 1200);
-    return () => window.clearInterval(id);
-  }, [titles.length]);
-
-  return (
-    <div ref={rootRef} className="rj-glance__scroller">
-      {titles.map((title) => (
-        <div key={title} className="rj-glance__scroller-title">
-          {title}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DriveCard({
-  title,
-  subtitle,
-  value,
-}: {
-  title: string;
-  subtitle: string;
-  value: number;
-}) {
-  const [shown, setShown] = useState(false);
-  const valueRef = useRef<HTMLDivElement>(null);
-  const currentRef = useRef(value / 10);
-
-  useEffect(() => {
-    const el = valueRef.current;
-    if (!el) return;
-    const target = shown ? value : value / 2;
-    const start = currentRef.current;
-    const t0 = performance.now();
-    const dur = shown ? 1000 : 1500;
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - t0) / dur);
-      const eased = shown ? 1 - Math.pow(1 - t, 3) : t;
-      currentRef.current = start + (target - start) * eased;
-      el.textContent = `${Math.round(currentRef.current)}%`;
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [shown, value]);
-
-  return (
-    <div
-      className="rj-glance__drive"
-      onMouseEnter={() => setShown(true)}
-      onMouseLeave={() => setShown(false)}
-    >
-      <div className="rj-glance__drive-top">
-        <span className="rj-glance__drive-title">{title}</span>
-        <span className="rj-glance__drive-sub">{subtitle}</span>
-      </div>
-      <div
-        ref={valueRef}
-        className={cn("rj-glance__drive-value", shown && "is-shown")}
-      >
-        {Math.round(value / 10)}%
-      </div>
-    </div>
-  );
-}
-
-function OfficesCard() {
-  const format = (tz: string) => {
-    try {
-      return new Intl.DateTimeFormat("en-US", {
-        timeZone: tz,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      }).format(new Date());
-    } catch {
-      return "00:00:00PM";
-    }
-  };
-
-  const [times, setTimes] = useState({
-    sd: "00:00:00PM",
-    paris: "00:00:00PM",
-  });
-
-  useEffect(() => {
-    const tick = () =>
-      setTimes({
-        sd: format("America/Los_Angeles"),
-        paris: format("Europe/Paris"),
-      });
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  return (
-    <div className="rj-glance__offices">
-      <div className="rj-glance__offices-top">
-        <span>2 Offices</span>
-        <div className="rj-glance__office">
-          <span>San Diego, USA</span>
-          <span>{times.sd}</span>
-        </div>
-        <div className="rj-glance__office">
-          <span>Paris, France</span>
-          <span>{times.paris}</span>
-        </div>
-      </div>
-      <div className="rj-glance__clock" aria-hidden="true">
-        <svg viewBox="0 0 270 270" fill="none">
-          <circle
-            cx="135"
-            cy="135"
-            r="115"
-            stroke="currentColor"
-            strokeOpacity="0.42"
-            strokeWidth="27"
-            strokeDasharray="0.5 14.55"
-          />
-          <circle
-            cx="135"
-            cy="135"
-            r="8.5"
-            stroke="currentColor"
-            strokeWidth="15"
-          />
-        </svg>
+      <div className="rj-glance__logo is-active">
+        <img src={src} alt="" draggable={false} />
       </div>
     </div>
   );
 }
 
 function WidgetCard({ widget }: { widget: GlanceWidget }) {
+  const ink = widget.logoInk ?? "light";
+  const invertLogo =
+    (widget.theme === "light" && ink === "light") ||
+    (widget.theme === "dark" && ink === "dark");
+
   return (
     <div
       className={cn(
@@ -374,31 +182,7 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
         `rj-glance__widget--${widget.theme}`,
       )}
     >
-      <div className="rj-glance__card">
-        <div className="rj-glance__card-top">
-          {widget.scroller ? (
-            <IndustryScroller titles={widget.scroller} />
-          ) : widget.drive ? (
-            <DriveCard {...widget.drive} />
-          ) : widget.offices ? (
-            <OfficesCard />
-          ) : (
-            <div className="rj-glance__card-title">{widget.title}</div>
-          )}
-        </div>
-        {!widget.drive && !widget.offices && !widget.scroller && (
-          <div className="rj-glance__card-bottom">
-            <div className="rj-glance__card-right">
-              {widget.link ? (
-                <ArrowLink href={widget.link.href}>{widget.link.label}</ArrowLink>
-              ) : null}
-            </div>
-            <div className="rj-glance__card-logos">
-              {widget.logos ? <LogoSwitcher logos={widget.logos} /> : null}
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Media first so title/link mix-blend:difference can sample it */}
       {widget.backgroundImage ? (
         <div className="rj-glance__bg">
           <img src={widget.backgroundImage} alt="" draggable={false} />
@@ -417,17 +201,36 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
           />
         </div>
       ) : null}
+      <div className="rj-glance__card">
+        <div className="rj-glance__card-top">
+          <div className="rj-glance__card-title">{widget.title}</div>
+        </div>
+        <div className="rj-glance__card-bottom">
+          <div className="rj-glance__card-link">
+            {widget.link ? (
+              <ArrowLink href={widget.link.href}>{widget.link.label}</ArrowLink>
+            ) : null}
+          </div>
+          <div
+            className={cn(
+              "rj-glance__card-logos",
+              invertLogo && "rj-glance__card-logos--invert",
+            )}
+          >
+            <LogoMark src={widget.logo} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 /**
- * Rejouice "at a Glance" horizontal marquee — black chrome (exception vs white on rejouice).
+ * Horizontal case-study marquee (Rejouice glance structure, cases only).
  */
 export function GlanceSection() {
   const rootRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const splitRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({
     active: false,
     startX: 0,
@@ -438,8 +241,7 @@ export function GlanceSection() {
   useEffect(() => {
     const root = rootRef.current;
     const track = trackRef.current;
-    const split = splitRef.current;
-    if (!root || !track || !split) return;
+    if (!root || !track) return;
 
     let x = 0;
     let dragOffset = 0;
@@ -448,13 +250,6 @@ export function GlanceSection() {
     let active = false;
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: split,
-        start: "top 90%",
-        once: true,
-        onEnter: () => split.classList.add("is-shown"),
-      });
-
       const cards = track.querySelectorAll(".rj-glance__enter");
       gsap.fromTo(
         cards,
@@ -554,31 +349,20 @@ export function GlanceSection() {
     };
   }, []);
 
-  const sequence = [...WIDGETS, ...WIDGETS];
+  const sequence = [...CASES, ...CASES];
 
   return (
     <section
       ref={rootRef}
       className="rj-glance"
       id="glance"
-      aria-label="UXLAB at a Glance"
+      aria-label="Selected case studies"
     >
-      <div className="rj-glance__split-wrap">
-        <div ref={splitRef} className="rj-split" />
-      </div>
-      <div className="rj-glance__header">
-        <span>UXLAB at a Glance.</span>
-        <a href="mailto:hello@uxlab.digital" className="rj-link-active">
-          hello@uxlab.digital
-        </a>
-      </div>
+      <div className="rj-glance__header" aria-hidden="true" />
       <div className="rj-glance__widgets">
         <div ref={trackRef} className="rj-glance__track">
           {sequence.map((widget, i) => (
-            <div
-              key={`${widget.id}-${i}`}
-              className="rj-glance__enter"
-            >
+            <div key={`${widget.id}-${i}`} className="rj-glance__enter">
               <WidgetCard widget={widget} />
             </div>
           ))}

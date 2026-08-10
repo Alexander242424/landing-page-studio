@@ -1,42 +1,83 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /**
- * Rejouice hero-reel: oversized display headline + dual taglines + scroll cue,
- * then full-viewport showreel with scrubbed parallax on the headline and video.
+ * Rejouice-matched hero + showreel:
+ * - Awards char reveal on 2-line static headline (Grow revenue… / right UX solutions.)
+ * - Description + scroll-cue entrance
+ * - Scrubbed headline + reel clip-path grow + video parallax
+ * - Showreel label: mix-blend difference, permanent underline, pointer
  */
 export function HeroReel() {
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const videoWrapRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const hero = heroRef.current;
     const logo = logoRef.current;
+    const description = descriptionRef.current;
+    const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
+    const frame = frameRef.current;
     const video = videoRef.current;
-    if (!hero || !logo || !reel || !videoWrap) return;
+    if (!hero || !logo || !reel || !videoWrap || !frame) return;
+
+    const cleanups: Array<() => void> = [];
+
+    // SplitText outside gsap.context so ctx.revert() cannot double-revert it.
+    cleanups.push(
+      createAwardsCharReveal(logo, {
+        playOnLoad: true,
+        delay: 0.2,
+        duration: 1.5,
+        stagger: 0.05,
+        yStagger: 0.016,
+      }),
+    );
+
+    if (description) {
+      cleanups.push(
+        createTextReveal(description, {
+          playOnLoad: true,
+          delay: 0.8,
+          direction: 1,
+          linesStagger: 0.08,
+          duration: 1.6,
+        }),
+      );
+    }
 
     const ctx = gsap.context(() => {
-      gsap.set(logo, { autoAlpha: 1 });
-      gsap.fromTo(
-        logo,
-        { yPercent: -18, autoAlpha: 0 },
-        {
-          yPercent: 0,
+      if (icon) {
+        gsap.set(icon, { autoAlpha: 0, y: -14 });
+        gsap.to(icon, {
           autoAlpha: 1,
-          duration: 2.3,
+          y: 0,
+          delay: 1.05,
+          duration: 1.2,
           ease: "expo.out",
-          delay: 0.2,
-        },
-      );
+        });
+        gsap.to(icon, {
+          y: 8,
+          delay: 2.4,
+          duration: 1.15,
+          ease: "power1.inOut",
+          yoyo: true,
+          repeat: -1,
+        });
+      }
 
       gsap
         .timeline({
@@ -56,6 +97,22 @@ export function HeroReel() {
             duration: 1,
             ease: "none",
           },
+        );
+
+      // Appear + grow (Rejouice home-video style), on the hero showreel.
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: reel,
+            scrub: true,
+            start: "top bottom",
+            end: "top top",
+          },
+        })
+        .fromTo(
+          frame,
+          { clipPath: "inset(12% round 2.4rem)" },
+          { clipPath: "inset(0% round 0rem)", ease: "none", duration: 1 },
         );
 
       gsap
@@ -82,11 +139,12 @@ export function HeroReel() {
 
     const refresh = () => ScrollTrigger.refresh();
     window.addEventListener("resize", refresh);
-    refresh();
+    requestAnimationFrame(refresh);
 
     return () => {
       video?.removeEventListener("loadeddata", play);
       window.removeEventListener("resize", refresh);
+      cleanups.forEach((fn) => fn());
       ctx.revert();
     };
   }, []);
@@ -94,23 +152,28 @@ export function HeroReel() {
   return (
     <section ref={rootRef} className="rj-hero-reel" id="hero" aria-label="Hero">
       <div ref={heroRef} className="rj-hero">
-        <h1 ref={logoRef} className="rj-hero__logo rj-hero__headline">
-          The Growth product performance agency.
-        </h1>
+        <div className="rj-hero__headline-stage">
+          <h1
+            ref={logoRef}
+            className="rj-hero__logo rj-hero__headline rj-awards-title"
+            aria-label="Growth product performance agency"
+          >
+            Growth product
+            <br />
+            performance agency
+          </h1>
+        </div>
 
         <div className="rj-hero__bottom">
           <div className="rj-hero__taglines">
-            <p className="rj-hero__tagline">
-              Strategy, Design,
-              <br /> Performance.
-            </p>
-            <p className="rj-hero__tagline">
-              Global Creative
-              <br /> &amp; Technology Agency.
+            <p ref={descriptionRef} className="rj-hero__tagline rj-hero__description">
+              We grow your revenue by boosting product performance, user
+              experience, journeys, and metrics that drive conversion,
+              activation, retention, and LTV.
             </p>
           </div>
           <div className="rj-hero__controls">
-            <div className="rj-hero__icon-wrap" aria-hidden="true">
+            <div ref={iconRef} className="rj-hero__icon-wrap" aria-hidden="true">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="12"
@@ -129,9 +192,16 @@ export function HeroReel() {
         </div>
       </div>
 
-      <div ref={reelRef} id="home-reel" className="rj-reel">
+      <div
+        ref={reelRef}
+        id="home-reel"
+        className="rj-reel"
+        role="button"
+        tabIndex={0}
+        aria-label="Play showreel"
+      >
         <div ref={videoWrapRef} className="rj-reel__videos">
-          <div className="rj-reel__video-frame">
+          <div ref={frameRef} className="rj-reel__video-frame">
             <video
               ref={videoRef}
               className="rj-reel__video"
@@ -145,7 +215,7 @@ export function HeroReel() {
             />
           </div>
         </div>
-        <h2 className="rj-reel__label">Showreel</h2>
+        <h2 className="rj-reel__label rj-link-active">Showreel</h2>
         <p className="rj-reel__mobile-label">
           <svg
             xmlns="http://www.w3.org/2000/svg"

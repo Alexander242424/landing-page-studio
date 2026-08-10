@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
 type Challenge = {
-  num: string;
   title: string;
   body: string;
   video: string;
@@ -13,32 +13,27 @@ type Challenge = {
 
 const CHALLENGES: Challenge[] = [
   {
-    num: "01/",
     title: "Conversion Rate optimization (CRO)",
     body: "Systematic improvement of conversion across key product and funnel touchpoints through UX changes grounded in user behavior and data.",
     video: "/challenges/c1.mp4",
   },
   {
-    num: "02/",
-    title: "Experience-led revenue optimization",
-    body: "Revenue growth driven by improving user journeys, decision points, and product experience across conversion, monetization, and retention.",
-    video: "/challenges/c2.mp4",
-  },
-  {
-    num: "03/",
     title: "End-to-end product design",
     body: "Holistic design and redesign of products from structure and flows to interaction and visual systems, built for scale and monetization.",
     video: "/challenges/c3.mp4",
   },
   {
-    num: "04/",
-    title: "Monetization & funnel architecture",
+    title: "User testing & Experimentation",
+    body: "Revenue growth driven by improving user journeys, decision points, and product experience across conversion, monetization, and retention.",
+    video: "/challenges/c2.mp4",
+  },
+  {
+    title: "Product launch",
     body: "Design of pricing, trials, paywalls, and funnels as a single monetization system that increases predictability and revenue efficiency.",
     video: "/challenges/c4.mp4",
   },
   {
-    num: "05/",
-    title: "System-level UX transformation",
+    title: "AI Transformation",
     body: "Unification of fragmented UX decisions into a coherent, scalable product experience aligned with business and growth goals.",
     video: "/challenges/c5.mp4",
   },
@@ -61,8 +56,8 @@ function CropMarks() {
 }
 
 /**
- * Framer "Challenges We Solve" — letter-blur headline reveal, stacked rows,
- * crop-mark media with hover video fade (matches witty-quicker Framer motion).
+ * Challenges We Solve — Awards-style headline reveal, stacked rows,
+ * crop-mark media with hover video fade.
  */
 export function ChallengesSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -76,26 +71,11 @@ export function ChallengesSection() {
     const cleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
-      const chars = headline.querySelectorAll(".rj-challenges__char");
-      gsap.set(chars, {
-        opacity: 0.001,
-        filter: "blur(10px)",
-        y: 60,
-      });
-
-      gsap.to(chars, {
-        opacity: 1,
-        filter: "blur(0px)",
-        y: 0,
-        duration: 1.1,
-        stagger: 0.028,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: headline,
+      cleanups.push(
+        createAwardsCharReveal(headline, {
           start: "top 85%",
-          once: true,
-        },
-      });
+        }),
+      );
 
       const rows = root.querySelectorAll(".rj-challenges__row");
       rows.forEach((row) => {
@@ -165,74 +145,32 @@ export function ChallengesSection() {
     };
   }, []);
 
-  const renderHeadline = () => (
-    <>
-      <span className="rj-challenges__word">
-        {"Challenges".split("").map((ch, ci) => (
-          <span key={`c-${ci}`} className="rj-challenges__char">
-            {ch}
-          </span>
-        ))}
-      </span>
-      <br />
-      <span className="rj-challenges__word">
-        {"We".split("").map((ch, ci) => (
-          <span key={`w-${ci}`} className="rj-challenges__char">
-            {ch}
-          </span>
-        ))}
-      </span>{" "}
-      <span className="rj-challenges__word">
-        {"Solve".split("").map((ch, ci) => (
-          <span key={`s-${ci}`} className="rj-challenges__char">
-            {ch}
-          </span>
-        ))}
-      </span>
-    </>
-  );
-
   return (
     <section
       ref={rootRef}
       className="rj-challenges"
       id="solutions"
-      aria-label="Challenges We Solve"
+      aria-label="How we invent your growth"
     >
       <div className="rj-challenges__headline-wrap">
-        <h2 ref={headlineRef} className="rj-challenges__headline">
-          {renderHeadline()}
+        <h2
+          ref={headlineRef}
+          className="rj-challenges__headline rj-awards-title"
+        >
+          How we invent
+          <br />
+          your growth
         </h2>
       </div>
 
       <div className="rj-challenges__list">
         {CHALLENGES.map((item) => (
-          <article key={item.num} className="rj-challenges__row" tabIndex={0}>
+          <article key={item.title} className="rj-challenges__row" tabIndex={0}>
             <div className="rj-challenges__content">
               <div className="rj-challenges__meta">
-                <span className="rj-challenges__num">{item.num}</span>
                 <h3 className="rj-challenges__title">{item.title}</h3>
                 <p className="rj-challenges__body">{item.body}</p>
               </div>
-              <a href="#contact" className="rj-challenges__cta">
-                <span>Let&apos;s talk</span>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <g opacity="0.6">
-                    <path d="M5.833 14.165 14.166 5.832" stroke="currentColor" />
-                    <path
-                      d="M5.833 5.832h8.333v8.333"
-                      stroke="currentColor"
-                      strokeLinecap="square"
-                    />
-                  </g>
-                </svg>
-              </a>
             </div>
             <div className="rj-challenges__media">
               <CropMarks />
