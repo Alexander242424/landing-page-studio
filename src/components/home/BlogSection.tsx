@@ -50,11 +50,13 @@ const ARTICLES = [
 export function BlogSection() {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
+  const gridRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     const headline = headlineRef.current;
-    if (!root || !headline) return;
+    const grid = gridRef.current;
+    if (!root || !headline || !grid) return;
 
     const cleanups: Array<() => void> = [];
 
@@ -63,6 +65,26 @@ export function BlogSection() {
         createTextReveal(headline, {
           start: "top 85%",
         }),
+      );
+
+      const cards = grid.querySelectorAll(".rj-blog__card");
+      gsap.fromTo(
+        cards,
+        { opacity: 0, yPercent: 40, rotateX: 45, rotateY: 12 },
+        {
+          opacity: 1,
+          yPercent: 0,
+          rotateX: 0,
+          rotateY: 0,
+          duration: 1,
+          stagger: 0.1,
+          ease: "expo.inOut",
+          scrollTrigger: {
+            trigger: grid,
+            start: "top 90%",
+            once: true,
+          },
+        },
       );
     }, root);
 
@@ -84,7 +106,7 @@ export function BlogSection() {
           Latest articles
         </h2>
 
-        <ul className="rj-blog__grid">
+        <ul ref={gridRef} className="rj-blog__grid">
           {ARTICLES.map((article) => (
             <li key={article.id} className="rj-blog__card">
               <a href={article.href} className="rj-blog__card-link">

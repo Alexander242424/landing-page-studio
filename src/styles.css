@@ -3667,6 +3667,11 @@ body.rj-scroll-dark {
   display: grid;
   grid-template-columns: 1fr;
   gap: 3.2rem 2rem;
+  perspective: 800px;
+}
+
+.rj-blog__card {
+  transform-origin: top center;
 }
 
 .rj-blog__card-link {
