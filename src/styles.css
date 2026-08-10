@@ -1047,10 +1047,19 @@ ul {
   transition: background-color 0.8s var(--rj-ease-soft);
 }
 
-/* Scroll band: dark from #process down (toggled on body + .rj-page) */
+/* Scroll bands on body: hero black → mid light → process+ dark */
 body {
-  background: var(--rj-bg, #fff);
+  /* Default black so first paint / overscroll matches the hero */
+  background: var(--rj-black);
   transition: background-color 0.8s var(--rj-ease-soft);
+}
+
+body.rj-scroll-hero {
+  background: var(--rj-black);
+}
+
+body.rj-scroll-light {
+  background: var(--rj-white);
 }
 
 body.rj-scroll-dark {
