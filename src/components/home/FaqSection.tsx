@@ -90,7 +90,7 @@ export function FaqSection() {
     <section
       ref={rootRef}
       id="faq"
-      className="rj-faq"
+      className="rj-faq theme-light"
       aria-label="Frequently asked questions"
     >
       <div className="rj-faq__headline-wrap">

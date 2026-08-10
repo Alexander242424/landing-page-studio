@@ -5,8 +5,10 @@ import { ChallengesSection } from "@/components/home/ChallengesSection";
 import { GlanceSection } from "@/components/home/GlanceSection";
 import { HomeIntro } from "@/components/home/HomeIntro";
 import { HomeVideoSection } from "@/components/home/HomeVideoSection";
+import { BlogSection } from "@/components/home/BlogSection";
 import { FaqSection } from "@/components/home/FaqSection";
 import { OurProcessSection } from "@/components/home/OurProcessSection";
+import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -28,6 +30,7 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   return (
     <div className="theme-light rj-page min-h-screen">
+      <ScrollThemeBand />
       <SiteHeader />
       <AiPromptInput />
 
@@ -40,6 +43,7 @@ function HomePage() {
         <ApproachSection />
         <HomeVideoSection />
         <FaqSection />
+        <BlogSection />
       </main>
 
       <SiteFooter />

@@ -1,5 +1,4 @@
 import {
-  ChangeEvent,
   FormEvent,
   useEffect,
   useId,
@@ -9,12 +8,25 @@ import {
 import { Logo } from "@/components/brand/Logo";
 import { OPEN_LEAD_CHAT_EVENT } from "@/lib/askChat";
 import { generateWithGeminiFlash } from "@/lib/ai.functions";
+import { mountCalInline } from "@/lib/cal";
+import {
+  CRO,
+  CRO_PLACEHOLDER,
+  CRO_SCAN_DURATION_MS,
+  CRO_SCAN_STEPS,
+  type CroAuditAnswers,
+  type CroAuditStep,
+  faviconUrlForDomain,
+  normalizeAuditUrl,
+} from "@/lib/croAudit";
 import { UXLAB_SYSTEM_PROMPT } from "@/lib/uxlabKnowledge";
 
-const TIPS = ["Talk to an expert", "What's your process", "Pricing"] as const;
-
-const FILE_ACCEPT =
-  "image/*,.pdf,.txt,.md,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.json";
+const TIPS = [
+  "Book a call",
+  "Help me pick a service",
+  "Ballpark on pricing",
+  "CRO Audit",
+] as const;
 
 const PLACEHOLDER_PROMPTS = [
   "Ask about UXLAB…",
@@ -33,7 +45,6 @@ type ChatMessage = {
   id: string;
   role: ChatRole;
   text: string;
-  fileName?: string;
   streaming?: boolean;
 };
 
@@ -56,19 +67,75 @@ const LEAD_PLACEHOLDER: Record<LeadStep, string> = {
   done: "Ask anything…",
 };
 
-function PlusIcon() {
-  return (
-    <svg className="rj-ask__icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M12 5v14M5 12h14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-    </svg>
+const PRICING_REPLY = [
+  "Directional ranges, not quotes — but enough to know if we’re in the same universe:",
+  "",
+  "Brand — $15K–$40K. Identity, positioning, marketing sites.",
+  "Product Design — $35K–$75K. UI/UX, design systems, user testing.",
+  "Design + Build — $75K minimum. End-to-end design and engineering.",
+  "MVP Sprint — $40K fixed. Fast, focused build to validate.",
+  "Ongoing Partnership — Retainer-based. Consistent design and dev support.",
+  "",
+  "But I’m just an AI — you’d have to talk to the team for real numbers.",
+].join("\n");
+
+const PRICING_ACTIONS = [
+  { id: "book", label: "Book a call" },
+  { id: "project", label: "Tell me about a project" },
+  { id: "explore", label: "Keep exploring" },
+] as const;
+
+type PricingActionId = (typeof PRICING_ACTIONS)[number]["id"];
+
+const CRO_AUDIT_ACTIONS = [
+  { id: "book", label: "Book a call" },
+  { id: "explore", label: "Keep exploring" },
+] as const;
+
+type CroAuditActionId = (typeof CRO_AUDIT_ACTIONS)[number]["id"];
+
+type ScanCardState = {
+  domain: string;
+  favicon: string;
+  progress: number;
+  stepIndex: number;
+  done: boolean;
+};
+
+function isPricingIntent(text: string) {
+  const t = text.trim().toLowerCase();
+  if (!t) return false;
+  if (t === "pricing" || t === "ballpark on pricing") return true;
+  return /\b(pric(?:e|ing)|costs?|budget|ballpark)\b/i.test(t);
+}
+
+function isCroAuditIntent(text: string) {
+  const t = text.trim().toLowerCase();
+  if (!t) return false;
+  if (t === "cro audit" || t === "cro") return true;
+  return /\b(cro\s*audit|conversion\s*(rate\s*)?audit|audit\s*(my\s*)?(funnel|site|page|landing))\b/i.test(
+    t,
   );
 }
+
+/** Call / calendar booking intents (CTA + free text). */
+function isCallIntent(text: string) {
+  const t = text.trim().toLowerCase();
+  if (!t) return false;
+  if (
+    /^(book\s+(a\s+)?call|schedule(\s+a\s+(call|meeting))?|meeting|call|zoom|cal)$/i.test(
+      t,
+    )
+  ) {
+    return true;
+  }
+  return /\b(book\s+(a\s+)?call|schedule(\s+a)?\s+(call|meeting)|book\s+(a\s+)?meeting|(hop|jump)\s+on\s+(a\s+)?call|set\s+up\s+(a\s+)?(call|meeting)|zoom(\s+call|\s+meeting)?|calendly|cal\.com)\b/i.test(
+    t,
+  );
+}
+
+const CAL_INTRO =
+  "Pick a time that works — the calendar is right here in chat.";
 
 function SendIcon() {
   return (
@@ -89,20 +156,6 @@ function SendIcon() {
   );
 }
 
-function CloseIcon() {
-  return (
-    <svg className="rj-ask__attach-x" viewBox="0 0 16 16" aria-hidden="true">
-      <path
-        d="M4 4l8 8M12 4l-8 8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 function ChatCloseIcon() {
   return (
     <svg className="rj-ask__chat-x" viewBox="0 0 20 20" aria-hidden="true">
@@ -115,18 +168,6 @@ function ChatCloseIcon() {
       />
     </svg>
   );
-}
-
-function truncateName(name: string, max = 28) {
-  if (name.length <= max) return name;
-  const ext = name.lastIndexOf(".");
-  if (ext > 0 && name.length - ext <= 6) {
-    const stem = name.slice(0, ext);
-    const suffix = name.slice(ext);
-    const keep = Math.max(8, max - suffix.length - 1);
-    return `${stem.slice(0, keep)}…${suffix}`;
-  }
-  return `${name.slice(0, max - 1)}…`;
 }
 
 function uid() {
@@ -188,6 +229,72 @@ function ThinkingIndicator() {
         <span />
         <span />
       </span>
+    </div>
+  );
+}
+
+function CroScanCard({ scan }: { scan: ScanCardState }) {
+  const label = scan.done
+    ? "Scan complete"
+    : CRO_SCAN_STEPS[scan.stepIndex] ?? CRO_SCAN_STEPS[0];
+  const pct = Math.min(100, Math.round(scan.progress * 100));
+
+  return (
+    <div
+      className={`rj-ask__scan${scan.done ? " is-done" : ""}`}
+      role="status"
+      aria-live="polite"
+      aria-label={`Scanning ${scan.domain}`}
+    >
+      <div className="rj-ask__scan-top">
+        <div className="rj-ask__scan-favicon-wrap">
+          <img
+            className="rj-ask__scan-favicon"
+            src={scan.favicon}
+            alt=""
+            width={28}
+            height={28}
+            loading="eager"
+            decoding="async"
+          />
+          {!scan.done ? (
+            <span className="rj-ask__scan-ring" aria-hidden="true" />
+          ) : null}
+        </div>
+        <div className="rj-ask__scan-meta">
+          <span className="rj-ask__scan-domain">{scan.domain}</span>
+          <span className="rj-ask__scan-label">{label}</span>
+        </div>
+      </div>
+
+      <div
+        className="rj-ask__scan-bar"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      >
+        <span
+          className="rj-ask__scan-bar-fill"
+          style={{ transform: `scaleX(${scan.progress})` }}
+        />
+      </div>
+
+      <ul className="rj-ask__scan-checklist">
+        {CRO_SCAN_STEPS.map((step, i) => {
+          const complete = scan.done || i < scan.stepIndex;
+          const active = !scan.done && i === scan.stepIndex;
+          return (
+            <li
+              key={step}
+              className={`rj-ask__scan-item${complete ? " is-complete" : ""}${active ? " is-active" : ""}`}
+            >
+              <span className="rj-ask__scan-check" aria-hidden="true" />
+              <span>{step}</span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -255,33 +362,51 @@ function useTypewriterPlaceholder(paused: boolean) {
  * Fixed bottom Apple-style ask bar + chat panel (same width as input).
  * Gemini 3 Flash via Lovable gateway, grounded on UXLAB.
  * “Let’s talk” runs a scripted lead capture (email → goal → company).
+ * CRO Audit runs a scripted URL → scan → name → email flow.
+ * Call / “Book a call” opens an inline Cal.com calendar in the chat.
  */
 export function AiPromptInput() {
   const inputId = useId();
-  const fileInputId = useId();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const calContainerId = `my-cal-inline-30min-${useId().replace(/:/g, "")}`;
+  const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const calRef = useRef<HTMLDivElement>(null);
   const revealRef = useRef({ cancelled: false });
   const leadStepRef = useRef<LeadStep | null>(null);
   const leadAnswersRef = useRef({ email: "", goal: "", company: "" });
+  const croStepRef = useRef<CroAuditStep | null>(null);
+  const croAnswersRef = useRef<CroAuditAnswers>({
+    url: "",
+    domain: "",
+    name: "",
+    email: "",
+  });
+  const scanRafRef = useRef<number | null>(null);
 
   const [value, setValue] = useState("");
-  const [file, setFile] = useState<File | null>(null);
   const [focused, setFocused] = useState(false);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
+  const [croStep, setCroStep] = useState<CroAuditStep | null>(null);
+  const [scanCard, setScanCard] = useState<ScanCardState | null>(null);
+  const [pricingActions, setPricingActions] = useState(false);
+  const [croAuditActions, setCroAuditActions] = useState(false);
+  const [showCal, setShowCal] = useState(false);
+  const [inputHint, setInputHint] = useState<string | null>(null);
 
-  const inLead = leadStep !== null && leadStep !== "done";
-  const canSend = Boolean(value.trim() || file) && !pending;
-  const animationPaused =
-    open || focused || Boolean(value.trim()) || Boolean(file);
+  const scanning = croStep === "scanning";
+  const canSend = Boolean(value.trim()) && !pending && !scanning;
+  const animationPaused = open || focused || Boolean(value.trim());
   const rotatingPlaceholder = useTypewriterPlaceholder(animationPaused);
+
   const placeholder = open
-    ? leadStep
-      ? LEAD_PLACEHOLDER[leadStep]
-      : "Ask anything…"
+    ? croStep
+      ? CRO_PLACEHOLDER[croStep]
+      : leadStep
+        ? LEAD_PLACEHOLDER[leadStep]
+        : (inputHint ?? "Ask anything…")
     : rotatingPlaceholder;
 
   useEffect(() => {
@@ -289,16 +414,60 @@ export function AiPromptInput() {
   }, [leadStep]);
 
   useEffect(() => {
+    croStepRef.current = croStep;
+  }, [croStep]);
+
+  useEffect(() => {
     const el = listRef.current;
     if (!el || !open) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [messages, open, pending]);
+  }, [
+    messages,
+    open,
+    pending,
+    pricingActions,
+    croAuditActions,
+    showCal,
+    scanCard,
+  ]);
 
   useEffect(() => {
     return () => {
       revealRef.current.cancelled = true;
+      if (scanRafRef.current != null) {
+        cancelAnimationFrame(scanRafRef.current);
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (!showCal || !open) return;
+    const el = calRef.current;
+    if (!el) return;
+
+    let cleanup: (() => void) | undefined;
+    try {
+      cleanup = mountCalInline(el);
+    } catch (error) {
+      console.error("[AiPromptInput] Cal embed failed", error);
+    }
+
+    return () => {
+      cleanup?.();
+    };
+  }, [showCal, open]);
+
+  function resetCroFlow() {
+    if (scanRafRef.current != null) {
+      cancelAnimationFrame(scanRafRef.current);
+      scanRafRef.current = null;
+    }
+    croAnswersRef.current = { url: "", domain: "", name: "", email: "" };
+    croStepRef.current = null;
+    setCroStep(null);
+    setScanCard(null);
+    setCroAuditActions(false);
+  }
 
   async function pushScriptedReply(text: string) {
     const assistantId = uid();
@@ -344,15 +513,238 @@ export function AiPromptInput() {
     await sleep(0);
     revealRef.current = { cancelled: false };
 
+    resetCroFlow();
     leadAnswersRef.current = { email: "", goal: "", company: "" };
     setLeadStep("email");
+    setPricingActions(false);
+    setShowCal(false);
+    setInputHint(null);
     setPending(false);
     setValue("");
-    clearFile();
     setMessages([]);
     setOpen(true);
 
     await pushScriptedReply(LEAD.intro);
+  }
+
+  async function startCalBookingFlow(userText?: string) {
+    revealRef.current.cancelled = true;
+    await sleep(0);
+    revealRef.current = { cancelled: false };
+
+    setLeadStep(null);
+    leadStepRef.current = null;
+    resetCroFlow();
+    setPricingActions(false);
+    setShowCal(false);
+    setInputHint(null);
+    setPending(false);
+    setValue("");
+    setOpen(true);
+
+    if (userText?.trim()) {
+      const userMsg: ChatMessage = {
+        id: uid(),
+        role: "user",
+        text: userText.trim(),
+      };
+      setMessages((prev) => [...prev, userMsg]);
+    }
+
+    await pushScriptedReply(CAL_INTRO);
+    if (!revealRef.current.cancelled) {
+      setShowCal(true);
+    }
+  }
+
+  async function runPricingFlow(userText: string) {
+    setPricingActions(false);
+    resetCroFlow();
+    setShowCal(false);
+    setInputHint(null);
+    revealRef.current.cancelled = false;
+
+    const userMsg: ChatMessage = {
+      id: uid(),
+      role: "user",
+      text: userText,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setOpen(true);
+
+    await pushScriptedReply(PRICING_REPLY);
+    if (!revealRef.current.cancelled) {
+      setPricingActions(true);
+    }
+  }
+
+  async function startCroAuditFlow(userText?: string) {
+    revealRef.current.cancelled = true;
+    await sleep(0);
+    revealRef.current = { cancelled: false };
+
+    setLeadStep(null);
+    leadStepRef.current = null;
+    resetCroFlow();
+    setPricingActions(false);
+    setShowCal(false);
+    setInputHint(null);
+    setPending(false);
+    setValue("");
+    setOpen(true);
+
+    if (userText?.trim()) {
+      setMessages((prev) => [
+        ...prev,
+        { id: uid(), role: "user", text: userText.trim() },
+      ]);
+    }
+
+    croStepRef.current = "url";
+    setCroStep("url");
+    await pushScriptedReply(CRO.intro);
+  }
+
+  async function runCroScan(domain: string) {
+    const favicon = faviconUrlForDomain(domain);
+    const started = performance.now();
+    setScanCard({
+      domain,
+      favicon,
+      progress: 0,
+      stepIndex: 0,
+      done: false,
+    });
+
+    await new Promise<void>((resolve) => {
+      const tick = (now: number) => {
+        if (revealRef.current.cancelled) {
+          resolve();
+          return;
+        }
+        const t = Math.min(1, (now - started) / CRO_SCAN_DURATION_MS);
+        const stepIndex = Math.min(
+          CRO_SCAN_STEPS.length - 1,
+          Math.floor(t * CRO_SCAN_STEPS.length),
+        );
+        setScanCard({
+          domain,
+          favicon,
+          progress: t,
+          stepIndex,
+          done: false,
+        });
+        if (t < 1) {
+          scanRafRef.current = requestAnimationFrame(tick);
+        } else {
+          scanRafRef.current = null;
+          setScanCard({
+            domain,
+            favicon,
+            progress: 1,
+            stepIndex: CRO_SCAN_STEPS.length - 1,
+            done: true,
+          });
+          resolve();
+        }
+      };
+      scanRafRef.current = requestAnimationFrame(tick);
+    });
+  }
+
+  async function handleCroReply(prompt: string) {
+    const step = croStepRef.current;
+    if (!step || step === "done" || step === "scanning") return;
+
+    const userMsg: ChatMessage = {
+      id: uid(),
+      role: "user",
+      text: prompt,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setOpen(true);
+
+    if (step === "url") {
+      const parsed = normalizeAuditUrl(prompt);
+      if (!parsed) {
+        await pushScriptedReply(CRO.urlRetry);
+        return;
+      }
+
+      croAnswersRef.current.url = parsed.href;
+      croAnswersRef.current.domain = parsed.domain;
+      croStepRef.current = "scanning";
+      setCroStep("scanning");
+
+      await runCroScan(parsed.domain);
+      if (revealRef.current.cancelled) return;
+
+      croStepRef.current = "name";
+      setCroStep("name");
+      await pushScriptedReply(CRO.afterScan);
+      return;
+    }
+
+    if (step === "name") {
+      const name = prompt.trim();
+      if (!name) {
+        await pushScriptedReply(CRO.namePrompt);
+        return;
+      }
+      croAnswersRef.current.name = name;
+      croStepRef.current = "email";
+      setCroStep("email");
+      await pushScriptedReply(CRO.emailPrompt);
+      return;
+    }
+
+    if (step === "email") {
+      if (!looksLikeEmail(prompt)) {
+        await pushScriptedReply(CRO.emailRetry);
+        return;
+      }
+      const email = prompt.trim();
+      croAnswersRef.current.email = email;
+      croStepRef.current = "done";
+      setCroStep("done");
+      await pushScriptedReply(CRO.done(email));
+      if (!revealRef.current.cancelled) {
+        setCroAuditActions(true);
+      }
+      // Keep answers in ref; clear step so further asks go to Gemini
+      croStepRef.current = null;
+      setCroStep(null);
+    }
+  }
+
+  function onPricingAction(id: PricingActionId) {
+    if (id === "book") {
+      void startCalBookingFlow("Book a call");
+      return;
+    }
+
+    if (id === "project") {
+      setPricingActions(false);
+      setCroAuditActions(false);
+      setShowCal(false);
+      setInputHint("Describe your project…");
+      setOpen(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
+    }
+
+    setPricingActions(false);
+    setInputHint(null);
+  }
+
+  function onCroAuditAction(id: CroAuditActionId) {
+    if (id === "book") {
+      void startCalBookingFlow("Book a call");
+      return;
+    }
+
+    setCroAuditActions(false);
+    setInputHint(null);
   }
 
   async function handleLeadReply(prompt: string) {
@@ -389,7 +781,6 @@ export function AiPromptInput() {
       leadAnswersRef.current.company = prompt.trim();
       setLeadStep("done");
       await pushScriptedReply(LEAD.done);
-      // Lead complete — further messages fall through to Gemini
       setLeadStep(null);
       leadStepRef.current = null;
     }
@@ -404,22 +795,11 @@ export function AiPromptInput() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stable listener; startLeadFlow closes over latest refs
   }, []);
 
-  function clearFile() {
-    setFile(null);
-    if (fileRef.current) fileRef.current.value = "";
-  }
-
-  function onFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const next = event.target.files?.[0] ?? null;
-    setFile(next);
-  }
-
-  async function pushExchange(prompt: string, attachedName?: string) {
+  async function pushExchange(prompt: string) {
     const userMsg: ChatMessage = {
       id: uid(),
       role: "user",
-      text: prompt || (attachedName ? `Attached ${attachedName}` : ""),
-      fileName: attachedName,
+      text: prompt,
     };
 
     setOpen(true);
@@ -432,19 +812,13 @@ export function AiPromptInput() {
       .slice(-12)
       .map((m) => ({ role: m.role, content: m.text }));
 
-    // Drop the current user turn from history — sent as `prompt`
     const prior = history.slice(0, -1);
-
-    const aiPrompt = attachedName
-      ? `${prompt || "Please review this attachment."}\n\n[Attachment: ${attachedName}]`
-      : prompt;
-
     const assistantId = uid();
 
     try {
       const { text } = await generateWithGeminiFlash({
         data: {
-          prompt: aiPrompt,
+          prompt,
           system: UXLAB_SYSTEM_PROMPT,
           history: prior,
         },
@@ -487,7 +861,7 @@ export function AiPromptInput() {
         {
           id: assistantId,
           role: "assistant",
-          text: "Something went wrong. Please try again in a moment — or email hello@uxlab.studio.",
+          text: "Something went wrong. Please try again in a moment — or email alex@uxlab.digital.",
         },
       ]);
     }
@@ -498,33 +872,80 @@ export function AiPromptInput() {
     if (!canSend) return;
 
     const prompt = value.trim();
-    const attachedName = file?.name;
     setValue("");
-    clearFile();
+    setPricingActions(false);
+    setCroAuditActions(false);
+    setInputHint(null);
+
+    const cro = croStepRef.current;
+    if (cro && cro !== "done" && cro !== "scanning") {
+      setShowCal(false);
+      void handleCroReply(prompt);
+      return;
+    }
 
     const step = leadStepRef.current;
     if (step && step !== "done") {
-      void handleLeadReply(prompt || (attachedName ? attachedName : ""));
+      setShowCal(false);
+      void handleLeadReply(prompt);
       return;
     }
 
-    pushExchange(prompt, attachedName);
+    if (isCallIntent(prompt)) {
+      void startCalBookingFlow(prompt);
+      return;
+    }
+
+    if (isPricingIntent(prompt)) {
+      void runPricingFlow(prompt);
+      return;
+    }
+
+    if (isCroAuditIntent(prompt)) {
+      void startCroAuditFlow(prompt);
+      return;
+    }
+
+    setShowCal(false);
+    void pushExchange(prompt);
   }
 
-  function onTip(tip: string) {
+  function onTip(tip: (typeof TIPS)[number]) {
     setValue("");
-    clearFile();
-    if (tip === "Talk to an expert") {
-      void startLeadFlow();
+    setPricingActions(false);
+    setCroAuditActions(false);
+    setInputHint(null);
+    if (tip === "Book a call") {
+      void startCalBookingFlow(tip);
       return;
     }
+    if (tip === "Ballpark on pricing") {
+      void runPricingFlow(tip);
+      return;
+    }
+    if (tip === "CRO Audit") {
+      void startCroAuditFlow(tip);
+      return;
+    }
+    setShowCal(false);
     setOpen(true);
-    pushExchange(tip);
+    void pushExchange(tip);
   }
 
   function closeChat() {
     revealRef.current.cancelled = true;
+    if (scanRafRef.current != null) {
+      cancelAnimationFrame(scanRafRef.current);
+      scanRafRef.current = null;
+    }
     setPending(false);
+    setPricingActions(false);
+    setCroAuditActions(false);
+    setShowCal(false);
+    setInputHint(null);
+    setScanCard(null);
+    setCroStep(null);
+    croStepRef.current = null;
     setOpen(false);
   }
 
@@ -572,8 +993,12 @@ export function AiPromptInput() {
             </button>
           </div>
 
-          <div ref={listRef} className="rj-ask__chat-messages">
-            {messages.length === 0 && !pending ? (
+          <div
+            ref={listRef}
+            className="rj-ask__chat-messages"
+            data-lenis-prevent
+          >
+            {messages.length === 0 && !pending && !showCal && !scanCard ? (
               <div className="rj-ask__msg rj-ask__msg--assistant rj-ask__msg--enter">
                 <div className="rj-ask__bubble">
                   How can we help grow your product?
@@ -590,20 +1015,18 @@ export function AiPromptInput() {
                   className={`rj-ask__bubble${msg.streaming ? " is-streaming" : ""}`}
                 >
                   {msg.text}
-                  {msg.streaming && !msg.text ? (
+                  {msg.streaming ? (
                     <span className="rj-ask__caret" aria-hidden="true" />
-                  ) : null}
-                  {msg.streaming && msg.text ? (
-                    <span className="rj-ask__caret" aria-hidden="true" />
-                  ) : null}
-                  {msg.fileName ? (
-                    <span className="rj-ask__bubble-file">
-                      {truncateName(msg.fileName, 36)}
-                    </span>
                   ) : null}
                 </div>
               </div>
             ))}
+
+            {scanCard ? (
+              <div className="rj-ask__msg rj-ask__msg--assistant rj-ask__msg--enter">
+                <CroScanCard scan={scanCard} />
+              </div>
+            ) : null}
 
             {pending ? (
               <div className="rj-ask__msg rj-ask__msg--assistant rj-ask__msg--enter">
@@ -612,65 +1035,101 @@ export function AiPromptInput() {
                 </div>
               </div>
             ) : null}
+
+            {pricingActions && !pending && !showCal ? (
+              <div
+                className="rj-ask__actions rj-ask__msg--enter"
+                role="group"
+                aria-label="Pricing next steps"
+              >
+                {PRICING_ACTIONS.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="rj-ask__action"
+                    onClick={() => onPricingAction(action.id)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {croAuditActions && !pending && !showCal ? (
+              <div
+                className="rj-ask__actions rj-ask__msg--enter"
+                role="group"
+                aria-label="CRO Audit next steps"
+              >
+                {CRO_AUDIT_ACTIONS.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="rj-ask__action"
+                    onClick={() => onCroAuditAction(action.id)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {showCal && !pending ? (
+              <div
+                className="rj-ask__cal-wrap rj-ask__msg--enter"
+                aria-label="Book a call"
+              >
+                <div
+                  ref={calRef}
+                  id={calContainerId}
+                  className="rj-ask__cal"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {file ? (
-        <div className="rj-ask__attach">
-          <span className="rj-ask__attach-pill" title={file.name}>
-            <span className="rj-ask__attach-name">{truncateName(file.name)}</span>
-            <button
-              type="button"
-              className="rj-ask__attach-remove"
-              aria-label={`Remove ${file.name}`}
-              onClick={clearFile}
-            >
-              <CloseIcon />
-            </button>
-          </span>
-        </div>
-      ) : null}
-
       <form className="rj-ask__bar" onSubmit={onSubmit}>
-        <input
-          ref={fileRef}
-          id={fileInputId}
-          className="rj-ask__file"
-          type="file"
-          accept={FILE_ACCEPT}
-          onChange={onFileChange}
-          tabIndex={-1}
-        />
-
-        <button
-          type="button"
-          className="rj-ask__btn"
-          aria-label="Add attachment"
-          onClick={() => fileRef.current?.click()}
-          disabled={inLead}
-        >
-          <PlusIcon />
-        </button>
-
         <div className="rj-ask__value">
           <label className="sr-only" htmlFor={inputId}>
             Ask UXLAB
           </label>
           <input
+            ref={inputRef}
             id={inputId}
             className="rj-ask__input"
-            type={leadStep === "email" ? "email" : "text"}
-            inputMode={leadStep === "email" ? "email" : "text"}
-            autoComplete={
-              leadStep === "email"
+            type={
+              leadStep === "email" || croStep === "email"
                 ? "email"
-                : leadStep === "company"
-                  ? "organization"
-                  : "off"
+                : croStep === "url"
+                  ? "url"
+                  : "text"
+            }
+            inputMode={
+              leadStep === "email" || croStep === "email"
+                ? "email"
+                : croStep === "url"
+                  ? "url"
+                  : "text"
+            }
+            autoComplete={
+              leadStep === "email" || croStep === "email"
+                ? "email"
+                : croStep === "name"
+                  ? "name"
+                  : leadStep === "company"
+                    ? "organization"
+                    : croStep === "url"
+                      ? "url"
+                      : "off"
             }
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            disabled={scanning}
+            onChange={(e) => {
+              setValue(e.target.value);
+              if (inputHint) setInputHint(null);
+            }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder={placeholder}

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -9,11 +10,29 @@ gsap.registerPlugin(ScrollTrigger);
  * Rejouice post-reel intro: word-reveal tagline + key-value row with split reveal.
  */
 export function HomeIntro() {
+  const { lenis } = useSmoothScroll();
   const rootRef = useRef<HTMLElement>(null);
   const taglineRef = useRef<HTMLParagraphElement>(null);
   const splitRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const bodyTextRef = useRef<HTMLDivElement>(null);
+
+  const scrollToHref = (href: string) => {
+    const id = href.replace("#", "");
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    if (lenis) {
+      lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+    } else {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const onServicesClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    scrollToHref("#solutions");
+  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -73,7 +92,11 @@ export function HomeIntro() {
             <p ref={taglineRef}>
               We help teams drive growth through product performance, UX,
               conversion, activations, and LTV lifts that compound. Explore{" "}
-              <a href="#solutions" className="rj-link-active-full">
+              <a
+                href="#solutions"
+                className="rj-link-active-full"
+                onClick={onServicesClick}
+              >
                 our services
               </a>
               .

@@ -169,11 +169,6 @@ function LogoMark({ src }: { src: string }) {
 }
 
 function WidgetCard({ widget }: { widget: GlanceWidget }) {
-  const ink = widget.logoInk ?? "light";
-  const invertLogo =
-    (widget.theme === "light" && ink === "light") ||
-    (widget.theme === "dark" && ink === "dark");
-
   return (
     <div
       className={cn(
@@ -182,7 +177,6 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
         `rj-glance__widget--${widget.theme}`,
       )}
     >
-      {/* Media first so title/link mix-blend:difference can sample it */}
       {widget.backgroundImage ? (
         <div className="rj-glance__bg">
           <img src={widget.backgroundImage} alt="" draggable={false} />
@@ -211,12 +205,7 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
               <ArrowLink href={widget.link.href}>{widget.link.label}</ArrowLink>
             ) : null}
           </div>
-          <div
-            className={cn(
-              "rj-glance__card-logos",
-              invertLogo && "rj-glance__card-logos--invert",
-            )}
-          >
+          <div className="rj-glance__card-logos">
             <LogoMark src={widget.logo} />
           </div>
         </div>

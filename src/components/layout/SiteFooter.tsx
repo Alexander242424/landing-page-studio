@@ -64,13 +64,13 @@ export function SiteFooter() {
         </div>
 
         <div className="rj-footer__col rj-footer__col--actions">
-          <a href="mailto:hello@uxlab.studio" className="rj-footer__action">
+          <a href="mailto:alex@uxlab.digital" className="rj-footer__action">
             <span>Subscribe to our newsletter</span>
             <span className="rj-footer__action-arrow" aria-hidden="true">
               →
             </span>
           </a>
-          <a href="mailto:hello@uxlab.studio" className="rj-footer__action">
+          <a href="mailto:alex@uxlab.digital" className="rj-footer__action">
             <span>Get in touch with us</span>
             <span className="rj-footer__action-arrow" aria-hidden="true">
               →

@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
+import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
+import { createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,29 +29,39 @@ const ITEMS = [
 ] as const;
 
 /**
- * Rejouice “Our approach” — awards headline + lead + key-value block.
+ * Rejouice “Our approach” — intro-style lead + key-value block.
  */
 export function ApproachSection() {
+  const { lenis } = useSmoothScroll();
   const rootRef = useRef<HTMLElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
   const leadRef = useRef<HTMLParagraphElement>(null);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
 
+  const scrollToHref = (href: string) => {
+    const id = href.replace("#", "");
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    if (lenis) {
+      lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+    } else {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const onProcessClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    scrollToHref("#process");
+  };
+
   useEffect(() => {
     const root = rootRef.current;
-    const headline = headlineRef.current;
     const lead = leadRef.current;
-    if (!root || !headline || !lead) return;
+    if (!root || !lead) return;
 
     const cleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
-      cleanups.push(
-        createAwardsCharReveal(headline, {
-          start: "top 85%",
-        }),
-      );
-
       cleanups.push(
         createTextReveal(lead, {
           trigger: lead.closest(".rj-approach__lead-content") ?? lead,
@@ -95,15 +106,6 @@ export function ApproachSection() {
       id="approach"
       aria-label="Our approach"
     >
-      <div className="rj-approach__title-row">
-        <h2
-          ref={headlineRef}
-          className="rj-approach__headline rj-awards-title"
-        >
-          Our approach
-        </h2>
-      </div>
-
       <div className="rj-approach__lead">
         <div className="rj-approach__lead-inner">
           <div className="rj-approach__lead-space" aria-hidden="true" />
@@ -112,7 +114,11 @@ export function ApproachSection() {
               Our approach is built for compounding growth—diagnose the real
               friction, design the highest-leverage fix, validate with signal,
               and ship what moves revenue. See{" "}
-              <a href="#process" className="rj-link-active-full">
+              <a
+                href="#process"
+                className="rj-link-active-full"
+                onClick={onProcessClick}
+              >
                 our process
               </a>
               .
