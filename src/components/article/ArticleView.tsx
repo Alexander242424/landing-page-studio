@@ -47,9 +47,6 @@ export function ArticleView({ article }: ArticleViewProps) {
                 Resources
               </Link>
             </li>
-            <li aria-current="page">
-              <span>{article.title}</span>
-            </li>
           </ol>
         </nav>
 
@@ -175,11 +172,6 @@ export function ArticleView({ article }: ArticleViewProps) {
               ))}
             </Accordion>
           </section>
-
-          <ArticleAsideCta
-            variant="footer"
-            className="rj-article__cta--end"
-          />
         </div>
 
         <aside
@@ -197,7 +189,9 @@ export function ArticleView({ article }: ArticleViewProps) {
           className="rj-article__related"
           aria-labelledby="related-heading"
         >
-          <h2 id="related-heading">Related articles</h2>
+          <h2 id="related-heading" className="rj-blog__headline">
+            Related articles
+          </h2>
           <BlogGrid articles={related} />
         </section>
       ) : null}

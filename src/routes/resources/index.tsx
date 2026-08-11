@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { BlogGrid } from "@/components/blog/BlogGrid";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
@@ -25,7 +25,33 @@ const RESOURCES_PATH = "/resources";
 const RESOURCES_DESCRIPTION =
   "UXLAB resources on activation, CRO, design systems, and AI in growth UX — practical notes from shipping product performance work.";
 
+type ResourcesSearch = {
+  category?: string;
+};
+
+function categoryToSlug(category: string) {
+  return category
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function categoryFromSlug(slug: string | undefined, categories: string[]) {
+  if (!slug) return "All";
+  const match = categories.find(
+    (category) => categoryToSlug(category) === slug,
+  );
+  return match ?? "All";
+}
+
 export const Route = createFileRoute("/resources/")({
+  validateSearch: (search: Record<string, unknown>): ResourcesSearch => ({
+    category:
+      typeof search.category === "string" && search.category.trim()
+        ? search.category.trim()
+        : undefined,
+  }),
   head: () => ({
     meta: defaultMeta({
       title: "Resources",
@@ -91,8 +117,13 @@ function buildResourcesJsonLd() {
 }
 
 function ResourcesIndexPage() {
+  const navigate = Route.useNavigate();
+  const { category: categorySlug } = Route.useSearch();
   const categories = useMemo(() => getArticleCategories(), []);
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const activeCategory = useMemo(
+    () => categoryFromSlug(categorySlug, categories),
+    [categorySlug, categories],
+  );
 
   const articles = useMemo(() => {
     if (activeCategory === "All") return ARTICLES;
@@ -113,6 +144,17 @@ function ResourcesIndexPage() {
       delete document.documentElement.dataset.rjRoute;
     };
   }, []);
+
+  function selectCategory(category: string) {
+    void navigate({
+      to: "/resources",
+      search:
+        category === "All"
+          ? {}
+          : { category: categoryToSlug(category) },
+      replace: false,
+    });
+  }
 
   return (
     <div className="theme-light rj-page rj-page--article min-h-screen">
@@ -138,11 +180,11 @@ function ResourcesIndexPage() {
             </ol>
           </nav>
 
-          <p className="rj-resources__eyebrow">Insights</p>
           <h1 className="rj-resources__title">Resources</h1>
           <p className="rj-resources__lede">
-            Notes from shipping growth UX — activation, CRO, systems, and where
-            AI actually helps product performance.
+            Notes from shipping growth UX — activation, CRO, systems,
+            <br />
+            and where AI actually helps product performance.
           </p>
         </header>
 
@@ -164,7 +206,7 @@ function ResourcesIndexPage() {
                     ? "rj-resources__filter rj-resources__filter--active"
                     : "rj-resources__filter"
                 }
-                onClick={() => setActiveCategory(category)}
+                onClick={() => selectCategory(category)}
               >
                 {category}
               </button>

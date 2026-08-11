@@ -4800,8 +4800,8 @@ html[data-rj-route="article"] body {
 /* Mobile / tablet: compact TOC as details above the answer. */
 .rj-article-toc-mobile {
   margin: 0 0 2.8rem;
-  border-bottom: 1px solid var(--rj-border);
-  padding-bottom: 1.6rem;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .rj-article-toc-mobile__summary {
@@ -4949,14 +4949,6 @@ html[data-rj-route="article"] body {
   }
 }
 
-.rj-article__crumbs [aria-current="page"] span {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  color: var(--rj-black);
-}
-
 .rj-article__category {
   display: inline-flex;
   align-self: flex-start;
@@ -5041,7 +5033,6 @@ html[data-rj-route="article"] body {
 .rj-article__takeaways h2,
 .rj-article__section h2,
 .rj-article__faq h2,
-.rj-article__related h2,
 .rj-article__cta h2 {
   margin: 0 0 1.6rem;
   font-size: clamp(2.2rem, 3vw, 3rem);
@@ -5221,11 +5212,7 @@ html[data-rj-route="article"] body {
 .rj-article__related {
   margin: 6rem 0 0;
   padding-top: 4rem;
-  border-top: 1px solid var(--rj-border);
-}
-
-.rj-article__related h2 {
-  margin-bottom: 2.4rem;
+  border-top: none;
 }
 
 @media (min-width: 768px) {
@@ -5362,15 +5349,6 @@ html[data-rj-route="article"] body {
   margin-bottom: 3.2rem;
 }
 
-.rj-resources__eyebrow {
-  margin: 0.4rem 0 0;
-  font-size: 1.2rem;
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--rj-fg-muted);
-}
-
 .rj-resources__title {
   margin: 0;
   font-size: clamp(4rem, 9vw, 7.2rem);
@@ -5382,12 +5360,12 @@ html[data-rj-route="article"] body {
 
 .rj-resources__lede {
   margin: 0;
-  max-width: 42rem;
+  max-width: 54rem;
   font-size: 1.6rem;
   font-weight: 300;
   letter-spacing: var(--rj-tracking-body);
   line-height: 1.45;
-  color: var(--rj-fg-muted);
+  color: var(--rj-black);
 }
 
 .rj-resources__filters {
@@ -5396,8 +5374,8 @@ html[data-rj-route="article"] body {
   align-items: center;
   gap: 0.8rem;
   margin: 0 0 3.2rem;
-  padding: 0 0 2.4rem;
-  border-bottom: 1px solid var(--rj-border);
+  padding: 0;
+  border-bottom: none;
 }
 
 .rj-resources__filter {
