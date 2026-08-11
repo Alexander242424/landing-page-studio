@@ -1,12 +1,16 @@
 import { lazy, Suspense, useEffect } from "react";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import {
   ArticleView,
   buildArticleJsonLd,
 } from "@/components/article/ArticleView";
-import { articlePath, getArticle } from "@/lib/articles";
+import {
+  articlePath,
+  getArticle,
+  resolveCanonicalArticleSlug,
+} from "@/lib/articles";
 import { SITE, absoluteUrl, pageTitle } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
@@ -17,7 +21,15 @@ const SiteFooter = lazy(() =>
 
 export const Route = createFileRoute("/resources/$slug")({
   loader: ({ params }) => {
-    const article = getArticle(params.slug);
+    const canonicalSlug = resolveCanonicalArticleSlug(params.slug);
+    if (!canonicalSlug) throw notFound();
+    if (canonicalSlug !== params.slug) {
+      throw redirect({
+        to: "/resources/$slug",
+        params: { slug: canonicalSlug },
+      });
+    }
+    const article = getArticle(canonicalSlug);
     if (!article) throw notFound();
     return { article };
   },
@@ -116,7 +128,7 @@ function ArticlePage() {
       </main>
 
       <Suspense fallback={null}>
-        <SiteFooter />
+        <SiteFooter variant="dark" />
       </Suspense>
     </div>
   );

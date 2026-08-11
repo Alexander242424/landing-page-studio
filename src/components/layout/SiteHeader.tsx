@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Work", href: "#glance" },
   { label: "About", href: "#about" },
   { label: "Solutions", href: "#solutions" },
+  { label: "Resources", href: "/resources" },
 ] as const;
 
 type NavHref = (typeof NAV_ITEMS)[number]["href"];
@@ -19,6 +20,10 @@ type SiteHeaderProps = {
   /** `home` = hash scroll-spy; `site` = navigate to home sections */
   variant?: "home" | "site";
 };
+
+function isPathHref(href: string): href is `/${string}` {
+  return href.startsWith("/");
+}
 
 /**
  * Fixed mix-blend header: scroll-spy nav, Lenis anchors, Let's talk CTA.
@@ -38,10 +43,11 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
       return;
     }
 
-    const sections = NAV_ITEMS.map((item) => ({
-      href: item.href,
-      el: document.getElementById(item.href.slice(1)),
-    }))
+    const sections = NAV_ITEMS.filter((item) => !isPathHref(item.href))
+      .map((item) => ({
+        href: item.href,
+        el: document.getElementById(item.href.slice(1)),
+      }))
       .filter((item): item is { href: NavHref; el: HTMLElement } => !!item.el)
       .sort((a, b) => a.el.offsetTop - b.el.offsetTop);
 
@@ -93,6 +99,10 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
 
   const onNavClick = (event: MouseEvent<HTMLAnchorElement>, href: NavHref) => {
     event.preventDefault();
+    if (isPathHref(href)) {
+      void navigate({ to: href, viewTransition: true });
+      return;
+    }
     if (isHome) {
       setActiveHref(href);
       scrollToHref(href);
@@ -136,11 +146,21 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
             <nav className="rj-header__nav" aria-label="Primary">
               <ul className="rj-header__menu">
                 {NAV_ITEMS.map((item) => {
-                  const isActive = activeHref === item.href;
+                  const pathItem = isPathHref(item.href);
+                  const isActive = pathItem
+                    ? pathname === item.href ||
+                      pathname.startsWith(`${item.href}/`)
+                    : activeHref === item.href;
+                  const hrefAttr = pathItem
+                    ? item.href
+                    : isHome
+                      ? item.href
+                      : `/${item.href}`;
+
                   return (
                     <li key={item.href} className="rj-header__menu-item">
                       <a
-                        href={isHome ? item.href : `/${item.href}`}
+                        href={hrefAttr}
                         aria-current={isActive ? "true" : undefined}
                         className={cn(
                           "rj-link-active",

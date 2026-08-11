@@ -66,9 +66,56 @@ function startOfUtcDay(d = new Date()): Date {
   );
 }
 
+function rankBySessions(
+  rows: AnalyticsEventRow[],
+  keyFn: (r: AnalyticsEventRow) => string | null,
+): Array<{ key: string; sessions: number }> {
+  const sessionsByKey = new Map<string, Set<string>>();
+  for (const r of rows) {
+    const key = keyFn(r);
+    if (!key) continue;
+    let set = sessionsByKey.get(key);
+    if (!set) {
+      set = new Set();
+      sessionsByKey.set(key, set);
+    }
+    set.add(r.sessionId);
+  }
+  return [...sessionsByKey.entries()]
+    .map(([key, sessions]) => ({ key, sessions: sessions.size }))
+    .sort((a, b) => b.sessions - a.sessions);
+}
+
+function formatGeoLabel(geo: {
+  city?: string | null;
+  country?: string | null;
+}): string {
+  const city = geo.city?.trim() || null;
+  const country = geo.country?.trim() || null;
+  if (city && country && city !== country) return `${city}, ${country}`;
+  return city || country || "—";
+}
+
 export const trackAnalyticsEvent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => TrackInput.parse(input))
   .handler(async ({ data }) => {
+    let geo = {
+      country: null as string | null,
+      countryCode: null as string | null,
+      city: null as string | null,
+    };
+    try {
+      const { getRequestHeaders } = await import(
+        "@tanstack/react-start/server"
+      );
+      const { resolveRequestGeo } = await import(
+        "@/lib/analytics/geo.server"
+      );
+      geo = await resolveRequestGeo(getRequestHeaders());
+    } catch (error) {
+      console.warn("[analytics] geo resolve failed", error);
+    }
+
     const row: AnalyticsEventRow = {
       id: createId(),
       receivedAt: new Date().toISOString(),
@@ -80,6 +127,9 @@ export const trackAnalyticsEvent = createServerFn({ method: "POST" })
       userAgent: data.userAgent ?? null,
       durationSec: data.durationSec ?? null,
       meta: data.meta ?? {},
+      country: geo.country,
+      countryCode: geo.countryCode,
+      city: geo.city,
     };
     const ok = await appendAnalytics(row);
     return { ok };
@@ -107,6 +157,35 @@ export const getAnalyticsDashboard = createServerFn({ method: "GET" }).handler(
       .slice(0, 8)
       .map(([path, views]) => ({ path, views }));
 
+    const topCountries = rankBySessions(today, (r) => {
+      if (!r.country || r.country === "Local") return null;
+      return r.country;
+    })
+      .slice(0, 8)
+      .map(({ key, sessions }) => {
+        const sample = today.find((r) => r.country === key);
+        return {
+          country: key,
+          countryCode: sample?.countryCode ?? null,
+          sessions,
+        };
+      });
+
+    const topCities = rankBySessions(today, (r) => {
+      if (!r.city || r.city === "Local") return null;
+      const country = r.country && r.country !== "Local" ? r.country : null;
+      return country ? `${r.city}|||${country}` : r.city;
+    })
+      .slice(0, 8)
+      .map(({ key, sessions }) => {
+        const [city, country] = key.split("|||");
+        return {
+          city: city || key,
+          country: country || null,
+          sessions,
+        };
+      });
+
     const recent = [...rows]
       .reverse()
       .slice(0, 40)
@@ -117,6 +196,10 @@ export const getAnalyticsDashboard = createServerFn({ method: "GET" }).handler(
         sessionId: r.sessionId.slice(0, 8),
         timestamp: r.timestamp,
         durationSec: r.durationSec ?? null,
+        country: r.country ?? null,
+        countryCode: r.countryCode ?? null,
+        city: r.city ?? null,
+        location: formatGeoLabel({ city: r.city, country: r.country }),
       }));
 
     const durations = today
@@ -136,6 +219,8 @@ export const getAnalyticsDashboard = createServerFn({ method: "GET" }).handler(
       pageViewsToday,
       avgDurationSec,
       topPaths,
+      topCountries,
+      topCities,
       recent,
       totalEvents: rows.length,
     };

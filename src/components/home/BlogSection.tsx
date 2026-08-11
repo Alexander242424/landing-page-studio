@@ -1,21 +1,32 @@
 import { useEffect, useRef } from "react";
-import { Link } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ARTICLES } from "@/lib/articles";
+import { BlogGrid } from "@/components/blog/BlogGrid";
+import { ARTICLES, type Article } from "@/lib/articles";
 import { createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+type BlogSectionProps = {
+  articles?: Article[];
+  /** Skip scroll reveal / card entrance (e.g. embed in article page). */
+  skipAnimation?: boolean;
+};
+
 /**
  * Latest articles — light band after FAQ.
  */
-export function BlogSection() {
+export function BlogSection({
+  articles = ARTICLES,
+  skipAnimation = false,
+}: BlogSectionProps = {}) {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
+    if (skipAnimation) return;
+
     const root = rootRef.current;
     const headline = headlineRef.current;
     const grid = gridRef.current;
@@ -55,7 +66,7 @@ export function BlogSection() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [skipAnimation]);
 
   return (
     <section
@@ -69,34 +80,7 @@ export function BlogSection() {
           Latest articles
         </h2>
 
-        <ul ref={gridRef} className="rj-blog__grid">
-          {ARTICLES.map((article) => (
-            <li key={article.slug} className="rj-blog__card">
-              <Link
-                to="/resources/$slug"
-                params={{ slug: article.slug }}
-                viewTransition
-                className="rj-blog__card-link"
-              >
-                <div className="rj-blog__media">
-                  <img
-                    src={article.image}
-                    alt={article.imageAlt}
-                    draggable={false}
-                    loading="lazy"
-                  />
-                </div>
-                <span className="rj-blog__category">{article.category}</span>
-                <h3 className="rj-blog__title">
-                  <span className="rj-blog__title-text">{article.title}</span>
-                </h3>
-                <p className="rj-blog__meta">
-                  {article.date} — {article.readTime}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <BlogGrid ref={gridRef} articles={articles} />
       </div>
     </section>
   );

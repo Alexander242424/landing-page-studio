@@ -42,9 +42,17 @@ const AUTHOR = {
   url: "https://uxlab.digital",
 } as const;
 
+/** Previous short slugs → current title-derived slugs (for redirects). */
+export const LEGACY_ARTICLE_SLUGS: Record<string, string> = {
+  activation: "how-activation-loops-compound-retention-in-the-first-14-days",
+  experiment: "a-practical-playbook-for-cro-experiments-that-ship-weekly",
+  systems: "design-systems-that-protect-conversion-under-product-velocity",
+  ai: "where-ai-belongs-in-growth-ux-and-where-it-still-fails",
+};
+
 export const ARTICLES: Article[] = [
   {
-    slug: "activation",
+    slug: "how-activation-loops-compound-retention-in-the-first-14-days",
     category: "Product News",
     title: "How activation loops compound retention in the first 14 days",
     description:
@@ -122,7 +130,7 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
-    slug: "experiment",
+    slug: "a-practical-playbook-for-cro-experiments-that-ship-weekly",
     category: "Best Practices",
     title: "A practical playbook for CRO experiments that ship weekly",
     description:
@@ -198,7 +206,7 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
-    slug: "systems",
+    slug: "design-systems-that-protect-conversion-under-product-velocity",
     category: "Engineering",
     title: "Design systems that protect conversion under product velocity",
     description:
@@ -273,7 +281,7 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
-    slug: "ai",
+    slug: "where-ai-belongs-in-growth-ux-and-where-it-still-fails",
     category: "Announcements",
     title: "Where AI belongs in growth UX — and where it still fails",
     description:
@@ -354,8 +362,18 @@ export function getArticle(slug: string): Article | undefined {
   return ARTICLES.find((article) => article.slug === slug);
 }
 
+/** Canonical slug for a route param, or undefined if unknown. */
+export function resolveCanonicalArticleSlug(slug: string): string | undefined {
+  if (ARTICLES.some((article) => article.slug === slug)) return slug;
+  return LEGACY_ARTICLE_SLUGS[slug];
+}
+
 export function getArticleSlugs(): string[] {
   return ARTICLES.map((article) => article.slug);
+}
+
+export function getArticleCategories(): string[] {
+  return [...new Set(ARTICLES.map((article) => article.category))];
 }
 
 export function getRelatedArticles(slug: string, limit = 3): Article[] {

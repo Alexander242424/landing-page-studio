@@ -1,11 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLink } from "@/components/ui/ArrowLink";
+import { ArticleAsideCta } from "@/components/article/ArticleAsideCta";
+import { articleHeadingId } from "@/components/article/articleHeadingId";
+import { ArticleToc } from "@/components/article/ArticleToc";
+import { BlogGrid } from "@/components/blog/BlogGrid";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   articlePath,
   getRelatedArticles,
   type Article,
 } from "@/lib/articles";
-import { openLeadChat } from "@/lib/askChat";
 import { SITE, absoluteUrl } from "@/lib/site";
 
 type ArticleViewProps = {
@@ -15,6 +23,7 @@ type ArticleViewProps = {
 /**
  * Light, SEO / GEO / LLM-optimized article body.
  * Semantic article markup + answer capsule + FAQ for generative engines.
+ * Desktop: sticky TOC | reading column | sticky CTA.
  */
 export function ArticleView({ article }: ArticleViewProps) {
   const related = getRelatedArticles(article.slug);
@@ -34,7 +43,7 @@ export function ArticleView({ article }: ArticleViewProps) {
               </Link>
             </li>
             <li>
-              <Link to="/" hash="resources" viewTransition>
+              <Link to="/resources" viewTransition>
                 Resources
               </Link>
             </li>
@@ -82,74 +91,106 @@ export function ArticleView({ article }: ArticleViewProps) {
         />
       </figure>
 
-      {/* Answer-first block for LLM / GEO citation */}
-      <section
-        className="rj-article__answer"
-        aria-label="Direct answer"
-        data-speakable="true"
-      >
-        <h2 className="rj-article__answer-label">In short</h2>
-        <p className="rj-article__answer-text" data-geo-answer>
-          {article.answerCapsule}
-        </p>
-      </section>
-
-      <section className="rj-article__takeaways" aria-labelledby="takeaways-heading">
-        <h2 id="takeaways-heading">Key takeaways</h2>
-        <ul>
-          {article.takeaways.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </section>
-
-      <div className="rj-article__body" itemProp="articleBody">
-        {article.sections.map((section) => (
-          <section key={section.heading} className="rj-article__section">
-            <h2>{section.heading}</h2>
-            {section.paragraphs.map((paragraph) => (
-              <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-            ))}
-            {section.bullets ? (
-              <ul>
-                {section.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
-            ) : null}
-          </section>
-        ))}
-      </div>
-
-      <section className="rj-article__faq" aria-labelledby="faq-heading">
-        <h2 id="faq-heading">FAQ</h2>
-        <div className="rj-article__faq-list">
-          {article.faq.map((item) => (
-            <details key={item.question} className="rj-article__faq-item">
-              <summary>{item.question}</summary>
-              <p>{item.answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      <aside className="rj-article__cta" aria-label="Talk to UXLAB">
-        <h2>Want this applied to your product?</h2>
-        <p>
-          UXLAB helps teams ship activation, CRO, and AI-native product work
-          that moves conversion—not slide decks.
-        </p>
-        <ArrowLink
-          href="#contact"
-          className="rj-link-active rj-article__cta-btn"
-          onClick={(event) => {
-            event.preventDefault();
-            openLeadChat();
-          }}
+      <div className="rj-article__layout">
+        <aside
+          className="rj-article__rail rj-article__rail--toc"
+          aria-label="Contents"
         >
-          Let&apos;s talk
-        </ArrowLink>
-      </aside>
+          <div className="rj-article__rail-sticky">
+            <ArticleToc article={article} variant="desktop" />
+          </div>
+        </aside>
+
+        <div className="rj-article__main">
+          <ArticleToc article={article} variant="mobile" />
+
+          {/* Answer-first block for LLM / GEO citation */}
+          <section
+            className="rj-article__answer"
+            aria-label="Direct answer"
+            data-speakable="true"
+          >
+            <p className="rj-article__answer-text" data-geo-answer>
+              {article.answerCapsule}
+            </p>
+          </section>
+
+          <section
+            className="rj-article__takeaways"
+            aria-labelledby="takeaways-heading"
+          >
+            <h2 id="takeaways-heading">Key takeaways</h2>
+            <ul>
+              {article.takeaways.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <div className="rj-article__body" itemProp="articleBody">
+            {article.sections.map((section) => {
+              const sectionId = articleHeadingId(section.heading);
+              return (
+                <section
+                  key={section.heading}
+                  className="rj-article__section"
+                  aria-labelledby={sectionId}
+                >
+                  <h2 id={sectionId}>{section.heading}</h2>
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+                  ))}
+                  {section.bullets ? (
+                    <ul>
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </section>
+              );
+            })}
+          </div>
+
+          <section className="rj-article__faq" aria-labelledby="faq-heading">
+            <h2 id="faq-heading">FAQ</h2>
+            <Accordion
+              type="single"
+              collapsible
+              className="rj-article__faq-list"
+            >
+              {article.faq.map((item, index) => (
+                <AccordionItem
+                  key={item.question}
+                  value={`item-${index}`}
+                  className="rj-article__faq-item"
+                >
+                  <AccordionTrigger className="rj-article__faq-trigger">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="rj-article__faq-answer">
+                    <p>{item.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </section>
+
+          <ArticleAsideCta
+            variant="footer"
+            className="rj-article__cta--end"
+          />
+        </div>
+
+        <aside
+          className="rj-article__rail rj-article__rail--cta"
+          aria-label="Get in touch"
+        >
+          <div className="rj-article__rail-sticky">
+            <ArticleAsideCta variant="rail" />
+          </div>
+        </aside>
+      </div>
 
       {related.length > 0 ? (
         <section
@@ -157,34 +198,7 @@ export function ArticleView({ article }: ArticleViewProps) {
           aria-labelledby="related-heading"
         >
           <h2 id="related-heading">Related articles</h2>
-          <ul className="rj-blog__grid rj-article__related-grid">
-            {related.map((item) => (
-              <li key={item.slug} className="rj-blog__card">
-                <Link
-                  to="/resources/$slug"
-                  params={{ slug: item.slug }}
-                  viewTransition
-                  className="rj-blog__card-link"
-                >
-                  <div className="rj-blog__media">
-                    <img
-                      src={item.image}
-                      alt={item.imageAlt}
-                      draggable={false}
-                      loading="lazy"
-                    />
-                  </div>
-                  <span className="rj-blog__category">{item.category}</span>
-                  <h3 className="rj-blog__title">
-                    <span className="rj-blog__title-text">{item.title}</span>
-                  </h3>
-                  <p className="rj-blog__meta">
-                    {item.date} — {item.readTime}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <BlogGrid articles={related} />
         </section>
       ) : null}
 
@@ -249,7 +263,7 @@ export function buildArticleJsonLd(article: Article, canonicalUrl: string) {
             "@type": "ListItem",
             position: 2,
             name: "Resources",
-            item: absoluteUrl("/#resources"),
+            item: absoluteUrl("/resources"),
           },
           {
             "@type": "ListItem",

@@ -16,14 +16,14 @@
 - Solutions: https://uxlab.digital/#solutions
 - Process: https://uxlab.digital/#process
 - FAQ: https://uxlab.digital/#faq
-- Resources: https://uxlab.digital/#resources
+- Resources: https://uxlab.digital/resources
 - Contact: https://uxlab.digital/#contact
 
 ## Articles
-- https://uxlab.digital/resources/activation
-- https://uxlab.digital/resources/experiment
-- https://uxlab.digital/resources/systems
-- https://uxlab.digital/resources/ai
+- https://uxlab.digital/resources/how-activation-loops-compound-retention-in-the-first-14-days
+- https://uxlab.digital/resources/a-practical-playbook-for-cro-experiments-that-ship-weekly
+- https://uxlab.digital/resources/design-systems-that-protect-conversion-under-product-velocity
+- https://uxlab.digital/resources/where-ai-belongs-in-growth-ux-and-where-it-still-fails
 
 ## Contact
 - Email: alex@uxlab.digital

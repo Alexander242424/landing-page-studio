@@ -26,7 +26,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminShell() {
   return (
-    <div className="theme-light min-h-screen bg-[var(--rj-surface)] font-[family-name:var(--rj-font-sans)] text-[var(--rj-fg)] antialiased">
+    <div className="theme-light rj-admin">
       <Outlet />
     </div>
   );

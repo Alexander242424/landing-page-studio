@@ -22,4 +22,8 @@ export type AnalyticsEventInput = {
 export type AnalyticsEventRow = AnalyticsEventInput & {
   id: string;
   receivedAt: string;
+  /** Resolved server-side from request IP / edge headers */
+  country?: string | null;
+  countryCode?: string | null;
+  city?: string | null;
 };

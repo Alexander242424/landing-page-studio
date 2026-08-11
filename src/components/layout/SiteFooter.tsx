@@ -1,6 +1,7 @@
 import { Logo } from "@/components/brand/Logo";
 import { openContactChat, openNewsletterChat } from "@/lib/askChat";
 import { SOLUTIONS } from "@/lib/solutions";
+import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "About", href: "#about" },
@@ -15,6 +16,11 @@ const SOCIALS = [
   { label: "X", href: "https://x.com/" },
 ] as const;
 
+type SiteFooterProps = {
+  /** `dark` scopes `.theme-dark` tokens (article pages). Home inherits page band. */
+  variant?: "inherit" | "dark";
+};
+
 /**
  * Dept-inspired multi-column footer, rendered in Rejouice / UXLAB tokens.
  *
@@ -22,11 +28,14 @@ const SOCIALS = [
  * and scrolls away to uncover `footer` stuck at the viewport bottom.
  * Mobile keeps normal document flow so the ask bar / touch scroll stay clean.
  */
-export function SiteFooter() {
+export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="rj-footer" id="contact">
+    <footer
+      className={cn("rj-footer", variant === "dark" && "theme-dark")}
+      id="contact"
+    >
       <div className="rj-footer__rule" aria-hidden="true" />
 
       <div className="rj-footer__grid">

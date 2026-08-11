@@ -1,36 +1,20 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Logo } from "@/components/brand/Logo";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { AdminOverviewChart } from "@/components/admin/AdminOverviewChart";
+import { Text } from "@/components/typography/Text";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { adminLogout } from "@/lib/admin/auth.functions";
 import {
   getAdminConversation,
-  getAdminOverviewCounts,
   listAdminConversations,
   listAdminOrders,
   type ConversationSummary,
   type OrderLead,
 } from "@/lib/admin/chatAdmin.functions";
+import {
+  getAdminOverview,
+  type AdminOverview,
+} from "@/lib/admin/overview.functions";
 import { getAnalyticsDashboard } from "@/lib/analytics/analytics.functions";
 import { cn } from "@/lib/utils";
 
@@ -64,13 +48,10 @@ function formatWhen(iso: string) {
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const { admin } = Route.useRouteContext();
 
+  const [rangeDays, setRangeDays] = useState<7 | 30>(30);
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsDash | null>(null);
-  const [counts, setCounts] = useState<{
-    activeChats: number;
-    newLeads: number;
-  } | null>(null);
   const [orders, setOrders] = useState<OrderLead[]>([]);
   const [conversations, setConversations] = useState<ConversationSummary[]>(
     [],
@@ -80,37 +61,47 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function loadAll(days: 7 | 30, soft = false) {
+    if (!soft) setLoading(true);
+    setError(null);
+    try {
+      const [ov, a, o, conv] = await Promise.all([
+        getAdminOverview({ data: { days } }),
+        getAnalyticsDashboard(),
+        listAdminOrders(),
+        listAdminConversations(),
+      ]);
+      setOverview(ov);
+      setAnalytics(a);
+      setOrders(o.orders);
+      setConversations(conv.conversations);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load admin data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [a, c, o, conv] = await Promise.all([
-          getAnalyticsDashboard(),
-          getAdminOverviewCounts(),
-          listAdminOrders(),
-          listAdminConversations(),
-        ]);
-        if (cancelled) return;
-        setAnalytics(a);
-        setCounts({ activeChats: c.activeChats, newLeads: c.newLeads });
-        setOrders(o.orders);
-        setConversations(conv.conversations);
-      } catch (e) {
-        if (!cancelled) {
-          setError(
-            e instanceof Error ? e.message : "Failed to load admin data",
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+    void loadAll(rangeDays);
+
+    const POLL_MS = 6_000;
+    const intervalId = window.setInterval(() => {
+      void loadAll(rangeDays, true);
+    }, POLL_MS);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void loadAll(rangeDays, true);
       }
-    })();
-    return () => {
-      cancelled = true;
     };
-  }, []);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [rangeDays]);
 
   useEffect(() => {
     if (!selectedSession) {
@@ -139,315 +130,387 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-[var(--rj-grid-margin)] py-10 sm:py-14">
-      <header className="flex flex-wrap items-end justify-between gap-6 pb-8">
-        <div className="space-y-3">
-          <Logo className="rj-logo text-[var(--rj-black)]" href="/" />
-          <div>
-            <p className="text-[1.1rem] font-light uppercase tracking-[0.14em] text-[var(--rj-fg-muted)]">
-              Admin
-            </p>
-            <h1 className="mt-1 text-[2.8rem] font-light tracking-[-0.03em] text-[var(--rj-black)]">
-              Dashboard
-            </h1>
-            <p className="mt-1 text-[1.4rem] font-light text-[var(--rj-fg-muted)]">
-              Signed in as {admin?.email ?? "—"}
-            </p>
-          </div>
+    <div className="rj-admin__shell">
+      <header className="rj-admin__header">
+        <div className="rj-admin__brand">
+          <Text as="h1" variant="heading" className="rj-admin__title">
+            Dashboard
+          </Text>
         </div>
-        <Button
+        <button
           type="button"
-          variant="outline"
+          className="rj-admin__btn rj-admin__btn--ghost"
           onClick={() => void onLogout()}
-          className="h-11 rounded-full border-[var(--rj-border)] bg-[var(--rj-white)] px-6 text-[1.4rem] font-light text-[var(--rj-fg)] shadow-none hover:bg-[var(--rj-surface)]"
         >
           Sign out
-        </Button>
+        </button>
       </header>
 
-      <Separator className="bg-[var(--rj-border)]" />
-
       {error ? (
-        <Alert
-          variant="destructive"
-          className="mt-8 rounded-[4px] border-red-200 bg-red-50 text-[1.4rem] font-light"
-        >
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <p className="rj-admin__error" role="alert">
+          {error}
+        </p>
       ) : null}
 
       {loading ? (
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-[4px] bg-black/5" />
-          ))}
+        <div className="rj-admin__stack">
+          <div className="rj-admin__skeleton" />
+          <div className="rj-admin__skeleton" style={{ height: "24rem" }} />
         </div>
       ) : (
-        <>
-          <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard
-              label="Sessions today"
-              value={analytics?.sessionsToday ?? 0}
-            />
-            <StatCard
-              label="Page views today"
-              value={analytics?.pageViewsToday ?? 0}
-            />
-            <StatCard
-              label="Active chats today"
-              value={counts?.activeChats ?? 0}
-            />
-            <StatCard label="New leads today" value={counts?.newLeads ?? 0} />
+        <div className="rj-admin__stack">
+          <section className="rj-admin__panel">
+            <div className="rj-admin__panel-head">
+              <div className="rj-admin__segment">
+                {([7, 30] as const).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    className={cn(
+                      "rj-admin__segment-btn",
+                      rangeDays === d && "is-active",
+                    )}
+                    onClick={() => setRangeDays(d)}
+                  >
+                    Last {d} days
+                  </button>
+                ))}
+              </div>
+            </div>
+            {overview ? <AdminOverviewChart overview={overview} /> : null}
           </section>
 
-          {analytics && analytics.avgDurationSec > 0 ? (
-            <p className="mt-4 text-[1.2rem] font-light text-[var(--rj-fg-muted)]">
-              Avg time on page (today): {analytics.avgDurationSec}s ·{" "}
-              {analytics.totalEvents} analytics events stored
-            </p>
-          ) : null}
+          <section className="rj-admin__panel">
+            <Tabs defaultValue="conversations">
+              <div className="rj-admin__panel-head rj-admin__panel-head--flush">
+                <h2 className="rj-admin__panel-title">Inbox</h2>
+                <TabsList className="rj-admin__tabs">
+                  <TabsTrigger
+                    value="conversations"
+                    className="rj-admin__tab"
+                  >
+                    Conversations
+                    <span className="rj-admin__count">
+                      {conversations.length}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="orders" className="rj-admin__tab">
+                    Orders
+                    <span className="rj-admin__count">{orders.length}</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
-            <Card className="rounded-[4px] border-[var(--rj-border)] bg-[var(--rj-white)] shadow-none">
-              <CardHeader className="p-6 pb-3">
-                <CardTitle className="text-[1.2rem] font-light uppercase tracking-[0.08em] text-[var(--rj-fg)]">
-                  Orders / Leads
-                </CardTitle>
-                <CardDescription className="text-[1.3rem] font-light">
-                  Contact, CRO audit, newsletter, booking intents from chat.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                {orders.length === 0 ? (
-                  <p className="px-6 py-8 text-[1.4rem] font-light text-[var(--rj-fg-muted)]">
-                    No leads yet. They appear when visitors complete chat flows.
-                  </p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-[var(--rj-border)] hover:bg-transparent">
-                        <TableHead className="h-10 px-6 text-[1.1rem] font-light uppercase tracking-wide text-[var(--rj-fg-muted)]">
-                          When
-                        </TableHead>
-                        <TableHead className="h-10 px-3 text-[1.1rem] font-light uppercase tracking-wide text-[var(--rj-fg-muted)]">
-                          Type
-                        </TableHead>
-                        <TableHead className="h-10 px-6 text-[1.1rem] font-light uppercase tracking-wide text-[var(--rj-fg-muted)]">
-                          Detail
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {orders.slice(0, 40).map((o: OrderLead) => (
-                        <TableRow
-                          key={o.id}
-                          className="border-[var(--rj-border)]"
-                        >
-                          <TableCell className="whitespace-nowrap px-6 py-3 text-[1.3rem] font-light text-[var(--rj-fg-muted)]">
-                            {formatWhen(o.createdAt)}
-                          </TableCell>
-                          <TableCell className="px-3 py-3">
-                            <Badge
-                              variant="secondary"
-                              className="rounded-[4px] border-0 bg-black/[0.06] text-[1.1rem] font-light text-[var(--rj-fg)] shadow-none"
+              <TabsContent value="conversations">
+                <div className="rj-admin__split">
+                  <div className="rj-admin__table-wrap">
+                    {conversations.length === 0 ? (
+                      <Text muted className="rj-admin__empty">
+                        No conversations persisted yet.
+                      </Text>
+                    ) : (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Session</th>
+                            <th>Preview</th>
+                            <th>Msgs</th>
+                            <th style={{ textAlign: "right" }}>When</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {conversations.slice(0, 60).map((c) => (
+                            <tr
+                              key={c.sessionId}
+                              className={cn(
+                                "rj-admin__row-btn",
+                                selectedSession === c.sessionId && "is-active",
+                              )}
+                              onClick={() =>
+                                setSelectedSession(
+                                  selectedSession === c.sessionId
+                                    ? null
+                                    : c.sessionId,
+                                )
+                              }
                             >
-                              {o.type}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="max-w-[220px] truncate px-6 py-3 text-[1.4rem] font-light">
-                            {o.email ?? o.summary}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
+                              <td>
+                                <span className="rj-admin__mono">
+                                  {c.sessionId.slice(0, 10)}…
+                                </span>
+                                {c.hasLead ? (
+                                  <span className="rj-admin__chip rj-admin__chip--lead">
+                                    lead
+                                  </span>
+                                ) : null}
+                              </td>
+                              <td>
+                                <span className="rj-admin__truncate">
+                                  {c.preview}
+                                </span>
+                              </td>
+                              <td>{c.messageCount}</td>
+                              <td
+                                className="rj-admin__muted"
+                                style={{ textAlign: "right" }}
+                              >
+                                {formatWhen(c.lastAt)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
 
-            <Card className="rounded-[4px] border-[var(--rj-border)] bg-[var(--rj-white)] shadow-none">
-              <CardHeader className="p-6 pb-3">
-                <CardTitle className="text-[1.2rem] font-light uppercase tracking-[0.08em] text-[var(--rj-fg)]">
-                  Conversations
-                </CardTitle>
-                <CardDescription className="text-[1.3rem] font-light">
-                  Ask-chat sessions from on-site chat persistence.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 p-6 pt-0">
-                {conversations.length === 0 ? (
-                  <p className="py-6 text-[1.4rem] font-light text-[var(--rj-fg-muted)]">
-                    No conversations persisted yet.
-                  </p>
+                  <div className="rj-admin__thread">
+                    {thread ? (
+                      <>
+                        <p className="rj-admin__mono">
+                          Session {thread.sessionId}
+                        </p>
+                        {thread.events.map((ev) => (
+                          <div key={ev.id} className="rj-admin__thread-item">
+                            <div className="rj-admin__thread-meta">
+                              <span>
+                                {ev.eventType}
+                                {ev.role ? ` · ${ev.role}` : ""}
+                                {ev.intent ? ` · ${ev.intent}` : ""}
+                              </span>
+                              <span>{formatWhen(ev.createdAt)}</span>
+                            </div>
+                            {ev.content ? (
+                              <Text variant="body">{ev.content}</Text>
+                            ) : null}
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <Text muted className="rj-admin__empty">
+                        Select a conversation to read the thread.
+                      </Text>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="orders">
+                <div className="rj-admin__table-wrap">
+                  {orders.length === 0 ? (
+                    <Text muted className="rj-admin__empty">
+                      No leads yet. They appear when visitors complete chat
+                      flows.
+                    </Text>
+                  ) : (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>When</th>
+                          <th>Type</th>
+                          <th>Email</th>
+                          <th>Detail</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.slice(0, 80).map((o: OrderLead) => (
+                          <tr key={o.id}>
+                            <td className="rj-admin__muted">
+                              {formatWhen(o.createdAt)}
+                            </td>
+                            <td>
+                              <span className="rj-admin__chip">{o.type}</span>
+                            </td>
+                            <td>{o.email ?? "—"}</td>
+                            <td>
+                              <span className="rj-admin__truncate">
+                                {o.summary}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </section>
+
+          <section>
+            <Text
+              as="h2"
+              variant="caption"
+              className="rj-admin__section-title"
+              style={{
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              Page analytics
+            </Text>
+            {analytics ? (
+              <Text
+                variant="caption"
+                muted
+                className="rj-admin__section-note"
+              >
+                Today: {analytics.sessionsToday} sessions ·{" "}
+                {analytics.pageViewsToday} page views
+                {analytics.avgDurationSec > 0
+                  ? ` · avg ${analytics.avgDurationSec}s on page`
+                  : ""}{" "}
+                · {analytics.totalEvents} events stored
+              </Text>
+            ) : null}
+
+            <div className="rj-admin__grid-2">
+              <div className="rj-admin__panel">
+                <h3 className="rj-admin__panel-title">Top paths today</h3>
+                {analytics?.topPaths.length ? (
+                  <div
+                    className="rj-admin__table-wrap"
+                    style={{ marginTop: "var(--rj-space-4)", border: 0 }}
+                  >
+                    <table>
+                      <tbody>
+                        {analytics.topPaths.map((p) => (
+                          <tr key={p.path}>
+                            <td className="rj-admin__mono">{p.path}</td>
+                            <td style={{ textAlign: "right" }}>{p.views}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 ) : (
-                  <ul className="divide-y divide-[var(--rj-border)] rounded-[4px] border border-[var(--rj-border)]">
-                    {conversations.slice(0, 30).map((c: ConversationSummary) => (
-                      <li key={c.sessionId}>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSelectedSession(
-                              selectedSession === c.sessionId
-                                ? null
-                                : c.sessionId,
-                            )
-                          }
-                          className={cn(
-                            "flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors hover:bg-black/[0.03]",
-                            selectedSession === c.sessionId && "bg-black/[0.05]",
-                          )}
-                        >
-                          <span className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[1.1rem] text-[var(--rj-fg-muted)]">
-                              {c.sessionId.slice(0, 8)}…
-                            </span>
-                            <span className="text-[1.1rem] font-light text-[var(--rj-fg-muted)]">
-                              {formatWhen(c.lastAt)}
-                            </span>
+                  <Text muted className="rj-admin__empty">
+                    No page views yet today.
+                  </Text>
+                )}
+              </div>
+
+              <div className="rj-admin__panel">
+                <h3 className="rj-admin__panel-title">Top countries today</h3>
+                {analytics?.topCountries.length ? (
+                  <div
+                    className="rj-admin__table-wrap"
+                    style={{ marginTop: "var(--rj-space-4)", border: 0 }}
+                  >
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Country</th>
+                          <th style={{ textAlign: "right" }}>Sessions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analytics.topCountries.map((c) => (
+                          <tr key={c.countryCode ?? c.country}>
+                            <td>
+                              {c.country}
+                              {c.countryCode ? (
+                                <span className="rj-admin__muted">
+                                  {" "}
+                                  · {c.countryCode}
+                                </span>
+                              ) : null}
+                            </td>
+                            <td style={{ textAlign: "right" }}>
+                              {c.sessions}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <Text muted className="rj-admin__empty">
+                    Country data appears as visitors browse.
+                  </Text>
+                )}
+              </div>
+            </div>
+
+            <div
+              className="rj-admin__grid-2"
+              style={{ marginTop: "var(--rj-space-5)" }}
+            >
+              <div className="rj-admin__panel">
+                <h3 className="rj-admin__panel-title">Top cities today</h3>
+                {analytics?.topCities.length ? (
+                  <div
+                    className="rj-admin__table-wrap"
+                    style={{ marginTop: "var(--rj-space-4)", border: 0 }}
+                  >
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>City</th>
+                          <th style={{ textAlign: "right" }}>Sessions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analytics.topCities.map((c) => (
+                          <tr
+                            key={`${c.city}-${c.country ?? "unknown"}`}
+                          >
+                            <td>
+                              {c.city}
+                              {c.country ? (
+                                <span className="rj-admin__muted">
+                                  {" "}
+                                  · {c.country}
+                                </span>
+                              ) : null}
+                            </td>
+                            <td style={{ textAlign: "right" }}>
+                              {c.sessions}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <Text muted className="rj-admin__empty">
+                    City data appears as visitors browse.
+                  </Text>
+                )}
+              </div>
+
+              <div className="rj-admin__panel">
+                <h3 className="rj-admin__panel-title">Recent activity</h3>
+                {analytics?.recent.length ? (
+                  <ul
+                    className="rj-admin__list"
+                    style={{ marginTop: "var(--rj-space-4)" }}
+                  >
+                    {analytics.recent.map((r) => (
+                      <li key={r.id}>
+                        <span>
+                          {r.name}{" "}
+                          <span className="rj-admin__mono">{r.path}</span>
+                          <span className="rj-admin__muted">
+                            {" "}
+                            · {r.location}
                           </span>
-                          <span className="truncate text-[1.4rem] font-light text-[var(--rj-black)]">
-                            {c.preview}
-                          </span>
-                          <span className="text-[1.1rem] font-light text-[var(--rj-fg-muted)]">
-                            {c.messageCount} msgs
-                            {c.hasLead ? " · lead" : ""}
-                            {c.intents.length
-                              ? ` · ${c.intents.join(", ")}`
-                              : ""}
-                          </span>
-                        </button>
+                        </span>
+                        <span className="rj-admin__muted">
+                          {formatWhen(r.timestamp)}
+                        </span>
                       </li>
                     ))}
                   </ul>
+                ) : (
+                  <Text muted className="rj-admin__empty">
+                    Analytics events will show after visitors load pages.
+                  </Text>
                 )}
-
-                {thread ? (
-                  <ScrollArea className="h-80 rounded-[4px] border border-[var(--rj-border)]">
-                    <div className="space-y-3 p-4">
-                      <p className="font-mono text-[1.1rem] text-[var(--rj-fg-muted)]">
-                        Session {thread.sessionId}
-                      </p>
-                      {thread.events.map((ev) => (
-                        <div
-                          key={ev.id}
-                          className="rounded-[4px] border border-[var(--rj-border)] px-3 py-2"
-                        >
-                          <div className="flex justify-between gap-2 text-[1.1rem] font-light text-[var(--rj-fg-muted)]">
-                            <span>
-                              {ev.eventType}
-                              {ev.role ? ` · ${ev.role}` : ""}
-                              {ev.intent ? ` · ${ev.intent}` : ""}
-                            </span>
-                            <span>{formatWhen(ev.createdAt)}</span>
-                          </div>
-                          {ev.content ? (
-                            <p className="mt-1.5 whitespace-pre-wrap text-[1.4rem] font-light text-[var(--rj-black)]">
-                              {ev.content}
-                            </p>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                ) : null}
-              </CardContent>
-            </Card>
-          </div>
-
-          <section className="mt-12">
-            <h2 className="text-[1.2rem] font-light uppercase tracking-[0.08em] text-[var(--rj-fg)]">
-              Page analytics
-            </h2>
-            <div className="mt-4 grid gap-6 lg:grid-cols-2">
-              <Card className="rounded-[4px] border-[var(--rj-border)] bg-[var(--rj-white)] shadow-none">
-                <CardHeader className="p-6 pb-2">
-                  <CardTitle className="text-[1.2rem] font-light uppercase tracking-[0.08em] text-[var(--rj-fg-muted)]">
-                    Top paths today
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {analytics?.topPaths.length ? (
-                    <Table>
-                      <TableBody>
-                        {analytics.topPaths.map((p) => (
-                          <TableRow
-                            key={p.path}
-                            className="border-[var(--rj-border)]"
-                          >
-                            <TableCell className="px-6 py-3 font-mono text-[1.2rem]">
-                              {p.path}
-                            </TableCell>
-                            <TableCell className="px-6 py-3 text-right text-[1.4rem] font-light tabular-nums">
-                              {p.views}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <p className="px-6 py-8 text-[1.4rem] font-light text-[var(--rj-fg-muted)]">
-                      No page views yet today.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-[4px] border-[var(--rj-border)] bg-[var(--rj-white)] shadow-none">
-                <CardHeader className="p-6 pb-2">
-                  <CardTitle className="text-[1.2rem] font-light uppercase tracking-[0.08em] text-[var(--rj-fg-muted)]">
-                    Recent activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {analytics?.recent.length ? (
-                    <ScrollArea className="h-72">
-                      <ul className="divide-y divide-[var(--rj-border)]">
-                        {analytics.recent.map((r) => (
-                          <li
-                            key={r.id}
-                            className="flex items-center justify-between gap-2 px-6 py-3 text-[1.4rem] font-light"
-                          >
-                            <span>
-                              <span className="text-[var(--rj-black)]">
-                                {r.name}
-                              </span>{" "}
-                              <span className="font-mono text-[1.1rem] text-[var(--rj-fg-muted)]">
-                                {r.path}
-                              </span>
-                            </span>
-                            <span className="shrink-0 text-[1.1rem] text-[var(--rj-fg-muted)]">
-                              {formatWhen(r.timestamp)}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </ScrollArea>
-                  ) : (
-                    <p className="px-6 py-8 text-[1.4rem] font-light text-[var(--rj-fg-muted)]">
-                      Analytics events will show after visitors load pages.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+              </div>
             </div>
           </section>
-        </>
+        </div>
       )}
     </div>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <Card className="rounded-[4px] border-[var(--rj-border)] bg-[var(--rj-white)] shadow-none">
-      <CardContent className="p-5">
-        <p className="text-[1.1rem] font-light uppercase tracking-[0.08em] text-[var(--rj-fg-muted)]">
-          {label}
-        </p>
-        <p className="mt-2 text-[3.2rem] font-light tabular-nums tracking-[-0.03em] text-[var(--rj-black)]">
-          {value}
-        </p>
-      </CardContent>
-    </Card>
   );
 }
