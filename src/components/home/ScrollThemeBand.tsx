@@ -17,60 +17,119 @@ function setBand(band: Band) {
 
   const page = document.querySelector(".rj-page");
   if (!page) return;
-  // Page theme flips only for the process+ dark band; hero keeps light
+  // Page theme flips only for the solutions+ dark band; hero keeps light
   // tokens so mid-page sections don't inherit dark prematurely.
   page.classList.toggle("theme-dark", band === "dark");
   page.classList.toggle("theme-light", band !== "dark");
 }
 
-function resolveBand(hero: HTMLElement, process: HTMLElement): Band {
-  const processTop = process.getBoundingClientRect().top;
-  if (processTop <= window.innerHeight * 0.55) return "dark";
+function setDarkProgress(progress: number) {
+  const t = Math.min(1, Math.max(0, progress));
+  document.documentElement.style.setProperty("--rj-dark-progress", t.toFixed(4));
+}
 
+function resolveHeroLight(hero: HTMLElement): Band {
   const heroBottom = hero.getBoundingClientRect().bottom;
-  // Still in the first section while any of the hero covers the viewport.
   if (heroBottom > window.innerHeight * 0.15) return "hero";
-
   return "light";
 }
 
 /**
  * Body bands:
  * - hero (first section): black
- * - mid page: light
- * - #process downward: dark (also flips .rj-page theme)
+ * - mid page (intro / glance): light
+ * - approach to #solutions: scrub white → black (same soft ease as theme flip)
+ * - past #solutions top: full dark (process+ stay dark)
  * FAQ / blog keep their own theme-light scope.
+ *
+ * Waits for lazy-mounted #solutions so triggers still arm after Suspense.
  */
 export function ScrollThemeBand() {
   useEffect(() => {
-    const hero = document.getElementById("hero");
-    const process = document.getElementById("process");
-    if (!hero || !process) return;
+    let cancelled = false;
+    let raf = 0;
+    let heroTrigger: ScrollTrigger | null = null;
+    let darkScrub: ScrollTrigger | null = null;
+    let syncHero: (() => void) | null = null;
 
-    const sync = () => setBand(resolveBand(hero, process));
+    const teardown = () => {
+      heroTrigger?.kill();
+      darkScrub?.kill();
+      heroTrigger = null;
+      darkScrub = null;
+      if (syncHero) {
+        window.removeEventListener("scroll", syncHero);
+        syncHero = null;
+      }
+    };
 
-    const heroTrigger = ScrollTrigger.create({
-      trigger: hero,
-      start: "top top",
-      end: "bottom 15%",
-      onEnter: sync,
-      onLeave: sync,
-      onEnterBack: sync,
-      onLeaveBack: sync,
-    });
+    const attach = () => {
+      if (cancelled) return;
+      const hero = document.getElementById("hero");
+      const solutions = document.getElementById("solutions");
+      if (!hero || !solutions) {
+        raf = requestAnimationFrame(attach);
+        return;
+      }
 
-    const processTrigger = ScrollTrigger.create({
-      trigger: process,
-      start: "top 55%",
-      onEnter: sync,
-      onLeaveBack: sync,
-    });
+      teardown();
 
-    sync();
+      syncHero = () => {
+        const darkTop = solutions.getBoundingClientRect().top;
+        // While scrubbing / in dark zone, don't override with hero band.
+        if (darkTop <= window.innerHeight) {
+          if (darkTop <= 0) setBand("dark");
+          else setBand("light");
+          return;
+        }
+        setDarkProgress(0);
+        setBand(resolveHeroLight(hero));
+      };
+
+      heroTrigger = ScrollTrigger.create({
+        trigger: hero,
+        start: "top top",
+        end: "bottom 15%",
+        onEnter: syncHero,
+        onLeave: syncHero,
+        onEnterBack: syncHero,
+        onLeaveBack: syncHero,
+      });
+
+      // Scrub page/body from white → black as #solutions rises through the
+      // viewport — removes the hard section seam at invent-growth.
+      darkScrub = ScrollTrigger.create({
+        trigger: solutions,
+        start: "top bottom",
+        end: "top top",
+        scrub: 0.65,
+        onUpdate: (self) => {
+          setDarkProgress(self.progress);
+          if (self.progress >= 0.55) setBand("dark");
+          else setBand("light");
+        },
+        onLeave: () => {
+          setDarkProgress(1);
+          setBand("dark");
+        },
+        onLeaveBack: () => {
+          setDarkProgress(0);
+          setBand(resolveHeroLight(hero));
+        },
+      });
+
+      window.addEventListener("scroll", syncHero, { passive: true });
+      syncHero();
+      ScrollTrigger.refresh();
+    };
+
+    attach();
 
     return () => {
-      heroTrigger.kill();
-      processTrigger.kill();
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      teardown();
+      setDarkProgress(0);
       setBand("hero");
     };
   }, []);

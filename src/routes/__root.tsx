@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SmoothScrollProvider } from "@/components/scroll/SmoothScrollProvider";
+import { SITE, absoluteUrl, defaultMeta } from "@/lib/site";
 
 function NotFoundComponent() {
   return (
@@ -78,21 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "UXLAB — Design System" },
-      {
-        name: "description",
-        content:
-          "UXLAB design system: Suisse Intl, Rejouice color & grid tokens, Lenis smooth scroll.",
-      },
-      { name: "author", content: "UXLAB" },
-      { property: "og:title", content: "UXLAB — Design System" },
-      {
-        property: "og:description",
-        content:
-          "UXLAB design system: Suisse Intl, Rejouice color & grid tokens, Lenis smooth scroll.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      ...defaultMeta({ path: "/" }),
     ],
     links: [
       {
@@ -113,7 +100,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: SITE.favicon, type: "image/x-icon" },
+      {
+        rel: "alternate",
+        type: "text/plain",
+        href: absoluteUrl("/llms.txt"),
+      },
+      {
+        rel: "alternate",
+        type: "text/plain",
+        href: absoluteUrl("/llms-full.txt"),
+      },
       { rel: "dns-prefetch", href: "https://app.cal.com" },
     ],
   }),

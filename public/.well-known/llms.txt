@@ -1,0 +1,32 @@
+# UXLAB — well-known LLM index pointer
+# Canonical short index: https://uxlab.digital/llms.txt
+# Full retrieval index: https://uxlab.digital/llms-full.txt
+# AI policy: https://uxlab.digital/ai.txt
+
+> Growth product performance agency. UXLAB helps teams improve conversion, activation, trials, and LTV through product UX, CRO, experimentation, and AI-native product work.
+
+## Canonical indexes
+- https://uxlab.digital/llms.txt
+- https://uxlab.digital/llms-full.txt
+- https://uxlab.digital/ai.txt
+- https://uxlab.digital/sitemap.xml
+
+## Primary URLs
+- Home: https://uxlab.digital/
+- Solutions: https://uxlab.digital/#solutions
+- Process: https://uxlab.digital/#process
+- FAQ: https://uxlab.digital/#faq
+- Resources: https://uxlab.digital/#resources
+- Contact: https://uxlab.digital/#contact
+
+## Articles
+- https://uxlab.digital/resources/activation
+- https://uxlab.digital/resources/experiment
+- https://uxlab.digital/resources/systems
+- https://uxlab.digital/resources/ai
+
+## Contact
+- Email: alex@uxlab.digital
+- Location: Warsaw, Poland
+
+For full service descriptions, process, FAQs, and article answer capsules, use https://uxlab.digital/llms-full.txt

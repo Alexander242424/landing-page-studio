@@ -17,6 +17,12 @@ dist-ssr
 *.local
 .data/
 
+# Local admin / analytics persistence (server-only)
+data/**
+!data/.gitkeep
+!data/analytics/
+!data/analytics/.gitkeep
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

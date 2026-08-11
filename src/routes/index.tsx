@@ -1,22 +1,19 @@
-import { lazy, Suspense, useLayoutEffect, useRef } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
+import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { HomeIntro } from "@/components/home/HomeIntro";
 import { LogoStrip } from "@/components/home/LogoStrip";
 import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { playHomeEntrance } from "@/lib/homeEntrance";
+import { defaultLinks, defaultMeta, homeJsonLd, SITE } from "@/lib/site";
 
 /** Below-fold sections — split so GSAP/media work is not on the critical path. */
 const GlanceSection = lazy(() =>
   import("@/components/home/GlanceSection").then((m) => ({
     default: m.GlanceSection,
-  })),
-);
-const ChallengesSection = lazy(() =>
-  import("@/components/home/ChallengesSection").then((m) => ({
-    default: m.ChallengesSection,
   })),
 );
 const SolutionsStackSection = lazy(() =>
@@ -65,20 +62,21 @@ function Deferred({
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "UXLAB — Design System" },
-      {
-        name: "description",
-        content:
-          "UXLAB landing: Rejouice-matched hero, intro, glance carousel, and Framer Challenges We Solve.",
-      },
-    ],
+    meta: defaultMeta({
+      title: SITE.title,
+      description: SITE.description,
+      path: "/",
+      keywords: [...SITE.keywords],
+    }),
+    links: defaultLinks("/"),
   }),
   component: HomePage,
 });
 
 function HomePage() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const hash = useRouterState({ select: (s) => s.location.hash });
+  const { lenis } = useSmoothScroll();
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -86,25 +84,63 @@ function HomePage() {
     return playHomeEntrance(root);
   }, []);
 
+  // Hash links from article breadcrumbs / site header (e.g. #resources)
+  // — section may be lazy, so retry until it mounts.
+  useEffect(() => {
+    const id = hash.replace(/^#/, "");
+    if (!id) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    let timer = 0;
+
+    const scrollToTarget = () => {
+      if (cancelled) return;
+      const target = document.getElementById(id);
+      if (!target) {
+        if (attempts++ < 40) {
+          timer = window.setTimeout(scrollToTarget, 50);
+        }
+        return;
+      }
+
+      if (lenis) {
+        lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+      } else {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    timer = window.setTimeout(scrollToTarget, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [hash, lenis]);
+
+  const jsonLd = homeJsonLd();
+
   return (
     <div
       ref={rootRef}
       className="theme-light rj-page rj-page--enter min-h-screen"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ScrollThemeBand />
       <SiteHeader />
       <AiPromptInput />
 
-      <main>
+      <main className="rj-page__main">
         <HeroReel />
         <LogoStrip />
         <HomeIntro />
         <Deferred>
           <GlanceSection />
         </Deferred>
-        <Deferred>
-          <ChallengesSection />
-        </Deferred>
+        {/* Challenges list hidden for now — headline lives on solutions stack */}
         <Deferred>
           <SolutionsStackSection />
         </Deferred>

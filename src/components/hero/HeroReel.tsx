@@ -270,9 +270,8 @@ export function HeroReel() {
             className="rj-hero__logo rj-hero__headline rj-awards-title"
             aria-label="Growth product performance agency"
           >
-            Growth product
-            <br />
-            performance agency
+            <span className="rj-hero__line">Growth product</span>
+            <span className="rj-hero__line">performance agency</span>
           </h1>
         </div>
 
@@ -282,8 +281,8 @@ export function HeroReel() {
               ref={descriptionRef}
               className="rj-hero__tagline rj-hero__description rj-text-reveal"
             >
-              We grow your product and revenue by boosting user experience,
-              journeys, and metrics that drive conversion, activation, trials.
+              We grow your product and revenue by boosting user experience and
+              metrics that drive conversion, activation, trials.
             </p>
             <div
               ref={actionsRef}
@@ -291,18 +290,18 @@ export function HeroReel() {
               aria-label="Hero actions"
             >
               <ArrowLink
-                href="#process"
-                className="rj-link-active rj-hero__cta"
-                onClick={onProcessClick}
-              >
-                Our process
-              </ArrowLink>
-              <ArrowLink
                 href="#contact"
-                className="rj-link-active rj-hero__cta"
+                className="rj-link-active rj-hero__cta rj-hero__cta--talk"
                 onClick={onTalkClick}
               >
                 Let&apos;s talk
+              </ArrowLink>
+              <ArrowLink
+                href="#process"
+                className="rj-link-active rj-hero__cta rj-hero__cta--process"
+                onClick={onProcessClick}
+              >
+                Our process
               </ArrowLink>
             </div>
           </div>

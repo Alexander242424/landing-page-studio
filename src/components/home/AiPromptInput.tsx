@@ -1211,8 +1211,12 @@ export function AiPromptInput() {
       role="complementary"
       aria-label="Ask UXLAB"
     >
-      <div className="rj-ask__tips" aria-hidden={open}>
-        <div className="rj-ask__row">
+      <div
+        className="rj-ask__tips"
+        aria-hidden={open}
+        data-lenis-prevent
+      >
+        <div className="rj-ask__row" data-lenis-prevent>
           {TIPS.map((tip) => (
             <button
               key={tip}

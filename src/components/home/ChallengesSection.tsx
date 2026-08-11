@@ -128,7 +128,6 @@ export function ChallengesSection() {
     <section
       ref={rootRef}
       className="rj-challenges"
-      id="solutions"
       aria-label="How we invent your growth"
     >
       <div className="rj-challenges__headline-wrap">

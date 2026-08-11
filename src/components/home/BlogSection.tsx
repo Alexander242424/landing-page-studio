@@ -1,48 +1,11 @@
 import { useEffect, useRef } from "react";
+import { Link } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ARTICLES } from "@/lib/articles";
 import { createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const ARTICLES = [
-  {
-    id: "activation",
-    category: "Product News",
-    title: "How activation loops compound retention in the first 14 days",
-    date: "Jul 23, 2026",
-    readTime: "7 min read",
-    image: "/glance/rivian.jpg",
-    href: "#",
-  },
-  {
-    id: "experiment",
-    category: "Best Practices",
-    title: "A practical playbook for CRO experiments that ship weekly",
-    date: "Jun 12, 2026",
-    readTime: "5 min read",
-    image: "/glance/oura-case.jpg",
-    href: "#",
-  },
-  {
-    id: "systems",
-    category: "Engineering",
-    title: "Design systems that protect conversion under product velocity",
-    date: "May 28, 2026",
-    readTime: "6 min read",
-    image: "/glance/moxion.jpg",
-    href: "#",
-  },
-  {
-    id: "ai",
-    category: "Announcements",
-    title: "Where AI belongs in growth UX — and where it still fails",
-    date: "Apr 9, 2026",
-    readTime: "8 min read",
-    image: "/glance/pergola.jpg",
-    href: "#",
-  },
-] as const;
 
 /**
  * Latest articles — light band after FAQ.
@@ -108,12 +71,17 @@ export function BlogSection() {
 
         <ul ref={gridRef} className="rj-blog__grid">
           {ARTICLES.map((article) => (
-            <li key={article.id} className="rj-blog__card">
-              <a href={article.href} className="rj-blog__card-link">
+            <li key={article.slug} className="rj-blog__card">
+              <Link
+                to="/resources/$slug"
+                params={{ slug: article.slug }}
+                viewTransition
+                className="rj-blog__card-link"
+              >
                 <div className="rj-blog__media">
                   <img
                     src={article.image}
-                    alt=""
+                    alt={article.imageAlt}
                     draggable={false}
                     loading="lazy"
                   />
@@ -125,7 +93,7 @@ export function BlogSection() {
                 <p className="rj-blog__meta">
                   {article.date} — {article.readTime}
                 </p>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

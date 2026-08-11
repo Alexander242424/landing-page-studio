@@ -23,9 +23,10 @@ const MOTION_MQ = "(prefers-reduced-motion: reduce)";
 
 /**
  * Hilden & Kaira–style stacked solutions cards:
- * tall pin-height scrub, perspective stack (y/z), then non-keeper cards
- * fling up with scale + rotation. Last card stays. Mobile / reduced-motion:
- * static vertical stack.
+ * tall pin-height scrub runway, one shared scrub timeline so cards fling
+ * 01→05 in order while pinned. Headline lives inside the pin so it stays
+ * with the stack for the full runway, then both scroll away. Last card
+ * stays. Mobile / reduced-motion: static vertical stack.
  */
 export function SolutionsStackSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -75,64 +76,78 @@ export function SolutionsStackSection() {
       stackCtx = gsap.context(() => {
         const gap = 72;
         const count = cards.length;
-        const scrollSpan = Math.max(
-          pinHeight.clientHeight - window.innerHeight,
-          window.innerHeight,
-        );
-        const distPerCard = scrollSpan / count;
-        const triggerFactor = 0.85;
+        const flingCount = count - 1;
 
+        // pin-height owns the scrub runway — pinSpacing would double it.
         ScrollTrigger.create({
           trigger: pinHeight,
           start: "top top",
           end: "bottom bottom",
           pin,
+          pinSpacing: false,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         });
 
-        gsap.set(cards, {
-          y: gap * (count - 1),
-          z: -gap * (count - 1),
-          transformOrigin: "50% 50%",
-          force3D: true,
+        // Front card (#01) sits on top; deeper cards step back in y/z.
+        cards.forEach((card, index) => {
+          gsap.set(card, {
+            y: gap * index,
+            z: -gap * index,
+            zIndex: count - index,
+            transformOrigin: "50% 50%",
+            force3D: true,
+          });
         });
 
-        cards.forEach((card, index) => {
-          // Last card is the keeper (never flings). Earlier cards sit on top
-          // via z-index so #01 reads first, then flings away as you scrub.
-          const isKeeper = index === count - 1;
-          gsap.set(card, { zIndex: count - index });
+        // One scrub timeline: each step flings the current front card and
+        // steps the rest of the stack forward. Per-card `top+=`/`bottom+=`
+        // offsets previously ran later cards *earlier*, so 02–04 flung under
+        // 01 and the section looked stuck on 01 then jumped to 05.
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: pinHeight,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 0.25,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        for (let i = 0; i < flingCount; i += 1) {
+          const card = cards[i];
           const rotation = (Math.random() - 0.5) * 42;
+          const at = i;
 
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: pinHeight,
-              start: `top top+=${distPerCard * index * triggerFactor}`,
-              end: `bottom bottom+=${distPerCard * index * triggerFactor}`,
-              scrub: 0.25,
-              invalidateOnRefresh: true,
-            },
-          });
-
-          for (let step = 0; step < count - 1; step += 1) {
-            tl.to(card, {
-              y: `-=${gap}`,
-              z: `+=${gap}`,
-              ease: "power2.inOut",
-            });
+          for (let j = i + 1; j < count; j += 1) {
+            tl.to(
+              cards[j],
+              {
+                y: `-=${gap}`,
+                z: `+=${gap}`,
+                ease: "power2.inOut",
+                duration: 1,
+              },
+              at,
+            );
           }
 
-          if (!isKeeper) {
-            tl.to(card, {
+          tl.to(
+            card,
+            {
               yPercent: -100,
               y: "-105vh",
               scale: 1.18,
               rotation,
               ease: "power4.in",
-            });
-          }
-        });
+              duration: 1,
+            },
+            at,
+          );
+        }
+
+        // Brief hold on the keeper (#05) before pin release / headline exit.
+        tl.to({}, { duration: 0.35 });
       }, root);
     };
 
@@ -157,7 +172,12 @@ export function SolutionsStackSection() {
       window.removeEventListener("orientationchange", onOrientation),
     );
 
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+    // Refresh after layout + fonts so pin-height measurements stick.
+    const refresh = () => ScrollTrigger.refresh();
+    requestAnimationFrame(() => requestAnimationFrame(refresh));
+    if (document.fonts?.ready) {
+      void document.fonts.ready.then(refresh);
+    }
 
     return () => {
       cleanups.forEach((fn) => fn());
@@ -167,25 +187,23 @@ export function SolutionsStackSection() {
   return (
     <section
       ref={rootRef}
-      id="solutions-cards"
+      id="solutions"
       className="rj-solutions-stack"
-      aria-label="Our solutions"
+      aria-label="How we invent your growth"
     >
-      <div className="rj-solutions-stack__heading">
-        <h2
-          ref={headlineRef}
-          className="rj-solutions-stack__headline rj-awards-title"
-        >
-          Our solutions
-        </h2>
-        <p className="rj-solutions-stack__lede">
-          Five focused engagements — each one built to move conversion,
-          product, and revenue.
-        </p>
-      </div>
-
       <div ref={pinHeightRef} className="rj-solutions-stack__pin-height">
         <div ref={pinRef} className="rj-solutions-stack__pin">
+          <div className="rj-solutions-stack__heading">
+            <h2
+              ref={headlineRef}
+              className="rj-solutions-stack__headline rj-awards-title"
+            >
+              How we invent
+              <br />
+              your growth
+            </h2>
+          </div>
+
           <div className="rj-solutions-stack__list" role="list">
             {SOLUTIONS.map((item, index) => {
               const tone = CARD_TONES[index % CARD_TONES.length];
@@ -228,7 +246,7 @@ export function SolutionsStackSection() {
                             openContactChat();
                           }}
                         >
-                          Get in touch
+                          Let&apos;s talk
                         </ArrowLink>
                       </div>
                       <div className="rj-solutions-stack__card-media">

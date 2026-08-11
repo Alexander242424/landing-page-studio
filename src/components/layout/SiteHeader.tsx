@@ -1,4 +1,5 @@
 import { useEffect, useState, type MouseEvent } from "react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
@@ -14,14 +15,29 @@ const NAV_ITEMS = [
 
 type NavHref = (typeof NAV_ITEMS)[number]["href"];
 
+type SiteHeaderProps = {
+  /** `home` = hash scroll-spy; `site` = navigate to home sections */
+  variant?: "home" | "site";
+};
+
 /**
  * Fixed mix-blend header: scroll-spy nav, Lenis anchors, Let's talk CTA.
  */
-export function SiteHeader() {
-  const [activeHref, setActiveHref] = useState<NavHref>("#hero");
+export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
+  const [activeHref, setActiveHref] = useState<NavHref | null>(
+    variant === "home" ? "#hero" : null,
+  );
   const { lenis } = useSmoothScroll();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isHome = variant === "home" || pathname === "/";
 
   useEffect(() => {
+    if (!isHome) {
+      setActiveHref(null);
+      return;
+    }
+
     const sections = NAV_ITEMS.map((item) => ({
       href: item.href,
       el: document.getElementById(item.href.slice(1)),
@@ -61,7 +77,7 @@ export function SiteHeader() {
 
     window.addEventListener("scroll", syncActive, { passive: true });
     return () => window.removeEventListener("scroll", syncActive);
-  }, [lenis]);
+  }, [lenis, isHome]);
 
   const scrollToHref = (href: string) => {
     const id = href.replace("#", "");
@@ -77,8 +93,12 @@ export function SiteHeader() {
 
   const onNavClick = (event: MouseEvent<HTMLAnchorElement>, href: NavHref) => {
     event.preventDefault();
-    setActiveHref(href);
-    scrollToHref(href);
+    if (isHome) {
+      setActiveHref(href);
+      scrollToHref(href);
+      return;
+    }
+    void navigate({ to: "/", hash: href.slice(1), viewTransition: true });
   };
 
   const onConnectClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -92,10 +112,25 @@ export function SiteHeader() {
         <div className="rj-header__outer">
           <div className="rj-header__inner">
             <div className="rj-header__logo">
-              <Logo
-                className="rj-header__logo-link"
-                markClassName="rj-logo__mark--header"
-              />
+              {isHome ? (
+                <Logo
+                  className="rj-header__logo-link"
+                  markClassName="rj-logo__mark--header"
+                />
+              ) : (
+                <Link
+                  to="/"
+                  viewTransition
+                  className="rj-header__logo-link rj-logo"
+                  aria-label="UXLAB"
+                >
+                  <span
+                    className="rj-logo__mark rj-logo__mark--header"
+                    role="img"
+                    aria-hidden="true"
+                  />
+                </Link>
+              )}
             </div>
 
             <nav className="rj-header__nav" aria-label="Primary">
@@ -105,7 +140,7 @@ export function SiteHeader() {
                   return (
                     <li key={item.href} className="rj-header__menu-item">
                       <a
-                        href={item.href}
+                        href={isHome ? item.href : `/${item.href}`}
                         aria-current={isActive ? "true" : undefined}
                         className={cn(
                           "rj-link-active",

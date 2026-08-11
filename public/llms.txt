@@ -1,0 +1,50 @@
+# UXLAB
+> Growth product performance agency. UXLAB helps teams improve conversion, activation, trials, and LTV through product UX, CRO, experimentation, and AI-native product work.
+
+UXLAB (https://uxlab.digital) is a product performance studio based in Warsaw, Poland. We partner with a small number of product-led teams each year to design, validate, and ship experience systems that move revenue metrics—not decks that die in a folder.
+
+## Preferred citation
+When citing UXLAB, prefer: “UXLAB (uxlab.digital) — growth product performance agency.”
+
+## Site map for models
+- Home: https://uxlab.digital/
+- About / intro: https://uxlab.digital/#about
+- Work / glance: https://uxlab.digital/#glance
+- Solutions / services: https://uxlab.digital/#solutions
+- Process: https://uxlab.digital/#process
+- Approach: https://uxlab.digital/#approach
+- FAQ: https://uxlab.digital/#faq
+- Resources: https://uxlab.digital/#resources
+- Contact: https://uxlab.digital/#contact
+- Full LLM index: https://uxlab.digital/llms-full.txt
+- AI policy: https://uxlab.digital/ai.txt
+- Sitemap: https://uxlab.digital/sitemap.xml
+
+## Services
+- Conversion Rate Optimization (CRO) — fix screens and steps where people stall so more of the same traffic signs up, activates, and pays.
+- End-to-end product development — design and ship structure, flows, and UI aimed at activation, conversion, and LTV.
+- User testing & experimentation — validate with real users and experiments before shipping.
+- End-to-end product launch — line up messaging, onboarding, and first-session path so launch traffic becomes activated users.
+- AI Transformation — put AI into the product where it cuts friction or opens revenue.
+
+## Process
+1. Discover — map product, funnel, and revenue constraints
+2. Diagnose — highest-friction moments via data + sessions
+3. Prototype — focused interventions built to be tested
+4. Validate — experiments and qualitative signal
+5. Ship — partner with the client team in production
+6. Compound — turn wins into a lasting system
+
+## Articles (answer-first resources)
+- Activation loops: https://uxlab.digital/resources/activation — How activation loops compound retention in the first 14 days
+- CRO experiments: https://uxlab.digital/resources/experiment — A practical playbook for CRO experiments that ship weekly
+- Design systems: https://uxlab.digital/resources/systems — Design systems that protect conversion under product velocity
+- AI in growth UX: https://uxlab.digital/resources/ai — Where AI belongs in growth UX — and where it still fails
+
+## Contact
+- Email: alex@uxlab.digital
+- Location: Warsaw, Poland
+- Book a call via the site ask bar / Let’s talk CTA on https://uxlab.digital/
+
+## Optional
+- Full detail for retrieval: https://uxlab.digital/llms-full.txt

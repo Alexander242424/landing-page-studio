@@ -8,27 +8,27 @@ export type Solution = {
 export const SOLUTIONS: Solution[] = [
   {
     title: "Conversion Rate optimization (CRO)",
-    body: "Systematic improvement of conversion across key product and funnel touchpoints through UX changes grounded in user behavior and data.",
+    body: "We fix the screens and steps where people stall—so more of the same traffic signs up, activates, and pays.",
     video: "/challenges/c1.mp4",
   },
   {
-    title: "AI native product design & development",
-    body: "Holistic design and redesign of products from structure and flows to interaction and visual systems, built for scale and monetization.",
+    title: "End-to-end product development",
+    body: "We design and ship the full product—structure, flows, and UI—aimed at activation, conversion, and LTV, not just a prettier interface.",
     video: "/challenges/c3.mp4",
   },
   {
-    title: "User testing & Experimentation",
-    body: "Revenue growth driven by improving user journeys, decision points, and product experience across conversion, monetization, and retention.",
+    title: "User testing & experimentation",
+    body: "We validate with real users and experiments before you ship—so you back changes that move conversion, not opinions.",
     video: "/challenges/c2.mp4",
   },
   {
-    title: "Product launch",
-    body: "Design of pricing, trials, paywalls, and funnels as a single monetization system that increases predictability and revenue efficiency.",
+    title: "End-to-end product launch",
+    body: "We line up messaging, onboarding, and the first-session path so launch traffic turns into activated users—not a one-day spike.",
     video: "/challenges/c4.mp4",
   },
   {
     title: "AI Transformation",
-    body: "Unification of fragmented UX decisions into a coherent, scalable product experience aligned with business and growth goals.",
+    body: "We put AI into the product where it cuts friction or opens revenue—clearer workflows, smarter surfaces, better activation.",
     video: "/challenges/c5.mp4",
   },
 ];

@@ -17,6 +17,10 @@ const SOCIALS = [
 
 /**
  * Dept-inspired multi-column footer, rendered in Rejouice / UXLAB tokens.
+ *
+ * Desktop (≥1024px): sticky underlay reveal — `main.rj-page__main` paints above
+ * and scrolls away to uncover `footer` stuck at the viewport bottom.
+ * Mobile keeps normal document flow so the ask bar / touch scroll stay clean.
  */
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -66,7 +70,7 @@ export function SiteFooter() {
           >
             <span>Subscribe to our newsletter</span>
             <span className="rj-footer__action-arrow" aria-hidden="true">
-              →
+              ↗
             </span>
           </button>
           <button
@@ -76,7 +80,7 @@ export function SiteFooter() {
           >
             <span>Get in touch with us</span>
             <span className="rj-footer__action-arrow" aria-hidden="true">
-              →
+              ↗
             </span>
           </button>
 

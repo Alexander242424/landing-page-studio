@@ -11,6 +11,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const SLOT_COUNT = 8;
 
+/** Match styles.css mobile band — marquee below this, even row at/above. */
+const MARQUEE_MQ = "(max-width: 767px)";
+
 /** Crossfade duration (seconds). Previous logo stays visible until swap starts. */
 const FADE_DURATION = 0.55;
 /** Pause between slot swaps (seconds), plus random jitter. */
@@ -85,6 +88,20 @@ function preloadLogo(logo: ClientLogo): Promise<ClientLogo> {
   });
 }
 
+/** Keep only the active layer in normal flow so idle buffers can't widen gaps. */
+function syncIdleLayers(
+  layers: { a: HTMLImageElement | null; b: HTMLImageElement | null } | undefined,
+  active: SlotLayer,
+) {
+  if (!layers) return;
+  if (layers.a) {
+    layers.a.classList.toggle("rj-logo-strip__logo--idle", active !== "a");
+  }
+  if (layers.b) {
+    layers.b.classList.toggle("rj-logo-strip__logo--idle", active !== "b");
+  }
+}
+
 async function preloadWithFallback(
   preferred: ClientLogo,
   visible: ClientLogo[],
@@ -113,10 +130,42 @@ async function preloadWithFallback(
   return visible[slotIndex] ?? pool[0]!;
 }
 
+function LogoMarqueeItem({
+  logo,
+  index,
+  duplicate,
+}: {
+  logo: ClientLogo;
+  index: number;
+  duplicate?: boolean;
+}) {
+  return (
+    <li
+      className="rj-logo-strip__item"
+      aria-hidden={duplicate ? true : undefined}
+    >
+      <span className="rj-logo-strip__slot">
+        <img
+          className="rj-logo-strip__logo"
+          src={logo.src}
+          alt={duplicate ? "" : logo.alt}
+          width={120}
+          height={28}
+          decoding="async"
+          loading={index < 4 && !duplicate ? "eager" : "lazy"}
+          fetchPriority="low"
+          draggable={false}
+        />
+      </span>
+    </li>
+  );
+}
+
 /**
  * Rejouice-style client logo strip: fixed slots on a light band,
  * logos crossfade from a larger pool (staggered, one at a time).
  * Double-buffered so a slot is never blank during swap.
+ * On narrow viewports: infinite right→left marquee instead of the even row.
  */
 export function LogoStrip() {
   const rootRef = useRef<HTMLElement>(null);
@@ -128,14 +177,22 @@ export function LogoStrip() {
     pickInitial().map((logo) => ({ logo, active: "a" as SlotLayer })),
   );
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMarquee, setIsMarquee] = useState(false);
   const enteredRef = useRef(false);
 
   useEffect(() => {
     const motionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const marqueeMq = window.matchMedia(MARQUEE_MQ);
     const syncMotion = () => setReducedMotion(motionMq.matches);
+    const syncMarquee = () => setIsMarquee(marqueeMq.matches);
     syncMotion();
+    syncMarquee();
     motionMq.addEventListener("change", syncMotion);
-    return () => motionMq.removeEventListener("change", syncMotion);
+    marqueeMq.addEventListener("change", syncMarquee);
+    return () => {
+      motionMq.removeEventListener("change", syncMotion);
+      marqueeMq.removeEventListener("change", syncMarquee);
+    };
   }, []);
 
   // Preload the full pool only once the strip is near the viewport.
@@ -173,6 +230,11 @@ export function LogoStrip() {
 
   // Entrance: stagger fade/slide up when the strip enters the viewport.
   useEffect(() => {
+    if (isMarquee) {
+      enteredRef.current = true;
+      return;
+    }
+
     const root = rootRef.current;
     if (!root) return;
 
@@ -211,11 +273,11 @@ export function LogoStrip() {
     return () => {
       ctx.revert();
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isMarquee]);
 
-  // Crossfade swap loop — only after entrance (or immediately if reduced motion).
+  // Crossfade swap loop — desktop only, after entrance (or immediately if reduced motion).
   useEffect(() => {
-    if (CLIENT_LOGOS.length <= 1) return;
+    if (isMarquee || CLIENT_LOGOS.length <= 1) return;
 
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -312,6 +374,7 @@ export function LogoStrip() {
           outgoing.setAttribute("aria-hidden", "true");
           incoming.alt = nextLogo.alt;
           incoming.removeAttribute("aria-hidden");
+          syncIdleLayers(layers, incomingLayer);
           slotsRef.current = slotsRef.current.map((s, i) =>
             i === slotIndex
               ? { logo: nextLogo, active: incomingLayer }
@@ -361,11 +424,13 @@ export function LogoStrip() {
         const idle = layers[slot.active === "a" ? "b" : "a"];
         if (active) gsap.set(active, { autoAlpha: 1 });
         if (idle) gsap.set(idle, { autoAlpha: 0 });
+        syncIdleLayers(layers, slot.active);
       });
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isMarquee]);
 
   const initial = slotsRef.current;
+  const marqueeLogos = LOGO_STRIP_SEED_IDS.map(logoById);
 
   return (
     <section
@@ -373,7 +438,36 @@ export function LogoStrip() {
       className="rj-logo-strip"
       aria-label="Clients and partners"
     >
-      <ul className="rj-logo-strip__row">
+      {/* Mobile marquee — visibility via CSS (max-width: 767px); both trees avoid hydration flash */}
+      <div className="rj-logo-strip__viewport" aria-hidden={isMarquee ? undefined : true}>
+        <ul
+          className={
+            reducedMotion
+              ? "rj-logo-strip__track rj-logo-strip__track--static"
+              : "rj-logo-strip__track"
+          }
+        >
+          {marqueeLogos.map((logo, index) => (
+            <LogoMarqueeItem
+              key={`m1-${logo.id}`}
+              logo={logo}
+              index={index}
+            />
+          ))}
+          {/* Duplicate set for seamless loop; hidden from AT */}
+          {marqueeLogos.map((logo, index) => (
+            <LogoMarqueeItem
+              key={`m2-${logo.id}`}
+              logo={logo}
+              index={index}
+              duplicate
+            />
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop / tablet even row */}
+      <ul className="rj-logo-strip__row" aria-hidden={isMarquee ? true : undefined}>
         {initial.map((slot, index) => (
           <li
             key={`slot-${index}`}
@@ -416,7 +510,7 @@ export function LogoStrip() {
                   }
                   layerRefs.current[index]!.b = el;
                 }}
-                className="rj-logo-strip__logo rj-logo-strip__logo--buffer"
+                className="rj-logo-strip__logo rj-logo-strip__logo--idle"
                 src={slot.logo.src}
                 alt=""
                 width={120}
