@@ -477,9 +477,23 @@ ul {
 }
 
 .rj-arrow__icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
   pointer-events: none;
   width: var(--rj-arrow-icon);
+  height: 1em;
+  line-height: 1;
+  /* Prevent Safari from treating leftover unicode arrows as emoji */
+  font-variant-emoji: text;
+}
+
+.rj-arrow__svg {
+  display: block;
+  width: 0.92em;
+  height: 0.92em;
+  overflow: visible;
 }
 
 .rj-arrow__icon--b {
@@ -827,7 +841,7 @@ ul {
 
   .rj-hero__headline {
     /* Cap so “performance agency” stays one line across desktop widths */
-    font-size: min(6.55vw, 11.6rem);
+    font-size: min(calc(6.55vw + 1.2rem), 12.8rem);
   }
 
   .rj-hero__line,
@@ -3428,6 +3442,7 @@ body.rj-scroll-dark {
 
 .rj-process__item-title-text {
   display: block;
+  will-change: transform;
 }
 
 .rj-process__description {
@@ -4334,7 +4349,7 @@ body.rj-scroll-dark {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-bottom: 4.8rem;
+  margin-bottom: 0;
   text-align: center;
   pointer-events: none;
   box-sizing: border-box;
@@ -4364,6 +4379,16 @@ body.rj-scroll-dark {
   width: 100%;
   padding-inline: var(--rj-grid-margin);
   box-sizing: border-box;
+}
+
+/* Title + cards column — GSAP may translateY this on compact desktops */
+.rj-solutions-stack__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 4.8rem;
+  will-change: transform;
 }
 
 .rj-solutions-stack__list {
@@ -4542,32 +4567,47 @@ body.rj-scroll-dark {
     padding-block: 12rem 0;
   }
 
-  /* Headline + cards share the pinned column in normal flow so the stack
-     never slides up under the title (absolute + vertical-centering did). */
   .rj-solutions-stack__pin {
     justify-content: flex-start;
     padding-top: calc(var(--rj-header-height) + 1.2rem);
     padding-bottom: 3.2rem;
-    gap: 8rem;
+  }
+
+  .rj-solutions-stack__stage {
+    gap: 6.4rem;
   }
 
   .rj-solutions-stack__heading {
     position: relative;
     inset: auto;
-    z-index: 0;
     flex-shrink: 0;
     margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0;
   }
 
   .rj-solutions-stack__list {
     margin-top: 0;
     margin-bottom: 0;
-    /* Leave room for header + title + gap inside 100vh */
-    height: min(58vh, 48rem);
-    flex: 0 1 auto;
+    /* <1920: ~10% shorter cards so the stack fits mid-viewport */
+    height: min(63vh, 50.4rem);
+    width: min(100%, 96rem);
+    flex: 0 0 auto;
     min-height: 0;
+  }
+
+  /*
+   * Compact desktops: clip the pin so the pre-shifted stage reads as
+   * “title already scrolled past” — letters cut by the top edge, cards
+   * centered. Class is toggled from SolutionsStackSection.
+   */
+  .rj-solutions-stack--scrolled-title .rj-solutions-stack__pin {
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .rj-solutions-stack--scrolled-title .rj-solutions-stack__stage {
+    gap: 5.6rem;
   }
 
   .rj-solutions-stack__card-inner {
@@ -4585,13 +4625,17 @@ body.rj-scroll-dark {
 }
 
 @media (min-width: 1024px) {
-  .rj-solutions-stack__pin {
-    gap: 8.8rem;
+  .rj-solutions-stack__stage {
+    gap: 7.2rem;
+  }
+
+  .rj-solutions-stack--scrolled-title .rj-solutions-stack__stage {
+    gap: 6rem;
   }
 
   .rj-solutions-stack__list {
     width: min(100%, 108rem);
-    height: min(60vh, 52rem);
+    height: min(64.8vh, 52.2rem);
   }
 
   .rj-solutions-stack__card-title {
@@ -4600,6 +4644,23 @@ body.rj-scroll-dark {
 
   .rj-solutions-stack__card-body p {
     font-size: 1.7rem;
+  }
+}
+
+/* ≥1920px: fully visible headline above the stack (no pre-shift) */
+@media (min-width: 1920px) {
+  .rj-solutions-stack__pin {
+    overflow: visible;
+    padding-top: calc(var(--rj-header-height) + 1.2rem);
+    padding-bottom: 3.2rem;
+  }
+
+  .rj-solutions-stack__stage {
+    gap: 6rem;
+  }
+
+  .rj-solutions-stack__list {
+    height: min(62vh, 54rem);
   }
 }
 
@@ -4669,8 +4730,13 @@ body.rj-scroll-dark {
 
   .rj-solutions-stack__heading {
     position: relative;
-    margin-bottom: 4.8rem;
+    margin-bottom: 0;
     padding-top: 0;
+  }
+
+  .rj-solutions-stack__stage {
+    gap: 4.8rem;
+    transform: none !important;
   }
 }
 

@@ -1014,28 +1014,57 @@ export function AiPromptInput() {
   }, []);
 
   async function pushExchange(prompt: string) {
+    // Bare domains (grono.ai) count as URLs — show what the user typed,
+    // but send a normalized https URL to the model.
+    const asUrl = normalizeAuditUrl(prompt);
+    const displayText = prompt;
+    const modelPrompt = asUrl
+      ? `The user shared this website URL for a quick look: ${asUrl.href}`
+      : prompt;
+
     const userMsg: ChatMessage = {
       id: uid(),
       role: "user",
-      text: prompt,
+      text: displayText,
     };
 
+    const startingChat = messages.length === 0;
     setOpen(true);
     setMessages((prev) => [...prev, userMsg]);
     setPending(true);
     revealRef.current.cancelled = false;
+    if (startingChat) {
+      logChatEvent({
+        eventType: "intent_open",
+        intent: "general",
+        metadata: {
+          source: "first_message",
+          ...(asUrl ? { url: asUrl.href, domain: asUrl.domain } : {}),
+        },
+      });
+      trackEvent("chat_open", { intent: "general" });
+    }
     logChatEvent({
       eventType: "user_message",
       intent: "general",
       role: "user",
-      content: prompt,
-      metadata: { messageId: userMsg.id },
+      content: displayText,
+      metadata: {
+        messageId: userMsg.id,
+        ...(asUrl ? { url: asUrl.href, domain: asUrl.domain } : {}),
+      },
     });
 
     const history = [...messages, userMsg]
       .filter((m) => m.text.trim())
       .slice(-12)
-      .map((m) => ({ role: m.role, content: m.text }));
+      .map((m) => ({
+        role: m.role,
+        content:
+          m.id === userMsg.id && asUrl
+            ? modelPrompt
+            : m.text,
+      }));
 
     const prior = history.slice(0, -1);
     const assistantId = uid();
@@ -1043,7 +1072,7 @@ export function AiPromptInput() {
     try {
       const { text } = await generateWithGeminiFlash({
         data: {
-          prompt,
+          prompt: modelPrompt,
           system: UXLAB_SYSTEM_PROMPT,
           history: prior,
         },
@@ -1372,9 +1401,7 @@ export function AiPromptInput() {
               croStep === "email" ||
               newsletterStep === "email"
                 ? "email"
-                : croStep === "url"
-                  ? "url"
-                  : "text"
+                : "text"
             }
             inputMode={
               leadStep === "email" ||

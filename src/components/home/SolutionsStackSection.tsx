@@ -19,27 +19,34 @@ const CARD_TONES = [
 ] as const;
 
 const DESKTOP_MQ = "(min-width: 768px)";
+const COMPACT_DESKTOP_MQ = "(min-width: 768px) and (max-width: 1919px)";
 const MOTION_MQ = "(prefers-reduced-motion: reduce)";
 
 /**
  * Hilden & Kaira–style stacked solutions cards:
  * tall pin-height scrub runway, one shared scrub timeline so cards fling
  * 01→05 in order while pinned. Headline lives inside the pin so it stays
- * with the stack for the full runway, then both scroll away. Last card
- * stays. Mobile / reduced-motion: static vertical stack.
+ * with the stack for the full runway, then both scroll away. On compact
+ * desktops (<1920) the stage is pre-shifted so the title reads as already
+ * scrolled off the top and cards sit mid-viewport. Mobile / reduced-motion:
+ * static vertical stack.
  */
 export function SolutionsStackSection() {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const pinHeightRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     const headline = headlineRef.current;
     const pinHeight = pinHeightRef.current;
     const pin = pinRef.current;
-    if (!root || !headline || !pinHeight || !pin) return;
+    const stage = stageRef.current;
+    const list = listRef.current;
+    if (!root || !headline || !pinHeight || !pin || !stage || !list) return;
 
     const cleanups: Array<() => void> = [];
     cleanups.push(
@@ -49,12 +56,48 @@ export function SolutionsStackSection() {
     );
 
     const desktopMq = window.matchMedia(DESKTOP_MQ);
+    const compactMq = window.matchMedia(COMPACT_DESKTOP_MQ);
     const motionMq = window.matchMedia(MOTION_MQ);
     let stackCtx: gsap.Context | null = null;
+
+    const clearStageShift = () => {
+      gsap.set(stage, { clearProps: "y,transform" });
+      root.classList.remove("rj-solutions-stack--scrolled-title");
+    };
+
+    /**
+     * Compact desktop: keep title+cards in normal flow, then shift the
+     * whole stage up so the list centers in the pin and the headline is
+     * clipped at the top — same silhouette as if the user had already
+     * scrolled past the title.
+     */
+    const applyScrolledTitleLayout = () => {
+      if (!compactMq.matches || motionMq.matches || !desktopMq.matches) {
+        clearStageShift();
+        return;
+      }
+
+      root.classList.add("rj-solutions-stack--scrolled-title");
+      gsap.set(stage, { y: 0 });
+
+      const pinH = pin.clientHeight;
+      const stageStyles = getComputedStyle(stage);
+      const gap = Number.parseFloat(stageStyles.rowGap || stageStyles.gap) || 0;
+      const headingEl = stage.querySelector<HTMLElement>(
+        ".rj-solutions-stack__heading",
+      );
+      const headingH = headingEl?.offsetHeight ?? 0;
+      const listH = list.offsetHeight;
+      const listCenterInStage = headingH + gap + listH / 2;
+      const y = pinH / 2 - listCenterInStage;
+
+      gsap.set(stage, { y });
+    };
 
     const teardownStack = () => {
       stackCtx?.revert();
       stackCtx = null;
+      clearStageShift();
     };
 
     const setupStack = () => {
@@ -87,7 +130,10 @@ export function SolutionsStackSection() {
           pinSpacing: false,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          onRefresh: applyScrolledTitleLayout,
         });
+
+        applyScrolledTitleLayout();
 
         // Front card (#01) sits on top; deeper cards step back in y/z.
         cards.forEach((card, index) => {
@@ -159,9 +205,11 @@ export function SolutionsStackSection() {
     };
 
     desktopMq.addEventListener("change", onChange);
+    compactMq.addEventListener("change", onChange);
     motionMq.addEventListener("change", onChange);
     cleanups.push(() => {
       desktopMq.removeEventListener("change", onChange);
+      compactMq.removeEventListener("change", onChange);
       motionMq.removeEventListener("change", onChange);
       teardownStack();
     });
@@ -173,7 +221,10 @@ export function SolutionsStackSection() {
     );
 
     // Refresh after layout + fonts so pin-height measurements stick.
-    const refresh = () => ScrollTrigger.refresh();
+    const refresh = () => {
+      applyScrolledTitleLayout();
+      ScrollTrigger.refresh();
+    };
     requestAnimationFrame(() => requestAnimationFrame(refresh));
     if (document.fonts?.ready) {
       void document.fonts.ready.then(refresh);
@@ -193,78 +244,84 @@ export function SolutionsStackSection() {
     >
       <div ref={pinHeightRef} className="rj-solutions-stack__pin-height">
         <div ref={pinRef} className="rj-solutions-stack__pin">
-          <div className="rj-solutions-stack__heading">
-            <h2
-              ref={headlineRef}
-              className="rj-solutions-stack__headline rj-awards-title"
+          <div ref={stageRef} className="rj-solutions-stack__stage">
+            <div className="rj-solutions-stack__heading">
+              <h2
+                ref={headlineRef}
+                className="rj-solutions-stack__headline rj-awards-title"
+              >
+                How we invent
+                <br />
+                your growth
+              </h2>
+            </div>
+
+            <div
+              ref={listRef}
+              className="rj-solutions-stack__list"
+              role="list"
             >
-              How we invent
-              <br />
-              your growth
-            </h2>
-          </div>
+              {SOLUTIONS.map((item, index) => {
+                const tone = CARD_TONES[index % CARD_TONES.length];
+                const num = String(index + 1).padStart(2, "0");
 
-          <div className="rj-solutions-stack__list" role="list">
-            {SOLUTIONS.map((item, index) => {
-              const tone = CARD_TONES[index % CARD_TONES.length];
-              const num = String(index + 1).padStart(2, "0");
-
-              return (
-                <article
-                  key={item.title}
-                  role="listitem"
-                  className={cn(
-                    "rj-solutions-stack__card",
-                    `rj-solutions-stack__card--${tone}`,
-                  )}
-                >
-                  <div className="rj-solutions-stack__card-inner">
-                    <div className="rj-solutions-stack__card-top">
-                      <div className="rj-solutions-stack__card-copy">
-                        <h3 className="rj-solutions-stack__card-title">
-                          {item.title}
-                        </h3>
-                      </div>
-                      <div
-                        className="rj-solutions-stack__card-number"
-                        aria-hidden="true"
-                      >
-                        <span>{num[0]}</span>
-                        <span>{num[1]}</span>
-                      </div>
-                    </div>
-
-                    <div className="rj-solutions-stack__card-bottom">
-                      <div className="rj-solutions-stack__card-body">
-                        <p>{item.body}</p>
-                        <ArrowLink
-                          href="#contact"
-                          className="rj-solutions-stack__cta"
-                          onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            openContactChat();
-                          }}
+                return (
+                  <article
+                    key={item.title}
+                    role="listitem"
+                    className={cn(
+                      "rj-solutions-stack__card",
+                      `rj-solutions-stack__card--${tone}`,
+                    )}
+                  >
+                    <div className="rj-solutions-stack__card-inner">
+                      <div className="rj-solutions-stack__card-top">
+                        <div className="rj-solutions-stack__card-copy">
+                          <h3 className="rj-solutions-stack__card-title">
+                            {item.title}
+                          </h3>
+                        </div>
+                        <div
+                          className="rj-solutions-stack__card-number"
+                          aria-hidden="true"
                         >
-                          Let&apos;s talk
-                        </ArrowLink>
+                          <span>{num[0]}</span>
+                          <span>{num[1]}</span>
+                        </div>
                       </div>
-                      <div className="rj-solutions-stack__card-media">
-                        <LazyVideo
-                          src={item.video}
-                          className="rj-solutions-stack__video"
-                          loop
-                          muted
-                          playsInline
-                          rootMargin="600px 0px"
-                          preload="metadata"
-                        />
+
+                      <div className="rj-solutions-stack__card-bottom">
+                        <div className="rj-solutions-stack__card-body">
+                          <p>{item.body}</p>
+                          <ArrowLink
+                            href="#contact"
+                            className="rj-solutions-stack__cta"
+                            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              openContactChat();
+                            }}
+                          >
+                            Let&apos;s talk
+                          </ArrowLink>
+                        </div>
+                        <div className="rj-solutions-stack__card-media">
+                          <LazyVideo
+                            src={item.video}
+                            className="rj-solutions-stack__video"
+                            loop
+                            muted
+                            playsInline
+                            rootMargin="600px 0px"
+                            preload="metadata"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

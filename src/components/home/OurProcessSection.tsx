@@ -80,7 +80,8 @@ export function OurProcessSection() {
   useEffect(() => {
     const root = rootRef.current;
     const headline = headlineRef.current;
-    if (!root) return;
+    const columns = columnsRef.current;
+    if (!root || !columns) return;
 
     const cleanups: Array<() => void> = [];
 
@@ -92,33 +93,86 @@ export function OurProcessSection() {
       );
     }
 
+    const items = itemRefs.current.filter(Boolean) as HTMLElement[];
+    if (items.length === 0) return;
+
+    const lines = items
+      .map((item) => item.querySelector<HTMLElement>(".rj-process__line"))
+      .filter(Boolean) as HTMLElement[];
+    const numbers = items
+      .map((item) => item.querySelector<HTMLElement>(".rj-process__number"))
+      .filter(Boolean) as HTMLElement[];
+    const titles = items
+      .map((item) =>
+        item.querySelector<HTMLElement>(".rj-process__item-title-text"),
+      )
+      .filter(Boolean) as HTMLElement[];
+
     const ctx = gsap.context(() => {
-      itemRefs.current.forEach((item) => {
-        if (!item) return;
-        const line = item.querySelector<HTMLElement>(".rj-process__line");
-        const number = item.querySelector<HTMLElement>(".rj-process__number");
-        const titleText = item.querySelector<HTMLElement>(
-          ".rj-process__item-title-text",
-        );
+      if (reducedMotion) {
+        gsap.set(lines, { scaleX: 1, scaleY: 1 });
+        gsap.set(numbers, { autoAlpha: 1 });
+        gsap.set(titles, { y: 0 });
+        return;
+      }
 
-        if (line) gsap.set(line, { scaleX: 0, scaleY: 0 });
-        if (number) gsap.set(number, { autoAlpha: 0 });
-        if (titleText) gsap.set(titleText, { y: "105%" });
-        // Descriptions: always visible below 1200px (CSS); desktop via .is-active hover.
+      gsap.set(lines, { scaleX: 0, scaleY: 0 });
+      gsap.set(numbers, { autoAlpha: 0, y: 12 });
+      gsap.set(titles, { y: "110%" });
+      gsap.set(items, { autoAlpha: 0.001 });
 
-        ScrollTrigger.create({
-          trigger: item,
-          start: "top bottom",
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+        scrollTrigger: {
+          trigger: columns,
+          start: "top 78%",
           once: true,
-          onEnter: () => {
-            const duration = reducedMotion ? 0.001 : 1.8;
-            const ease = "power3.out";
-            if (line) gsap.to(line, { scaleX: 1, scaleY: 1, duration, ease });
-            if (titleText) gsap.to(titleText, { y: 0, duration, ease });
-            if (number) gsap.to(number, { autoAlpha: 1, duration, ease });
-          },
-        });
+        },
       });
+
+      // Soft column fade, then staggered Metalab line / number / title reveal.
+      tl.to(
+        items,
+        {
+          autoAlpha: 1,
+          duration: 0.55,
+          stagger: 0.07,
+          ease: "power2.out",
+        },
+        0,
+      );
+
+      tl.to(
+        lines,
+        {
+          scaleX: 1,
+          scaleY: 1,
+          duration: 1.15,
+          stagger: 0.09,
+        },
+        0.08,
+      );
+
+      tl.to(
+        numbers,
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.85,
+          stagger: 0.09,
+        },
+        0.16,
+      );
+
+      tl.to(
+        titles,
+        {
+          y: "0%",
+          duration: 1.05,
+          stagger: 0.09,
+        },
+        0.2,
+      );
     }, root);
 
     return () => {

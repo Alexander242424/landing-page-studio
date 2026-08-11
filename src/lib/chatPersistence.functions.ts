@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { notifyTelegramForChatEvent } from "@/lib/telegram";
 
 const ChatEventRow = z.object({
   id: z.string().min(1),
@@ -81,6 +82,11 @@ async function appendLocalDevFile(row: ChatEventRow): Promise<boolean> {
 export const logChatEvent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ChatEventRow.parse(input))
   .handler(async ({ data }) => {
+    // Telegram alerts run regardless of store success (best-effort).
+    void notifyTelegramForChatEvent(data).catch((error) => {
+      console.error("[chatPersistence] Telegram notify failed", error);
+    });
+
     try {
       const wroteRemote = await insertSupabase(data);
       if (wroteRemote) {

@@ -41,6 +41,14 @@ export const CRO_PLACEHOLDER: Record<CroAuditStep, string> = {
   done: "Ask anything…",
 };
 
+/**
+ * True when the whole string is (or clearly is) a site URL — including bare
+ * domains like `grono.ai` / `www.example.com/pricing` without a protocol.
+ */
+export function looksLikeUrl(raw: string): boolean {
+  return normalizeAuditUrl(raw) != null;
+}
+
 /** Normalize input → absolute http(s) URL, or null if invalid. */
 export function normalizeAuditUrl(raw: string): {
   href: string;
@@ -52,6 +60,10 @@ export function normalizeAuditUrl(raw: string): {
   // Strip wrapping quotes / angle brackets people sometimes paste
   input = input.replace(/^['"<]+|['">]+$/g, "").trim();
 
+  // Reject obvious non-URLs (spaces, emails) before we prepend https://
+  if (/\s/.test(input) || input.includes("@")) return null;
+
+  // Bare domains / paths without a scheme are still URLs (e.g. grono.ai)
   if (!/^https?:\/\//i.test(input)) {
     input = `https://${input}`;
   }
@@ -69,7 +81,7 @@ export function normalizeAuditUrl(raw: string): {
 
   const host = parsed.hostname.toLowerCase();
   if (!host || host === "localhost") return null;
-  // Basic hostname: needs a dot and a plausible TLD (or xn-- IDN)
+  // Basic hostname: needs a dot and a plausible TLD (incl. short ones like .ai)
   if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(host)) {
     return null;
   }
