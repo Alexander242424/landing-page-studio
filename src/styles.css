@@ -1040,15 +1040,11 @@ ul {
   content: none;
 }
 
-/* Mobile: +15% on hero-bottom copy + CTA labels (desktop sizes unchanged) */
+/* Mobile: +15% on hero-bottom copy only — CTAs stay 1.4rem like header Let's talk */
 @media (max-width: 767px) {
   .rj-hero__tagline,
   .rj-hero__description {
     font-size: calc(1.15 * clamp(14px, 3.6vw, 18px));
-  }
-
-  .rj-hero__cta {
-    font-size: calc(1.4rem * 1.15);
   }
 }
 
