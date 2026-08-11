@@ -1,3 +1,12 @@
+# Admin — never index login or dashboard
+/admin
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Cache-Control: no-store
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Cache-Control: no-store
+
 # Long-cache immutable hashed assets from Vite builds
 /assets/*
   Cache-Control: public, max-age=31536000, immutable

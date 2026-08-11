@@ -1,78 +1,117 @@
 # UXLAB — https://uxlab.digital
 # AI / LLM crawler policy: allow indexing for search + generative engines.
+# Admin (/admin*) is never for public or AI indexes.
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # OpenAI
 User-agent: GPTBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Anthropic
 User-agent: ClaudeBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 User-agent: Claude-Web
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Google Gemini / AI Overviews
 User-agent: Google-Extended
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Perplexity
 User-agent: PerplexityBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Apple Intelligence / Applebot
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 User-agent: Applebot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # ByteDance
 User-agent: Bytespider
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Cohere
 User-agent: cohere-ai
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Common Crawl (training corpora often sourced here)
 User-agent: CCBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Meta AI
 User-agent: meta-externalagent
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 User-agent: FacebookBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Microsoft / Bing
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # Diffbot
 User-agent: Diffbot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 # You.com
 User-agent: YouBot
 Allow: /
+Disallow: /admin
+Disallow: /admin/
 
 Sitemap: https://uxlab.digital/sitemap.xml
 
-# LLM / GEO indexes
+# LLM / GEO indexes (admin is not listed)
 # https://uxlab.digital/llms.txt
 # https://uxlab.digital/llms-full.txt
 # https://uxlab.digital/ai.txt

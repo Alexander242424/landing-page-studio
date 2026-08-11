@@ -2,6 +2,12 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { getAdminSession } from "@/lib/admin/auth.functions";
 
 export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { name: "robots", content: "noindex,nofollow,noarchive,nosnippet" },
+      { name: "googlebot", content: "noindex,nofollow,noarchive,nosnippet" },
+    ],
+  }),
   beforeLoad: async ({ location }) => {
     const isLogin = location.pathname === "/admin/login";
     const session = await getAdminSession();
@@ -20,7 +26,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminShell() {
   return (
-    <div className="min-h-screen bg-[#f4f5f7] text-[#111827] antialiased">
+    <div className="theme-light min-h-screen bg-[var(--rj-surface)] font-[family-name:var(--rj-font-sans)] text-[var(--rj-fg)] antialiased">
       <Outlet />
     </div>
   );

@@ -576,7 +576,7 @@ ul {
 }
 
 .rj-header__menu-item a:not(.rj-header__link--active) {
-  opacity: 0.42;
+  opacity: 0.72;
 }
 
 .rj-header__link--active {
