@@ -1,17 +1,12 @@
 import { Logo } from "@/components/brand/Logo";
-
-const STUDIOS = [
-  "Product design",
-  "Conversion (CRO)",
-  "Brand systems",
-  "Growth UX",
-] as const;
+import { openContactChat, openNewsletterChat } from "@/lib/askChat";
+import { SOLUTIONS } from "@/lib/solutions";
 
 const NAV = [
   { label: "About", href: "#about" },
   { label: "Work", href: "#glance" },
-  { label: "Services", href: "#solutions" },
-  { label: "Approach", href: "#approach" },
+  { label: "Solutions", href: "#solutions" },
+  { label: "Process", href: "#process" },
 ] as const;
 
 const SOCIALS = [
@@ -41,10 +36,10 @@ export function SiteFooter() {
 
         <div className="rj-footer__col">
           <ul className="rj-footer__list">
-            {STUDIOS.map((item) => (
-              <li key={item}>
+            {SOLUTIONS.map((item) => (
+              <li key={item.title}>
                 <a href="#solutions" className="rj-link-active">
-                  {item}
+                  {item.title}
                 </a>
               </li>
             ))}
@@ -64,18 +59,26 @@ export function SiteFooter() {
         </div>
 
         <div className="rj-footer__col rj-footer__col--actions">
-          <a href="mailto:alex@uxlab.digital" className="rj-footer__action">
+          <button
+            type="button"
+            className="rj-footer__action"
+            onClick={() => openNewsletterChat()}
+          >
             <span>Subscribe to our newsletter</span>
             <span className="rj-footer__action-arrow" aria-hidden="true">
               →
             </span>
-          </a>
-          <a href="mailto:alex@uxlab.digital" className="rj-footer__action">
+          </button>
+          <button
+            type="button"
+            className="rj-footer__action"
+            onClick={() => openContactChat()}
+          >
             <span>Get in touch with us</span>
             <span className="rj-footer__action-arrow" aria-hidden="true">
               →
             </span>
-          </a>
+          </button>
 
           <ul className="rj-footer__socials">
             {SOCIALS.map((item) => (

@@ -202,7 +202,9 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
         <div className="rj-glance__card-bottom">
           <div className="rj-glance__card-link">
             {widget.link ? (
-              <ArrowLink href={widget.link.href}>{widget.link.label}</ArrowLink>
+              <ArrowLink href={widget.link.href} className="rj-link-active">
+                {widget.link.label}
+              </ArrowLink>
             ) : null}
           </div>
           <div className="rj-glance__card-logos">

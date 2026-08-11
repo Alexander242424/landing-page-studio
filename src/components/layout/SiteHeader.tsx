@@ -9,14 +9,13 @@ const NAV_ITEMS = [
   { label: "Home", href: "#hero" },
   { label: "Work", href: "#glance" },
   { label: "About", href: "#about" },
-  { label: "Services", href: "#solutions" },
-  { label: "Contact", href: "#contact" },
+  { label: "Solutions", href: "#solutions" },
 ] as const;
 
 type NavHref = (typeof NAV_ITEMS)[number]["href"];
 
 /**
- * Fixed mix-blend header: scroll-spy nav, Lenis anchors, Let's connect CTA.
+ * Fixed mix-blend header: scroll-spy nav, Lenis anchors, Let's talk CTA.
  */
 export function SiteHeader() {
   const [activeHref, setActiveHref] = useState<NavHref>("#hero");
@@ -46,11 +45,6 @@ export function SiteHeader() {
         if (section.el.getBoundingClientRect().top <= marker) {
           next = section.href;
         }
-      }
-
-      const doc = document.documentElement;
-      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 80) {
-        next = "#contact";
       }
 
       setActiveHref((prev) => (prev === next ? prev : next));
@@ -89,7 +83,6 @@ export function SiteHeader() {
 
   const onConnectClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    setActiveHref("#contact");
     openLeadChat();
   };
 

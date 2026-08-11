@@ -1,43 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowLink } from "@/components/ui/ArrowLink";
+import { openContactChat } from "@/lib/askChat";
+import { SOLUTIONS } from "@/lib/solutions";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
-
-type Challenge = {
-  title: string;
-  body: string;
-  video: string;
-};
-
-const CHALLENGES: Challenge[] = [
-  {
-    title: "Conversion Rate optimization (CRO)",
-    body: "Systematic improvement of conversion across key product and funnel touchpoints through UX changes grounded in user behavior and data.",
-    video: "/challenges/c1.mp4",
-  },
-  {
-    title: "AI native product design & development",
-    body: "Holistic design and redesign of products from structure and flows to interaction and visual systems, built for scale and monetization.",
-    video: "/challenges/c3.mp4",
-  },
-  {
-    title: "User testing & Experimentation",
-    body: "Revenue growth driven by improving user journeys, decision points, and product experience across conversion, monetization, and retention.",
-    video: "/challenges/c2.mp4",
-  },
-  {
-    title: "Product launch",
-    body: "Design of pricing, trials, paywalls, and funnels as a single monetization system that increases predictability and revenue efficiency.",
-    video: "/challenges/c4.mp4",
-  },
-  {
-    title: "AI Transformation",
-    body: "Unification of fragmented UX decisions into a coherent, scalable product experience aligned with business and growth goals.",
-    video: "/challenges/c5.mp4",
-  },
-];
 
 function CropMarks() {
   return (
@@ -164,13 +133,24 @@ export function ChallengesSection() {
       </div>
 
       <div className="rj-challenges__list">
-        {CHALLENGES.map((item) => (
+        {SOLUTIONS.map((item) => (
           <article key={item.title} className="rj-challenges__row" tabIndex={0}>
             <div className="rj-challenges__content">
               <div className="rj-challenges__meta">
                 <h3 className="rj-challenges__title">{item.title}</h3>
                 <p className="rj-challenges__body">{item.body}</p>
               </div>
+              <ArrowLink
+                href="#contact"
+                className="rj-challenges__cta"
+                onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  openContactChat();
+                }}
+              >
+                Learn more
+              </ArrowLink>
             </div>
             <div className="rj-challenges__media">
               <CropMarks />

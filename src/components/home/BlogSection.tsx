@@ -119,7 +119,9 @@ export function BlogSection() {
                   />
                 </div>
                 <span className="rj-blog__category">{article.category}</span>
-                <h3 className="rj-blog__title">{article.title}</h3>
+                <h3 className="rj-blog__title">
+                  <span className="rj-blog__title-text">{article.title}</span>
+                </h3>
                 <p className="rj-blog__meta">
                   {article.date} — {article.readTime}
                 </p>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
+import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,7 +11,7 @@ const DESKTOP_MQ = "(min-width: 1024px)";
 /**
  * Rejouice-matched hero + showreel:
  * - Awards char reveal on 2-line static headline
- * - Description + scroll-cue entrance
+ * - Description entrance via playHomeEntrance; scroll-cue fade here
  * - Scrubbed headline (+ mobile description) parallax, reel clip-path grow + video parallax
  * - Mobile uses a lighter animation budget to avoid touch scroll jitter
  */
@@ -20,7 +20,6 @@ export function HeroReel() {
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLParagraphElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const videoWrapRef = useRef<HTMLDivElement>(null);
@@ -31,7 +30,6 @@ export function HeroReel() {
     const hero = heroRef.current;
     const logo = logoRef.current;
     const bottom = bottomRef.current;
-    const description = descriptionRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
@@ -51,18 +49,6 @@ export function HeroReel() {
         yStagger: 0.016,
       }),
     );
-
-    if (description) {
-      cleanups.push(
-        createTextReveal(description, {
-          playOnLoad: true,
-          delay: 0.8,
-          direction: 1,
-          linesStagger: 0.08,
-          duration: 1.6,
-        }),
-      );
-    }
 
     const ctx = gsap.context(() => {
       if (icon) {
@@ -244,7 +230,7 @@ export function HeroReel() {
 
         <div ref={bottomRef} className="rj-hero__bottom">
           <div className="rj-hero__taglines">
-            <p ref={descriptionRef} className="rj-hero__tagline rj-hero__description">
+            <p className="rj-hero__tagline rj-hero__description">
               We grow your product and revenue by boosting user experience,
               journeys, and metrics that drive conversion, activation, trials.
             </p>

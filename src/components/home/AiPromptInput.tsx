@@ -6,8 +6,12 @@ import {
   useState,
 } from "react";
 import { Logo } from "@/components/brand/Logo";
-import { OPEN_LEAD_CHAT_EVENT } from "@/lib/askChat";
+import {
+  OPEN_LEAD_CHAT_EVENT,
+  OPEN_NEWSLETTER_CHAT_EVENT,
+} from "@/lib/askChat";
 import { generateWithGeminiFlash } from "@/lib/ai.functions";
+import { logChatEvent } from "@/lib/chatPersistence";
 import { mountCalInline } from "@/lib/cal";
 import {
   CRO,
@@ -64,6 +68,21 @@ const LEAD_PLACEHOLDER: Record<LeadStep, string> = {
   email: "Your email…",
   goal: "Your goal…",
   company: "Company name…",
+  done: "Ask anything…",
+};
+
+/** Scripted newsletter subscribe capture. */
+type NewsletterStep = "email" | "done";
+
+const NEWSLETTER = {
+  intro:
+    "Happy to keep you in the loop. What’s the best email for our newsletter?",
+  emailRetry: "Please share a valid email so we can subscribe you.",
+  done: "You’re on the list — thanks. We’ll send thoughtful updates, not noise.",
+} as const;
+
+const NEWSLETTER_PLACEHOLDER: Record<NewsletterStep, string> = {
+  email: "Your email…",
   done: "Ask anything…",
 };
 
@@ -361,7 +380,8 @@ function useTypewriterPlaceholder(paused: boolean) {
 /**
  * Fixed bottom Apple-style ask bar + chat panel (same width as input).
  * Gemini 3 Flash via Lovable gateway, grounded on UXLAB.
- * “Let’s talk” runs a scripted lead capture (email → goal → company).
+ * “Let’s talk” / footer “Get in touch” runs scripted lead capture.
+ * Footer “Subscribe” runs a newsletter email capture in the same ask bar.
  * CRO Audit runs a scripted URL → scan → name → email flow.
  * Call / “Book a call” opens an inline Cal.com calendar in the chat.
  */
@@ -374,6 +394,8 @@ export function AiPromptInput() {
   const revealRef = useRef({ cancelled: false });
   const leadStepRef = useRef<LeadStep | null>(null);
   const leadAnswersRef = useRef({ email: "", goal: "", company: "" });
+  const newsletterStepRef = useRef<NewsletterStep | null>(null);
+  const newsletterEmailRef = useRef("");
   const croStepRef = useRef<CroAuditStep | null>(null);
   const croAnswersRef = useRef<CroAuditAnswers>({
     url: "",
@@ -389,6 +411,9 @@ export function AiPromptInput() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
+  const [newsletterStep, setNewsletterStep] = useState<NewsletterStep | null>(
+    null,
+  );
   const [croStep, setCroStep] = useState<CroAuditStep | null>(null);
   const [scanCard, setScanCard] = useState<ScanCardState | null>(null);
   const [pricingActions, setPricingActions] = useState(false);
@@ -406,12 +431,30 @@ export function AiPromptInput() {
       ? CRO_PLACEHOLDER[croStep]
       : leadStep
         ? LEAD_PLACEHOLDER[leadStep]
-        : (inputHint ?? "Ask anything…")
+        : newsletterStep
+          ? NEWSLETTER_PLACEHOLDER[newsletterStep]
+          : (inputHint ?? "Ask anything…")
     : rotatingPlaceholder;
+
+  function focusAskInput() {
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  }
+
+  function resetNewsletterFlow() {
+    newsletterEmailRef.current = "";
+    newsletterStepRef.current = null;
+    setNewsletterStep(null);
+  }
 
   useEffect(() => {
     leadStepRef.current = leadStep;
   }, [leadStep]);
+
+  useEffect(() => {
+    newsletterStepRef.current = newsletterStep;
+  }, [newsletterStep]);
 
   useEffect(() => {
     croStepRef.current = croStep;
@@ -469,7 +512,7 @@ export function AiPromptInput() {
     setCroAuditActions(false);
   }
 
-  async function pushScriptedReply(text: string) {
+  async function pushScriptedReply(text: string, intent?: Parameters<typeof logChatEvent>[0]["intent"]) {
     const assistantId = uid();
     setPending(true);
     await sleep(520 + Math.random() * 280);
@@ -506,6 +549,16 @@ export function AiPromptInput() {
         m.id === assistantId ? { ...m, streaming: false } : m,
       ),
     );
+
+    if (!revealRef.current.cancelled) {
+      logChatEvent({
+        eventType: "assistant_message",
+        intent: intent ?? null,
+        role: "assistant",
+        content: text.trim(),
+        metadata: { messageId: assistantId, scripted: true },
+      });
+    }
   }
 
   async function startLeadFlow() {
@@ -514,6 +567,7 @@ export function AiPromptInput() {
     revealRef.current = { cancelled: false };
 
     resetCroFlow();
+    resetNewsletterFlow();
     leadAnswersRef.current = { email: "", goal: "", company: "" };
     setLeadStep("email");
     setPricingActions(false);
@@ -523,8 +577,45 @@ export function AiPromptInput() {
     setValue("");
     setMessages([]);
     setOpen(true);
+    focusAskInput();
 
-    await pushScriptedReply(LEAD.intro);
+    logChatEvent({
+      eventType: "intent_open",
+      intent: "contact",
+      metadata: { source: "open_lead_chat" },
+    });
+
+    await pushScriptedReply(LEAD.intro, "contact");
+  }
+
+  async function startNewsletterFlow() {
+    revealRef.current.cancelled = true;
+    await sleep(0);
+    revealRef.current = { cancelled: false };
+
+    resetCroFlow();
+    setLeadStep(null);
+    leadStepRef.current = null;
+    leadAnswersRef.current = { email: "", goal: "", company: "" };
+    newsletterEmailRef.current = "";
+    setNewsletterStep("email");
+    newsletterStepRef.current = "email";
+    setPricingActions(false);
+    setShowCal(false);
+    setInputHint(null);
+    setPending(false);
+    setValue("");
+    setMessages([]);
+    setOpen(true);
+    focusAskInput();
+
+    logChatEvent({
+      eventType: "intent_open",
+      intent: "newsletter",
+      metadata: { source: "open_newsletter_chat" },
+    });
+
+    await pushScriptedReply(NEWSLETTER.intro, "newsletter");
   }
 
   async function startCalBookingFlow(userText?: string) {
@@ -534,6 +625,7 @@ export function AiPromptInput() {
 
     setLeadStep(null);
     leadStepRef.current = null;
+    resetNewsletterFlow();
     resetCroFlow();
     setPricingActions(false);
     setShowCal(false);
@@ -541,17 +633,32 @@ export function AiPromptInput() {
     setPending(false);
     setValue("");
     setOpen(true);
+    focusAskInput();
 
     if (userText?.trim()) {
+      const text = userText.trim();
       const userMsg: ChatMessage = {
         id: uid(),
         role: "user",
-        text: userText.trim(),
+        text,
       };
       setMessages((prev) => [...prev, userMsg]);
+      logChatEvent({
+        eventType: "user_message",
+        intent: "cal",
+        role: "user",
+        content: text,
+        metadata: { messageId: userMsg.id },
+      });
+    } else {
+      logChatEvent({
+        eventType: "intent_open",
+        intent: "cal",
+        metadata: { source: "cal_booking" },
+      });
     }
 
-    await pushScriptedReply(CAL_INTRO);
+    await pushScriptedReply(CAL_INTRO, "cal");
     if (!revealRef.current.cancelled) {
       setShowCal(true);
     }
@@ -560,6 +667,7 @@ export function AiPromptInput() {
   async function runPricingFlow(userText: string) {
     setPricingActions(false);
     resetCroFlow();
+    resetNewsletterFlow();
     setShowCal(false);
     setInputHint(null);
     revealRef.current.cancelled = false;
@@ -571,8 +679,15 @@ export function AiPromptInput() {
     };
     setMessages((prev) => [...prev, userMsg]);
     setOpen(true);
+    logChatEvent({
+      eventType: "user_message",
+      intent: "pricing",
+      role: "user",
+      content: userText,
+      metadata: { messageId: userMsg.id },
+    });
 
-    await pushScriptedReply(PRICING_REPLY);
+    await pushScriptedReply(PRICING_REPLY, "pricing");
     if (!revealRef.current.cancelled) {
       setPricingActions(true);
     }
@@ -585,6 +700,7 @@ export function AiPromptInput() {
 
     setLeadStep(null);
     leadStepRef.current = null;
+    resetNewsletterFlow();
     resetCroFlow();
     setPricingActions(false);
     setShowCal(false);
@@ -592,17 +708,30 @@ export function AiPromptInput() {
     setPending(false);
     setValue("");
     setOpen(true);
+    focusAskInput();
 
     if (userText?.trim()) {
-      setMessages((prev) => [
-        ...prev,
-        { id: uid(), role: "user", text: userText.trim() },
-      ]);
+      const text = userText.trim();
+      const userMsg = { id: uid(), role: "user" as const, text };
+      setMessages((prev) => [...prev, userMsg]);
+      logChatEvent({
+        eventType: "user_message",
+        intent: "cro",
+        role: "user",
+        content: text,
+        metadata: { messageId: userMsg.id },
+      });
+    } else {
+      logChatEvent({
+        eventType: "intent_open",
+        intent: "cro",
+        metadata: { source: "cro_audit" },
+      });
     }
 
     croStepRef.current = "url";
     setCroStep("url");
-    await pushScriptedReply(CRO.intro);
+    await pushScriptedReply(CRO.intro, "cro");
   }
 
   async function runCroScan(domain: string) {
@@ -663,11 +792,18 @@ export function AiPromptInput() {
     };
     setMessages((prev) => [...prev, userMsg]);
     setOpen(true);
+    logChatEvent({
+      eventType: "user_message",
+      intent: "cro",
+      role: "user",
+      content: prompt,
+      metadata: { messageId: userMsg.id, croStep: step },
+    });
 
     if (step === "url") {
       const parsed = normalizeAuditUrl(prompt);
       if (!parsed) {
-        await pushScriptedReply(CRO.urlRetry);
+        await pushScriptedReply(CRO.urlRetry, "cro");
         return;
       }
 
@@ -681,35 +817,40 @@ export function AiPromptInput() {
 
       croStepRef.current = "name";
       setCroStep("name");
-      await pushScriptedReply(CRO.afterScan);
+      await pushScriptedReply(CRO.afterScan, "cro");
       return;
     }
 
     if (step === "name") {
       const name = prompt.trim();
       if (!name) {
-        await pushScriptedReply(CRO.namePrompt);
+        await pushScriptedReply(CRO.namePrompt, "cro");
         return;
       }
       croAnswersRef.current.name = name;
       croStepRef.current = "email";
       setCroStep("email");
-      await pushScriptedReply(CRO.emailPrompt);
+      await pushScriptedReply(CRO.emailPrompt, "cro");
       return;
     }
 
     if (step === "email") {
       if (!looksLikeEmail(prompt)) {
-        await pushScriptedReply(CRO.emailRetry);
+        await pushScriptedReply(CRO.emailRetry, "cro");
         return;
       }
       const email = prompt.trim();
       croAnswersRef.current.email = email;
       croStepRef.current = "done";
       setCroStep("done");
-      await pushScriptedReply(CRO.done(email));
+      await pushScriptedReply(CRO.done(email), "cro");
       if (!revealRef.current.cancelled) {
         setCroAuditActions(true);
+        logChatEvent({
+          eventType: "lead_complete",
+          intent: "cro",
+          metadata: { ...croAnswersRef.current, flow: "cro_audit" },
+        });
       }
       // Keep answers in ref; clear step so further asks go to Gemini
       croStepRef.current = null;
@@ -718,6 +859,12 @@ export function AiPromptInput() {
   }
 
   function onPricingAction(id: PricingActionId) {
+    logChatEvent({
+      eventType: "pricing_action",
+      intent: "pricing",
+      metadata: { actionId: id },
+    });
+
     if (id === "book") {
       void startCalBookingFlow("Book a call");
       return;
@@ -729,7 +876,7 @@ export function AiPromptInput() {
       setShowCal(false);
       setInputHint("Describe your project…");
       setOpen(true);
-      requestAnimationFrame(() => inputRef.current?.focus());
+      focusAskInput();
       return;
     }
 
@@ -738,6 +885,12 @@ export function AiPromptInput() {
   }
 
   function onCroAuditAction(id: CroAuditActionId) {
+    logChatEvent({
+      eventType: "cro_action",
+      intent: "cro",
+      metadata: { actionId: id },
+    });
+
     if (id === "book") {
       void startCalBookingFlow("Book a call");
       return;
@@ -758,31 +911,81 @@ export function AiPromptInput() {
     };
     setMessages((prev) => [...prev, userMsg]);
     setOpen(true);
+    logChatEvent({
+      eventType: "user_message",
+      intent: "contact",
+      role: "user",
+      content: prompt,
+      metadata: { messageId: userMsg.id, leadStep: step },
+    });
 
     if (step === "email") {
       if (!looksLikeEmail(prompt)) {
-        await pushScriptedReply(LEAD.emailRetry);
+        await pushScriptedReply(LEAD.emailRetry, "contact");
         return;
       }
       leadAnswersRef.current.email = prompt.trim();
       setLeadStep("goal");
-      await pushScriptedReply(LEAD.goal);
+      await pushScriptedReply(LEAD.goal, "contact");
       return;
     }
 
     if (step === "goal") {
       leadAnswersRef.current.goal = prompt.trim();
       setLeadStep("company");
-      await pushScriptedReply(LEAD.company);
+      await pushScriptedReply(LEAD.company, "contact");
       return;
     }
 
     if (step === "company") {
       leadAnswersRef.current.company = prompt.trim();
       setLeadStep("done");
-      await pushScriptedReply(LEAD.done);
+      await pushScriptedReply(LEAD.done, "contact");
+      logChatEvent({
+        eventType: "lead_complete",
+        intent: "contact",
+        metadata: { ...leadAnswersRef.current },
+      });
       setLeadStep(null);
       leadStepRef.current = null;
+    }
+  }
+
+  async function handleNewsletterReply(prompt: string) {
+    const step = newsletterStepRef.current;
+    if (!step || step === "done") return;
+
+    const userMsg: ChatMessage = {
+      id: uid(),
+      role: "user",
+      text: prompt,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setOpen(true);
+    logChatEvent({
+      eventType: "user_message",
+      intent: "newsletter",
+      role: "user",
+      content: prompt,
+      metadata: { messageId: userMsg.id, newsletterStep: step },
+    });
+
+    if (step === "email") {
+      if (!looksLikeEmail(prompt)) {
+        await pushScriptedReply(NEWSLETTER.emailRetry, "newsletter");
+        return;
+      }
+      const email = prompt.trim();
+      newsletterEmailRef.current = email;
+      setNewsletterStep("done");
+      await pushScriptedReply(NEWSLETTER.done, "newsletter");
+      logChatEvent({
+        eventType: "newsletter_complete",
+        intent: "newsletter",
+        metadata: { email },
+      });
+      setNewsletterStep(null);
+      newsletterStepRef.current = null;
     }
   }
 
@@ -790,9 +993,16 @@ export function AiPromptInput() {
     const onOpenLead = () => {
       void startLeadFlow();
     };
+    const onOpenNewsletter = () => {
+      void startNewsletterFlow();
+    };
     window.addEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
-    return () => window.removeEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable listener; startLeadFlow closes over latest refs
+    window.addEventListener(OPEN_NEWSLETTER_CHAT_EVENT, onOpenNewsletter);
+    return () => {
+      window.removeEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
+      window.removeEventListener(OPEN_NEWSLETTER_CHAT_EVENT, onOpenNewsletter);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable listener; flows close over latest refs
   }, []);
 
   async function pushExchange(prompt: string) {
@@ -806,6 +1016,13 @@ export function AiPromptInput() {
     setMessages((prev) => [...prev, userMsg]);
     setPending(true);
     revealRef.current.cancelled = false;
+    logChatEvent({
+      eventType: "user_message",
+      intent: "general",
+      role: "user",
+      content: prompt,
+      metadata: { messageId: userMsg.id },
+    });
 
     const history = [...messages, userMsg]
       .filter((m) => m.text.trim())
@@ -835,9 +1052,12 @@ export function AiPromptInput() {
         },
       ]);
 
-      await revealAssistantText(
+      const fullText =
         text?.trim() ||
-          "I couldn’t generate a reply. Try again in a moment.",
+        "I couldn’t generate a reply. Try again in a moment.";
+
+      await revealAssistantText(
+        fullText,
         (partial) => {
           setMessages((prev) =>
             prev.map((m) =>
@@ -853,17 +1073,36 @@ export function AiPromptInput() {
           m.id === assistantId ? { ...m, streaming: false } : m,
         ),
       );
+
+      if (!revealRef.current.cancelled) {
+        logChatEvent({
+          eventType: "assistant_message",
+          intent: "general",
+          role: "assistant",
+          content: fullText,
+          metadata: { messageId: assistantId, scripted: false },
+        });
+      }
     } catch (error) {
       console.error("[AiPromptInput] Gemini error", error);
       setPending(false);
+      const fallback =
+        "Something went wrong. Please try again in a moment — or email alex@uxlab.digital.";
       setMessages((prev) => [
         ...prev,
         {
           id: assistantId,
           role: "assistant",
-          text: "Something went wrong. Please try again in a moment — or email alex@uxlab.digital.",
+          text: fallback,
         },
       ]);
+      logChatEvent({
+        eventType: "assistant_message",
+        intent: "general",
+        role: "assistant",
+        content: fallback,
+        metadata: { messageId: assistantId, error: true },
+      });
     }
   }
 
@@ -891,6 +1130,13 @@ export function AiPromptInput() {
       return;
     }
 
+    const newsletter = newsletterStepRef.current;
+    if (newsletter && newsletter !== "done") {
+      setShowCal(false);
+      void handleNewsletterReply(prompt);
+      return;
+    }
+
     if (isCallIntent(prompt)) {
       void startCalBookingFlow(prompt);
       return;
@@ -915,6 +1161,11 @@ export function AiPromptInput() {
     setPricingActions(false);
     setCroAuditActions(false);
     setInputHint(null);
+    logChatEvent({
+      eventType: "chip_click",
+      intent: "chip",
+      metadata: { tip },
+    });
     if (tip === "Book a call") {
       void startCalBookingFlow(tip);
       return;
@@ -946,7 +1197,12 @@ export function AiPromptInput() {
     setScanCard(null);
     setCroStep(null);
     croStepRef.current = null;
+    resetNewsletterFlow();
     setOpen(false);
+    logChatEvent({
+      eventType: "chat_close",
+      metadata: {},
+    });
   }
 
   return (
@@ -1100,21 +1356,27 @@ export function AiPromptInput() {
             id={inputId}
             className="rj-ask__input"
             type={
-              leadStep === "email" || croStep === "email"
+              leadStep === "email" ||
+              croStep === "email" ||
+              newsletterStep === "email"
                 ? "email"
                 : croStep === "url"
                   ? "url"
                   : "text"
             }
             inputMode={
-              leadStep === "email" || croStep === "email"
+              leadStep === "email" ||
+              croStep === "email" ||
+              newsletterStep === "email"
                 ? "email"
                 : croStep === "url"
                   ? "url"
                   : "text"
             }
             autoComplete={
-              leadStep === "email" || croStep === "email"
+              leadStep === "email" ||
+              croStep === "email" ||
+              newsletterStep === "email"
                 ? "email"
                 : croStep === "name"
                   ? "name"

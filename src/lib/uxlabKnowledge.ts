@@ -33,7 +33,7 @@ Approach:
 
 Site orientation (this page):
 - Work / cases: #glance
-- Services: #solutions
+- Solutions: #solutions
 - Process: #process
 - Approach: #approach
 - Contact / footer: #contact

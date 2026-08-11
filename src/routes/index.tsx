@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { ApproachSection } from "@/components/home/ApproachSection";
@@ -7,11 +8,13 @@ import { HomeIntro } from "@/components/home/HomeIntro";
 import { HomeVideoSection } from "@/components/home/HomeVideoSection";
 import { BlogSection } from "@/components/home/BlogSection";
 import { FaqSection } from "@/components/home/FaqSection";
+import { LogoStrip } from "@/components/home/LogoStrip";
 import { OurProcessSection } from "@/components/home/OurProcessSection";
 import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { playHomeEntrance } from "@/lib/homeEntrance";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,14 +31,26 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    return playHomeEntrance(root);
+  }, []);
+
   return (
-    <div className="theme-light rj-page min-h-screen">
+    <div
+      ref={rootRef}
+      className="theme-light rj-page rj-page--enter min-h-screen"
+    >
       <ScrollThemeBand />
       <SiteHeader />
       <AiPromptInput />
 
       <main>
         <HeroReel />
+        <LogoStrip />
         <HomeIntro />
         <GlanceSection />
         <ChallengesSection />
