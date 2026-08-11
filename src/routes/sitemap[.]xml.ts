@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { ARTICLES, articlePath } from "@/lib/articles";
+import { CASES, casePath } from "@/lib/cases";
 import { SITE } from "@/lib/site";
 
 interface SitemapEntry {
@@ -43,6 +44,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             lastmod: article.dateModified,
             changefreq: "monthly" as const,
             priority: "0.8",
+          })),
+          ...CASES.map((caseStudy) => ({
+            path: casePath(caseStudy.slug),
+            lastmod: caseStudy.dateModified,
+            changefreq: "monthly" as const,
+            priority: "0.85",
           })),
         ];
 

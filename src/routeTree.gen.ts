@@ -14,6 +14,7 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourcesIndexRouteImport } from './routes/resources/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as WorkSlugRouteImport } from './routes/work/$slug'
 import { Route as ResourcesSlugRouteImport } from './routes/resources/$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 
@@ -42,6 +43,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const WorkSlugRoute = WorkSlugRouteImport.update({
+  id: '/work/$slug',
+  path: '/work/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourcesSlugRoute = ResourcesSlugRouteImport.update({
   id: '/resources/$slug',
   path: '/resources/$slug',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/login': typeof AdminLoginRoute
   '/resources/$slug': typeof ResourcesSlugRoute
+  '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/resources/': typeof ResourcesIndexRoute
 }
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/login': typeof AdminLoginRoute
   '/resources/$slug': typeof ResourcesSlugRoute
+  '/work/$slug': typeof WorkSlugRoute
   '/admin': typeof AdminIndexRoute
   '/resources': typeof ResourcesIndexRoute
 }
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/login': typeof AdminLoginRoute
   '/resources/$slug': typeof ResourcesSlugRoute
+  '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/resources/': typeof ResourcesIndexRoute
 }
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/login'
     | '/resources/$slug'
+    | '/work/$slug'
     | '/admin/'
     | '/resources/'
   fileRoutesByTo: FileRoutesByTo
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/login'
     | '/resources/$slug'
+    | '/work/$slug'
     | '/admin'
     | '/resources'
   id:
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin/login'
     | '/resources/$slug'
+    | '/work/$slug'
     | '/admin/'
     | '/resources/'
   fileRoutesById: FileRoutesById
@@ -114,6 +126,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ResourcesSlugRoute: typeof ResourcesSlugRoute
+  WorkSlugRoute: typeof WorkSlugRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
 }
 
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/work/$slug': {
+      id: '/work/$slug'
+      path: '/work/$slug'
+      fullPath: '/work/$slug'
+      preLoaderRoute: typeof WorkSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resources/$slug': {
       id: '/resources/$slug'
       path: '/resources/$slug'
@@ -190,6 +210,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ResourcesSlugRoute: ResourcesSlugRoute,
+  WorkSlugRoute: WorkSlugRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
 }
 export const routeTree = rootRouteImport

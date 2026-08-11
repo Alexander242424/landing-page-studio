@@ -34,6 +34,37 @@ function ArrowIcon() {
   );
 }
 
+function ArrowCueInner({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <span className="rj-arrow__icon rj-arrow__icon--b" aria-hidden="true">
+        <ArrowIcon />
+      </span>
+      <span className="rj-arrow__content">{children}</span>
+      <span className="rj-arrow__icon rj-arrow__icon--a" aria-hidden="true">
+        <ArrowIcon />
+      </span>
+    </>
+  );
+}
+
+/**
+ * Visual-only arrow cue (for when a parent element is already the link).
+ */
+export function ArrowCue({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <span className={cn("rj-arrow", className)}>
+      <ArrowCueInner>{children}</ArrowCueInner>
+    </span>
+  );
+}
+
 /**
  * Rejouice b-arrow CTA: label slides right on hover while the ↗ icon
  * exits up-right and a second ↗ enters from bottom-left.
@@ -53,13 +84,7 @@ export function ArrowLink({
       )}
       {...props}
     >
-      <span className="rj-arrow__icon rj-arrow__icon--b" aria-hidden="true">
-        <ArrowIcon />
-      </span>
-      <span className="rj-arrow__content">{children}</span>
-      <span className="rj-arrow__icon rj-arrow__icon--a" aria-hidden="true">
-        <ArrowIcon />
-      </span>
+      <ArrowCueInner>{children}</ArrowCueInner>
     </a>
   );
 }

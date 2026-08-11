@@ -1,17 +1,32 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  type MouseEvent,
+  type MutableRefObject,
+  type ReactNode,
+} from "react";
+import { Link } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LazyVideo } from "@/components/media/LazyVideo";
-import { ArrowLink } from "@/components/ui/ArrowLink";
+import { ArrowCue } from "@/components/ui/ArrowLink";
+import {
+  getCase,
+  type CaseHeadline,
+} from "@/lib/cases";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const DRAG_CLICK_THRESHOLD = 8;
 
 type WidgetSize = "small" | "medium" | "full";
 type WidgetTheme = "dark" | "light";
 
 type GlanceWidget = {
   id: string;
+  /** Case study slug for `/work/$slug` (rivian-still → rivian). */
+  caseSlug: string;
   size: WidgetSize;
   theme: WidgetTheme;
   title: ReactNode;
@@ -24,138 +39,118 @@ type GlanceWidget = {
   logoInk?: "light" | "dark";
   backgroundImage?: string;
   backgroundVideo?: string;
-  link?: { href: string; label: string };
+  linkLabel?: string;
 };
+
+function glanceHeadline(headline: CaseHeadline): ReactNode {
+  return (
+    <p>
+      {headline.line}
+      <br />
+      <em>{headline.emphasis}</em>
+    </p>
+  );
+}
+
+function caseHeadlineTitle(slug: string): ReactNode {
+  const study = getCase(slug);
+  if (!study) return null;
+  return glanceHeadline(study.headline);
+}
 
 /** Heights alternate — no two neighbors share the same size (incl. loop seam). */
 const CASES: GlanceWidget[] = [
   {
     id: "rivian",
+    caseSlug: "rivian",
     size: "medium",
     theme: "dark",
-    title: (
-      <p>
-        +71,000 pre-orders
-        <br />
-        <em>after brand reveal — ~$5.68B.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("rivian"),
     logo: "/glance/rivian.svg",
     logoInk: "light",
-    backgroundVideo: "/glance/rivian.mp4",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/rivian-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "oura",
+    caseSlug: "oura",
     size: "full",
     theme: "dark",
-    title: (
-      <p>
-        Category-defining wearables
-        <br />
-        <em>brand & product experience.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("oura"),
     logo: "/glance/oura.svg",
     logoInk: "light",
-    backgroundImage: "/glance/oura-case.jpg",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/oura-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "tensr",
+    caseSlug: "tensr",
     size: "small",
     theme: "dark",
-    title: (
-      <p>
-        +1799% activations
-        <br />
-        <em>performance-led redesign.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("tensr"),
     logo: "/glance/tensr.svg",
     logoInk: "light",
-    backgroundVideo: "/glance/work-01.mp4",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/tensr-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "moxion",
+    caseSlug: "moxion",
     size: "full",
     theme: "dark",
-    title: (
-      <p>
-        +395% conversion rate
-        <br />
-        <em>in 3 weeks.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("moxion"),
     logo: "/glance/moxion.svg",
     logoInk: "light",
-    backgroundImage: "/glance/moxion.jpg",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/moxion-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "hyperframe",
+    caseSlug: "hyperframe",
     size: "small",
     theme: "dark",
-    title: (
-      <p>
-        +150% LTV:CAC
-        <br />
-        <em>across launch funnels.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("hyperframe"),
     logo: "/glance/hyperframe.svg",
     logoInk: "light",
-    backgroundVideo: "/glance/work-02.mp4",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/hyperframe-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "rivian-still",
+    caseSlug: "rivian",
     size: "medium",
     theme: "dark",
-    title: (
-      <p>
-        Market-defining launch
-        <br />
-        <em>strategy, design, performance.</em>
-      </p>
-    ),
+    // Alternate card — intentionally not the primary case headline.
+    title: glanceHeadline({
+      line: "Market-defining launch",
+      emphasis: "strategy, design, performance.",
+    }),
     logo: "/glance/rivian.svg",
     logoInk: "light",
-    backgroundImage: "/glance/rivian.jpg",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/rivian-still-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "noovo",
+    caseSlug: "noovo",
     size: "full",
     theme: "dark",
-    title: (
-      <p>
-        End-to-end brand system
-        <br />
-        <em>from launch to scale.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("noovo"),
     logo: "/glance/noovo.svg",
     logoInk: "dark",
-    backgroundImage: "/glance/pergola.jpg",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/noovo-metalab.jpg",
+    linkLabel: "Case Study",
   },
   {
     id: "rappi",
+    caseSlug: "rappi",
     size: "small",
     theme: "dark",
-    title: (
-      <p>
-        $5M+ in new business
-        <br />
-        <em>in 90 days.</em>
-      </p>
-    ),
+    title: caseHeadlineTitle("rappi"),
     logo: "/glance/rappi.svg",
     logoInk: "light",
-    backgroundVideo: "/glance/work-03.mp4",
-    link: { href: "#solutions", label: "Case Study" },
+    backgroundImage: "/glance/rappi-metalab.jpg",
+    linkLabel: "Case Study",
   },
 ];
 
@@ -177,14 +172,35 @@ function LogoMark({ src }: { src: string }) {
   );
 }
 
-function WidgetCard({ widget }: { widget: GlanceWidget }) {
+function WidgetCard({
+  widget,
+  suppressNavRef,
+}: {
+  widget: GlanceWidget;
+  suppressNavRef: MutableRefObject<boolean>;
+}) {
+  const label = widget.linkLabel ?? "Case Study";
+
+  const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (suppressNavRef.current) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   return (
-    <div
+    <Link
+      to="/work/$slug"
+      params={{ slug: widget.caseSlug }}
+      viewTransition
       className={cn(
         "rj-glance__widget",
         `rj-glance__widget--${widget.size}`,
         `rj-glance__widget--${widget.theme}`,
       )}
+      aria-label={`${widget.caseSlug} case study`}
+      onClick={onClick}
+      draggable={false}
     >
       {widget.backgroundImage ? (
         <div className="rj-glance__bg">
@@ -218,18 +234,14 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
         </div>
         <div className="rj-glance__card-bottom">
           <div className="rj-glance__card-link">
-            {widget.link ? (
-              <ArrowLink href={widget.link.href} className="rj-link-active">
-                {widget.link.label}
-              </ArrowLink>
-            ) : null}
+            <ArrowCue className="rj-link-active">{label}</ArrowCue>
           </div>
           <div className="rj-glance__card-logos">
             <LogoMark src={widget.logo} />
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -245,6 +257,7 @@ export function GlanceSection() {
     scrollStart: 0,
     moved: 0,
   });
+  const suppressNavRef = useRef(false);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -315,6 +328,7 @@ export function GlanceSection() {
     track.addEventListener("mouseleave", onLeave);
 
     const onPointerDown = (e: PointerEvent) => {
+      suppressNavRef.current = false;
       dragRef.current = {
         active: true,
         startX: e.clientX,
@@ -326,6 +340,9 @@ export function GlanceSection() {
       if (!dragRef.current.active) return;
       const dx = e.clientX - dragRef.current.startX;
       dragRef.current.moved = dx;
+      if (Math.abs(dx) > DRAG_CLICK_THRESHOLD) {
+        suppressNavRef.current = true;
+      }
       dragOffset = dragRef.current.scrollStart + dx;
     };
     const onPointerUp = () => {
@@ -371,7 +388,7 @@ export function GlanceSection() {
         <div ref={trackRef} className="rj-glance__track">
           {sequence.map((widget, i) => (
             <div key={`${widget.id}-${i}`} className="rj-glance__enter">
-              <WidgetCard widget={widget} />
+              <WidgetCard widget={widget} suppressNavRef={suppressNavRef} />
             </div>
           ))}
         </div>
