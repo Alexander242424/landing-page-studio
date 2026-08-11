@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { adminUsersPath } from "@/lib/admin/paths";
-import { verifyPassword } from "@/lib/admin/password";
+import { adminUsersPath } from "@/lib/admin/paths.server";
+import { verifyPassword } from "@/lib/admin/password.server";
 
 export type AdminUserRecord = {
   email: string;
@@ -11,8 +11,8 @@ export type AdminUserRecord = {
 };
 
 /**
- * Seed super-admin (hashed). Password is the one provided for bootstrap;
- * only the hash ships in this server module — not written to a public file.
+ * Seed super-admin (hashed). Password is the bootstrap credential;
+ * only the hash lives here / in data/admin-users.json.
  */
 const SEED_ADMIN: AdminUserRecord = {
   email: "alex@uxdrive.io",
@@ -54,7 +54,6 @@ export async function authenticateAdmin(
 ): Promise<AdminUserRecord | null> {
   const user = await findAdminByEmail(email);
   if (!user) {
-    // Cheap equalize timing a bit
     verifyPassword(password, SEED_ADMIN.passwordHash);
     return null;
   }

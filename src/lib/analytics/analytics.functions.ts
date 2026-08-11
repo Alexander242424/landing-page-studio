@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { mkdir, appendFile, readFile } from "node:fs/promises";
-import { requireAdmin } from "@/lib/admin/auth.functions";
-import { analyticsDir, analyticsEventsPath } from "@/lib/admin/paths";
+import { requireAdmin } from "@/lib/admin/session.server";
+import {
+  analyticsDir,
+  analyticsEventsPath,
+} from "@/lib/admin/paths.server";
 import type { AnalyticsEventRow } from "@/lib/analytics/types";
 
 const TrackInput = z.object({
@@ -23,6 +25,7 @@ function createId() {
 async function appendAnalytics(row: AnalyticsEventRow): Promise<boolean> {
   if (typeof process === "undefined" || !process.versions?.node) return false;
   try {
+    const { mkdir, appendFile } = await import("node:fs/promises");
     await mkdir(analyticsDir(), { recursive: true });
     await appendFile(
       analyticsEventsPath(),
@@ -39,6 +42,7 @@ async function appendAnalytics(row: AnalyticsEventRow): Promise<boolean> {
 async function readAnalyticsLines(limit = 5000): Promise<AnalyticsEventRow[]> {
   if (typeof process === "undefined" || !process.versions?.node) return [];
   try {
+    const { readFile } = await import("node:fs/promises");
     const raw = await readFile(analyticsEventsPath(), "utf8");
     const lines = raw.split("\n").filter(Boolean);
     const slice = lines.length > limit ? lines.slice(-limit) : lines;
@@ -115,7 +119,6 @@ export const getAnalyticsDashboard = createServerFn({ method: "GET" }).handler(
         durationSec: r.durationSec ?? null,
       }));
 
-    // Rough engagement: average leave/heartbeat duration today
     const durations = today
       .filter(
         (r) =>
@@ -125,9 +128,7 @@ export const getAnalyticsDashboard = createServerFn({ method: "GET" }).handler(
       .map((r) => r.durationSec as number);
     const avgDurationSec =
       durations.length > 0
-        ? Math.round(
-            durations.reduce((a, b) => a + b, 0) / durations.length,
-          )
+        ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
         : 0;
 
     return {

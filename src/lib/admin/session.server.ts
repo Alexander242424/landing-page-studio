@@ -9,8 +9,7 @@ export type AdminSessionData = {
   role: "superadmin";
 };
 
-const DEV_SECRET =
-  "uxlab-admin-dev-session-secret-change-me!!";
+const DEV_SECRET = "uxlab-admin-dev-session-secret-change-me!!";
 
 function sessionPassword() {
   const fromEnv = process.env["ADMIN_SESSION_SECRET"]?.trim();
@@ -51,4 +50,13 @@ export async function writeAdminSession(data: AdminSessionData) {
 
 export async function destroyAdminSession() {
   await clearSession(adminSessionConfig());
+}
+
+/** Throws if not authenticated — use from other admin server fns. */
+export async function requireAdmin() {
+  const session = await readAdminSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  return session;
 }

@@ -12,6 +12,7 @@ import {
 } from "@/lib/askChat";
 import { generateWithGeminiFlash } from "@/lib/ai.functions";
 import { logChatEvent } from "@/lib/chatPersistence";
+import { trackEvent } from "@/lib/analytics/tracker";
 import { mountCalInline } from "@/lib/cal";
 import {
   CRO,
@@ -584,6 +585,7 @@ export function AiPromptInput() {
       intent: "contact",
       metadata: { source: "open_lead_chat" },
     });
+    trackEvent("chat_open", { intent: "contact" });
 
     await pushScriptedReply(LEAD.intro, "contact");
   }
@@ -614,6 +616,7 @@ export function AiPromptInput() {
       intent: "newsletter",
       metadata: { source: "open_newsletter_chat" },
     });
+    trackEvent("chat_open", { intent: "newsletter" });
 
     await pushScriptedReply(NEWSLETTER.intro, "newsletter");
   }
@@ -656,6 +659,7 @@ export function AiPromptInput() {
         intent: "cal",
         metadata: { source: "cal_booking" },
       });
+      trackEvent("chat_open", { intent: "cal" });
     }
 
     await pushScriptedReply(CAL_INTRO, "cal");
@@ -727,6 +731,7 @@ export function AiPromptInput() {
         intent: "cro",
         metadata: { source: "cro_audit" },
       });
+      trackEvent("chat_open", { intent: "cro" });
     }
 
     croStepRef.current = "url";
@@ -851,6 +856,7 @@ export function AiPromptInput() {
           intent: "cro",
           metadata: { ...croAnswersRef.current, flow: "cro_audit" },
         });
+        trackEvent("lead_submit", { intent: "cro", flow: "cro_audit" });
       }
       // Keep answers in ref; clear step so further asks go to Gemini
       croStepRef.current = null;
@@ -946,6 +952,7 @@ export function AiPromptInput() {
         intent: "contact",
         metadata: { ...leadAnswersRef.current },
       });
+      trackEvent("lead_submit", { intent: "contact" });
       setLeadStep(null);
       leadStepRef.current = null;
     }
@@ -984,6 +991,7 @@ export function AiPromptInput() {
         intent: "newsletter",
         metadata: { email },
       });
+      trackEvent("lead_submit", { intent: "newsletter" });
       setNewsletterStep(null);
       newsletterStepRef.current = null;
     }

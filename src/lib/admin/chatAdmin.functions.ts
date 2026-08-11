@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { readFile } from "node:fs/promises";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/admin/auth.functions";
-import { chatEventsPath } from "@/lib/admin/paths";
+import { requireAdmin } from "@/lib/admin/session.server";
+import { chatEventsPath } from "@/lib/admin/paths.server";
 import type { ChatEventRow } from "@/lib/chatPersistence.functions";
 
 async function readChatEvents(limit = 8000): Promise<ChatEventRow[]> {
   if (typeof process === "undefined" || !process.versions?.node) return [];
   try {
+    const { readFile } = await import("node:fs/promises");
     const raw = await readFile(chatEventsPath(), "utf8");
     const lines = raw.split("\n").filter(Boolean);
     const slice = lines.length > limit ? lines.slice(-limit) : lines;
@@ -58,8 +58,7 @@ function orderTypeFromEvent(row: ChatEventRow): OrderLead["type"] {
 function summarizeLead(row: ChatEventRow): string {
   const meta = row.metadata ?? {};
   const email =
-    (typeof meta["email"] === "string" && meta["email"]) ||
-    null;
+    (typeof meta["email"] === "string" && meta["email"]) || null;
   const company =
     typeof meta["company"] === "string" ? meta["company"] : null;
   const goal = typeof meta["goal"] === "string" ? meta["goal"] : null;
@@ -103,7 +102,6 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
       });
     }
 
-    // Also surface cal booking opens as soft orders
     for (const row of events) {
       if (row.event_type !== "intent_open" || row.intent !== "cal") continue;
       leads.push({

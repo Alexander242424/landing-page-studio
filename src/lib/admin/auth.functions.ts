@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { authenticateAdmin } from "@/lib/admin/users";
+import { authenticateAdmin } from "@/lib/admin/users.server";
 import {
   destroyAdminSession,
   readAdminSession,
   writeAdminSession,
-} from "@/lib/admin/session";
+} from "@/lib/admin/session.server";
 
 const LoginInput = z.object({
   email: z.string().email().max(320),
@@ -37,12 +37,3 @@ export const adminLogout = createServerFn({ method: "POST" }).handler(
     return { ok: true as const };
   },
 );
-
-/** Throws if not authenticated — use from other admin server fns. */
-export async function requireAdmin() {
-  const session = await readAdminSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-  return session;
-}
