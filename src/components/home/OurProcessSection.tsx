@@ -8,10 +8,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const ITEMS = [
   {
-    title: "Discover",
-    body: "We map the product, funnel, and revenue constraints before we touch UI—so every design decision is aimed at a real growth lever.",
-  },
-  {
     title: "Diagnose",
     body: "Behavior data, session review, and competitive context surface the highest-friction moments. We prioritize what moves conversion, retention, or monetization first.",
   },

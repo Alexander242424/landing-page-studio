@@ -74,14 +74,12 @@ export function ScrollThemeBand() {
 
       teardown();
 
+      // Only owns the zone ABOVE the solutions scrub. While #solutions is in
+      // (or above) the viewport, darkScrub alone drives band + progress —
+      // otherwise syncHero forced "light" and left a charcoal mix on screen.
       syncHero = () => {
         const darkTop = solutions.getBoundingClientRect().top;
-        // While scrubbing / in dark zone, don't override with hero band.
-        if (darkTop <= window.innerHeight) {
-          if (darkTop <= 0) setBand("dark");
-          else setBand("light");
-          return;
-        }
+        if (darkTop <= window.innerHeight) return;
         setDarkProgress(0);
         setBand(resolveHeroLight(hero));
       };
@@ -96,21 +94,24 @@ export function ScrollThemeBand() {
         onLeaveBack: syncHero,
       });
 
-      // Scrub page/body from white → black as #solutions rises through the
-      // viewport — removes the hard section seam at invent-growth.
+      // Finish at full black before the section top hits the viewport top,
+      // so the title band never sits on a stuck charcoal mix.
       darkScrub = ScrollTrigger.create({
         trigger: solutions,
         start: "top bottom",
-        end: "top top",
-        scrub: 0.65,
+        end: "top 18%",
+        scrub: true,
         onUpdate: (self) => {
           setDarkProgress(self.progress);
-          if (self.progress >= 0.55) setBand("dark");
+          if (self.progress >= 0.45) setBand("dark");
           else setBand("light");
         },
         onLeave: () => {
           setDarkProgress(1);
           setBand("dark");
+        },
+        onEnterBack: () => {
+          // Re-enter scrub from below — onUpdate will resume.
         },
         onLeaveBack: () => {
           setDarkProgress(0);
@@ -120,6 +121,11 @@ export function ScrollThemeBand() {
 
       window.addEventListener("scroll", syncHero, { passive: true });
       syncHero();
+      // Snap current state if we mounted mid-page
+      if (darkScrub.progress > 0) {
+        setDarkProgress(darkScrub.progress);
+        if (darkScrub.progress >= 0.45) setBand("dark");
+      }
       ScrollTrigger.refresh();
     };
 

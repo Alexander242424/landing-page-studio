@@ -18,35 +18,34 @@ const CARD_TONES = [
   "tone-teal",
 ] as const;
 
+/** Deterministic fling spins — Math.random() re-rolls on every refresh and feels like a jump. */
+const FLING_ROTATIONS = [-14, 11, -8, 16] as const;
+
 const DESKTOP_MQ = "(min-width: 768px)";
-const COMPACT_DESKTOP_MQ = "(min-width: 768px) and (max-width: 1919px)";
 const MOTION_MQ = "(prefers-reduced-motion: reduce)";
 
 /**
- * Hilden & Kaira–style stacked solutions cards:
- * tall pin-height scrub runway, one shared scrub timeline so cards fling
- * 01→05 in order while pinned. Headline lives inside the pin so it stays
- * with the stack for the full runway, then both scroll away. On compact
- * desktops (<1920) the stage is pre-shifted so the title reads as already
- * scrolled off the top and cards sit mid-viewport. Mobile / reduced-motion:
- * static vertical stack.
+ * Hilden & Kaira–style stacked solutions cards.
+ *
+ * Desktop: headline stays in normal flow and scrolls away; the pin frame is a
+ * full viewport that sticks at the top while cards fling on scrub. Same pin
+ * target on every width ≥768 — pinning the short list at "center center" was
+ * fighting Lenis and jerking on engage/release.
+ *
+ * Mobile / reduced-motion: static vertical stack.
  */
 export function SolutionsStackSection() {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const pinHeightRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     const headline = headlineRef.current;
     const pinHeight = pinHeightRef.current;
     const pin = pinRef.current;
-    const stage = stageRef.current;
-    const list = listRef.current;
-    if (!root || !headline || !pinHeight || !pin || !stage || !list) return;
+    if (!root || !headline || !pinHeight || !pin) return;
 
     const cleanups: Array<() => void> = [];
     cleanups.push(
@@ -56,48 +55,12 @@ export function SolutionsStackSection() {
     );
 
     const desktopMq = window.matchMedia(DESKTOP_MQ);
-    const compactMq = window.matchMedia(COMPACT_DESKTOP_MQ);
     const motionMq = window.matchMedia(MOTION_MQ);
     let stackCtx: gsap.Context | null = null;
-
-    const clearStageShift = () => {
-      gsap.set(stage, { clearProps: "y,transform" });
-      root.classList.remove("rj-solutions-stack--scrolled-title");
-    };
-
-    /**
-     * Compact desktop: keep title+cards in normal flow, then shift the
-     * whole stage up so the list centers in the pin and the headline is
-     * clipped at the top — same silhouette as if the user had already
-     * scrolled past the title.
-     */
-    const applyScrolledTitleLayout = () => {
-      if (!compactMq.matches || motionMq.matches || !desktopMq.matches) {
-        clearStageShift();
-        return;
-      }
-
-      root.classList.add("rj-solutions-stack--scrolled-title");
-      gsap.set(stage, { y: 0 });
-
-      const pinH = pin.clientHeight;
-      const stageStyles = getComputedStyle(stage);
-      const gap = Number.parseFloat(stageStyles.rowGap || stageStyles.gap) || 0;
-      const headingEl = stage.querySelector<HTMLElement>(
-        ".rj-solutions-stack__heading",
-      );
-      const headingH = headingEl?.offsetHeight ?? 0;
-      const listH = list.offsetHeight;
-      const listCenterInStage = headingH + gap + listH / 2;
-      const y = pinH / 2 - listCenterInStage;
-
-      gsap.set(stage, { y });
-    };
 
     const teardownStack = () => {
       stackCtx?.revert();
       stackCtx = null;
-      clearStageShift();
     };
 
     const setupStack = () => {
@@ -120,80 +83,76 @@ export function SolutionsStackSection() {
         const gap = 72;
         const count = cards.length;
         const flingCount = count - 1;
+        // Settle after pin engages so card 01 doesn't fling on the same
+        // frame as position:fixed — that read as a jump; later cards were fine.
+        const introHold = 0.75;
+        const outroHold = 0.4;
 
-        // pin-height owns the scrub runway — pinSpacing would double it.
-        ScrollTrigger.create({
-          trigger: pinHeight,
-          start: "top top",
-          end: "bottom bottom",
-          pin,
-          pinSpacing: false,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onRefresh: applyScrolledTitleLayout,
-        });
-
-        applyScrolledTitleLayout();
-
-        // Front card (#01) sits on top; deeper cards step back in y/z.
         cards.forEach((card, index) => {
           gsap.set(card, {
             y: gap * index,
             z: -gap * index,
+            yPercent: 0,
+            scale: 1,
+            rotation: 0,
             zIndex: count - index,
             transformOrigin: "50% 50%",
             force3D: true,
           });
         });
 
-        // One scrub timeline: each step flings the current front card and
-        // steps the rest of the stack forward. Per-card `top+=`/`bottom+=`
-        // offsets previously ran later cards *earlier*, so 02–04 flung under
-        // 01 and the section looked stuck on 01 then jumped to 05.
+        // One ScrollTrigger owns pin + scrub so they can't drift apart.
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: pinHeight,
             start: "top top",
             end: "bottom bottom",
-            scrub: 0.25,
+            pin,
+            pinSpacing: false,
+            anticipatePin: 0,
+            scrub: true,
             invalidateOnRefresh: true,
           },
         });
 
+        tl.to({}, { duration: introHold });
+
         for (let i = 0; i < flingCount; i += 1) {
           const card = cards[i];
-          const rotation = (Math.random() - 0.5) * 42;
-          const at = i;
+          const rotation = FLING_ROTATIONS[i % FLING_ROTATIONS.length] ?? 12;
+          const at = introHold + i;
 
+          // Absolute stack targets — relative -= jumps if ST refreshes mid-scrub.
           for (let j = i + 1; j < count; j += 1) {
+            const stackIndex = j - i - 1;
             tl.to(
               cards[j],
               {
-                y: `-=${gap}`,
-                z: `+=${gap}`,
-                ease: "power2.inOut",
+                y: gap * stackIndex,
+                z: -gap * stackIndex,
+                ease: "none",
                 duration: 1,
               },
               at,
             );
           }
 
+          // Single y channel (no yPercent mix) — y + yPercent on card 0
+          // from rest caused a one-frame pop at fling start.
           tl.to(
             card,
             {
-              yPercent: -100,
-              y: "-105vh",
+              y: () => -window.innerHeight * 1.2,
               scale: 1.18,
               rotation,
-              ease: "power4.in",
+              ease: "none",
               duration: 1,
             },
             at,
           );
         }
 
-        // Brief hold on the keeper (#05) before pin release / headline exit.
-        tl.to({}, { duration: 0.35 });
+        tl.to({}, { duration: outroHold });
       }, root);
     };
 
@@ -205,11 +164,9 @@ export function SolutionsStackSection() {
     };
 
     desktopMq.addEventListener("change", onChange);
-    compactMq.addEventListener("change", onChange);
     motionMq.addEventListener("change", onChange);
     cleanups.push(() => {
       desktopMq.removeEventListener("change", onChange);
-      compactMq.removeEventListener("change", onChange);
       motionMq.removeEventListener("change", onChange);
       teardownStack();
     });
@@ -220,11 +177,7 @@ export function SolutionsStackSection() {
       window.removeEventListener("orientationchange", onOrientation),
     );
 
-    // Refresh after layout + fonts so pin-height measurements stick.
-    const refresh = () => {
-      applyScrolledTitleLayout();
-      ScrollTrigger.refresh();
-    };
+    const refresh = () => ScrollTrigger.refresh();
     requestAnimationFrame(() => requestAnimationFrame(refresh));
     if (document.fonts?.ready) {
       void document.fonts.ready.then(refresh);
@@ -242,86 +195,80 @@ export function SolutionsStackSection() {
       className="rj-solutions-stack"
       aria-label="How we invent your growth"
     >
+      <div className="rj-solutions-stack__heading">
+        <h2
+          ref={headlineRef}
+          className="rj-solutions-stack__headline rj-awards-title"
+        >
+          How we invent
+          <br />
+          your growth
+        </h2>
+      </div>
+
       <div ref={pinHeightRef} className="rj-solutions-stack__pin-height">
         <div ref={pinRef} className="rj-solutions-stack__pin">
-          <div ref={stageRef} className="rj-solutions-stack__stage">
-            <div className="rj-solutions-stack__heading">
-              <h2
-                ref={headlineRef}
-                className="rj-solutions-stack__headline rj-awards-title"
-              >
-                How we invent
-                <br />
-                your growth
-              </h2>
-            </div>
+          <div className="rj-solutions-stack__list" role="list">
+            {SOLUTIONS.map((item, index) => {
+              const tone = CARD_TONES[index % CARD_TONES.length];
+              const num = String(index + 1).padStart(2, "0");
 
-            <div
-              ref={listRef}
-              className="rj-solutions-stack__list"
-              role="list"
-            >
-              {SOLUTIONS.map((item, index) => {
-                const tone = CARD_TONES[index % CARD_TONES.length];
-                const num = String(index + 1).padStart(2, "0");
-
-                return (
-                  <article
-                    key={item.title}
-                    role="listitem"
-                    className={cn(
-                      "rj-solutions-stack__card",
-                      `rj-solutions-stack__card--${tone}`,
-                    )}
-                  >
-                    <div className="rj-solutions-stack__card-inner">
-                      <div className="rj-solutions-stack__card-top">
-                        <div className="rj-solutions-stack__card-copy">
-                          <h3 className="rj-solutions-stack__card-title">
-                            {item.title}
-                          </h3>
-                        </div>
-                        <div
-                          className="rj-solutions-stack__card-number"
-                          aria-hidden="true"
-                        >
-                          <span>{num[0]}</span>
-                          <span>{num[1]}</span>
-                        </div>
+              return (
+                <article
+                  key={item.title}
+                  role="listitem"
+                  className={cn(
+                    "rj-solutions-stack__card",
+                    `rj-solutions-stack__card--${tone}`,
+                  )}
+                >
+                  <div className="rj-solutions-stack__card-inner">
+                    <div className="rj-solutions-stack__card-top">
+                      <div className="rj-solutions-stack__card-copy">
+                        <h3 className="rj-solutions-stack__card-title">
+                          {item.title}
+                        </h3>
                       </div>
-
-                      <div className="rj-solutions-stack__card-bottom">
-                        <div className="rj-solutions-stack__card-body">
-                          <p>{item.body}</p>
-                          <ArrowLink
-                            href="#contact"
-                            className="rj-solutions-stack__cta"
-                            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              openContactChat();
-                            }}
-                          >
-                            Let&apos;s talk
-                          </ArrowLink>
-                        </div>
-                        <div className="rj-solutions-stack__card-media">
-                          <LazyVideo
-                            src={item.video}
-                            className="rj-solutions-stack__video"
-                            loop
-                            muted
-                            playsInline
-                            rootMargin="600px 0px"
-                            preload="metadata"
-                          />
-                        </div>
+                      <div
+                        className="rj-solutions-stack__card-number"
+                        aria-hidden="true"
+                      >
+                        <span>{num[0]}</span>
+                        <span>{num[1]}</span>
                       </div>
                     </div>
-                  </article>
-                );
-              })}
-            </div>
+
+                    <div className="rj-solutions-stack__card-bottom">
+                      <div className="rj-solutions-stack__card-body">
+                        <p>{item.body}</p>
+                        <ArrowLink
+                          href="#contact"
+                          className="rj-solutions-stack__cta"
+                          onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            openContactChat();
+                          }}
+                        >
+                          Let&apos;s talk
+                        </ArrowLink>
+                      </div>
+                      <div className="rj-solutions-stack__card-media">
+                        <LazyVideo
+                          src={item.video}
+                          className="rj-solutions-stack__video"
+                          loop
+                          muted
+                          playsInline
+                          rootMargin="600px 0px"
+                          preload="metadata"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -758,20 +758,21 @@ ul {
   font-style: normal;
   letter-spacing: -0.014rem;
   line-height: 1.14;
-  /* Bottom copy band: padding-bottom + description + CTAs */
-  --rj-hero-bottom-band: calc(4.8rem + 1.55rem * 1.25 * 4 + 2rem + 4.4rem);
+  /* Reserve space for description + CTAs (px — independent of mobile vw-rem) */
+  --rj-hero-bottom-band: clamp(148px, 30vh, 210px);
 }
 
 .rj-hero__headline-stage {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   padding-inline: 1rem;
   /* Mobile: optical center between header and bottom description */
-  padding-top: var(--rj-header-height);
+  padding-top: calc(var(--rj-header-height) + 0.8rem);
   padding-bottom: var(--rj-hero-bottom-band);
   box-sizing: border-box;
   pointer-events: none;
@@ -793,16 +794,18 @@ ul {
   font-weight: 300;
   font-style: normal;
   letter-spacing: -0.0456em;
-  line-height: 0.82;
+  line-height: 0.88;
 }
 
 .rj-hero__headline {
   min-width: 0;
-  font-size: 12.8vw;
+  /* Mobile root rem is 2.667vw — rem floors explode near 767px. Size with vw/px. */
+  font-size: clamp(36px, 9.2vw, 64px);
   color: var(--rj-white);
   overflow-wrap: normal;
-  word-break: keep-all;
+  word-break: normal;
   hyphens: none;
+  max-width: 100%;
 }
 
 /* Explicit line boxes so SplitText measures the intended breaks */
@@ -811,16 +814,49 @@ ul {
 }
 
 .rj-challenges__headline {
-  font-size: 14.5vw;
+  /* Same rem-trap as hero — keep mobile on vw */
+  font-size: clamp(40px, 11vw, 72px);
   color: var(--rj-fg);
 }
 
 .rj-solutions-stack__headline {
-  font-size: 14.5vw;
+  font-size: clamp(40px, 11vw, 72px);
   color: var(--rj-white);
 }
 
+/* 10px root — rem clamps are safe again */
+@media (min-width: 768px) {
+  .rj-hero__headline {
+    font-size: clamp(4.8rem, 1.2rem + 5vw, 9.6rem);
+    line-height: 0.84;
+  }
+
+  .rj-challenges__headline,
+  .rj-solutions-stack__headline {
+    font-size: clamp(5.2rem, 2rem + 6.5vw, 14rem);
+  }
+
+  .rj-hero {
+    --rj-hero-bottom-band: calc(4.8rem + 1.8rem * 1.3 * 3 + 2rem + 4.4rem);
+  }
+
+  .rj-hero__bottom {
+    padding-bottom: 4.8rem;
+  }
+
+  .rj-hero__description {
+    max-width: min(55.1rem, 78%);
+    font-size: clamp(1.55rem, 1.1rem + 0.45vw, 2rem);
+  }
+}
+
+/* Lock the two authored lines only once width can hold them */
 @media (min-width: 1024px) {
+  .rj-hero__line,
+  .rj-hero__headline .rj-text-reveal__line {
+    white-space: nowrap;
+  }
+
   .rj-hero__headline-stage {
     padding-inline: 4rem;
     /* Keep padding-top/bottom from base: flex-center the headline in the
@@ -834,19 +870,27 @@ ul {
     line-height: 0.8;
   }
 
+  /* +15% vs mid fluid scale */
+  .rj-hero__headline {
+    font-size: clamp(5.5rem, 1.38rem + 5.98vw, 12.88rem);
+  }
+
   .rj-challenges__headline,
   .rj-solutions-stack__headline {
-    font-size: min(8.4vw, 158.4px);
+    font-size: clamp(5.6rem, 1.6rem + 7vw, 15.84rem);
   }
+}
 
+/* Short viewports: keep headline from colliding with header / bottom copy */
+@media (max-height: 720px) {
   .rj-hero__headline {
-    /* Cap so “performance agency” stays one line across desktop widths */
-    font-size: min(calc(6.55vw + 1.2rem), 12.8rem);
+    font-size: min(9.2vw, 7.2vh, 56px);
   }
+}
 
-  .rj-hero__line,
-  .rj-hero__headline .rj-text-reveal__line {
-    white-space: nowrap;
+@media (min-width: 768px) and (max-height: 720px) {
+  .rj-hero__headline {
+    font-size: min(4.8rem, 7.5vh);
   }
 }
 
@@ -881,13 +925,14 @@ ul {
   position: absolute;
   right: 0;
   bottom: 0;
+  z-index: 2;
   will-change: transform;
   left: 0;
   display: flex;
   justify-content: center;
   align-items: flex-end;
   padding-inline: 1rem;
-  padding-bottom: 4.8rem;
+  padding-bottom: 3.2rem;
 }
 
 .rj-hero__taglines {
@@ -895,7 +940,7 @@ ul {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.4rem;
   width: 100%;
   text-align: center;
 }
@@ -905,12 +950,17 @@ ul {
 }
 
 .rj-hero__description {
-  max-width: min(55.1rem, 70.5%);
+  max-width: min(55.1rem, 92%);
   margin: 0;
-  font-size: 1.55rem;
+  /* px floor — avoids 2.667vw-rem inflation on mid mobile widths */
+  font-size: clamp(14px, 3.6vw, 18px);
   font-weight: 300;
   letter-spacing: -0.016rem;
-  line-height: 1.25;
+  line-height: 1.3;
+}
+
+.rj-hero__description-break {
+  display: none;
 }
 
 .rj-hero__actions {
@@ -1099,15 +1149,16 @@ ul {
 @media (min-width: 1024px) {
   .rj-hero {
     height: auto;
-    min-height: 76.5svh;
-    min-height: calc(var(--rj-svh, 1svh) * 76.5);
+    /* ~10% shorter than prior 88svh */
+    min-height: 79.2svh;
+    min-height: calc(var(--rj-svh, 1svh) * 79.2);
     padding-inline: 4rem;
     font-size: 1.6rem;
     font-weight: 300;
     letter-spacing: -0.016rem;
     line-height: 1.75rem;
     /* Bottom copy band: padding-bottom + ~3 lines of description + CTAs */
-    --rj-hero-bottom-band: calc(4.8rem + 2.4rem * 1.3 * 3 + 2rem + 4.8rem);
+    --rj-hero-bottom-band: calc(4.8rem + 2.76rem * 1.3 * 3 + 2rem + 4.8rem);
   }
 
   .rj-hero__bottom {
@@ -1120,11 +1171,17 @@ ul {
   }
 
   .rj-hero__description {
-    max-width: min(66.06rem, 53.55%);
+    /* Wide enough that the forced break stays exactly two lines */
+    max-width: min(78rem, 72%);
     width: auto;
-    font-size: 2.4rem;
+    /* +15% vs prior desktop scale */
+    font-size: clamp(2.07rem, 1.27rem + 0.63vw, 2.76rem);
     letter-spacing: -0.024rem;
     line-height: 1.3;
+  }
+
+  .rj-hero__description-break {
+    display: block;
   }
 
   .rj-hero__actions {
@@ -1150,6 +1207,14 @@ ul {
   .rj-reel,
   .rj-reel__label {
     cursor: pointer;
+  }
+}
+
+@media (min-width: 1920px) {
+  .rj-hero {
+    /* ~10% shorter than prior 76.5svh */
+    min-height: 68.9svh;
+    min-height: calc(var(--rj-svh, 1svh) * 68.9);
   }
 }
 
@@ -1197,21 +1262,21 @@ ul {
 }
 
 .rj-page {
-  /* Mid→dark scrub uses --rj-dark-progress; otherwise follow theme tokens */
+  /* Mid→dark scrub uses --rj-dark-progress; otherwise follow theme tokens.
+     No background transition — it lagged the scrub and left a charcoal mix. */
   background: color-mix(
     in srgb,
     var(--rj-black) calc(var(--rj-dark-progress, 0) * 100%),
     var(--rj-bg)
   );
   color: var(--rj-fg);
-  transition: background-color 0.8s var(--rj-ease-soft);
+  transition: color 0.8s var(--rj-ease-soft);
   overflow-x: clip;
 }
 
 /* Homepage first-load entrance: hide until GSAP arms / completes */
 .rj-page--enter:not(.rj-page--entered) .rj-header,
 .rj-page--enter:not(.rj-page--entered) .rj-reel,
-.rj-page--enter:not(.rj-page--entered) .rj-ask,
 .rj-page--enter:not(.rj-page--entered) .rj-hero__tagline {
   opacity: 0;
 }
@@ -1219,7 +1284,6 @@ ul {
 @media (prefers-reduced-motion: reduce) {
   .rj-page--enter:not(.rj-page--entered) .rj-header,
   .rj-page--enter:not(.rj-page--entered) .rj-reel,
-  .rj-page--enter:not(.rj-page--entered) .rj-ask,
   .rj-page--enter:not(.rj-page--entered) .rj-hero__tagline {
     opacity: 1;
   }
@@ -1250,8 +1314,14 @@ body.rj-scroll-dark {
   --rj-fg-muted: var(--rj-muted);
   --rj-border: color-mix(in srgb, var(--rj-white) 14%, transparent);
   --rj-accent-surface: #121212;
+  /* Force solid black once the dark band latches — no stuck mix */
   background: var(--rj-black);
   color: var(--rj-white);
+}
+
+body.rj-scroll-dark .rj-page,
+body.rj-scroll-dark .rj-page__main {
+  background: var(--rj-black);
 }
 
 /* Sections that paint their own fill follow the band smoothly */
@@ -1260,7 +1330,7 @@ body.rj-scroll-dark {
 .rj-approach,
 .rj-home-video,
 .rj-footer {
-  transition: background-color 0.8s var(--rj-ease-soft);
+  transition: background-color 0.35s var(--rj-ease-soft);
 }
 
 /* Light islands stay stable (no inherited dark flash) */
@@ -1556,6 +1626,9 @@ body.rj-scroll-dark {
   top: 50%;
   transform: translate(-50%, -50%) scale(1.058);
   pointer-events: none;
+  /* Default hidden; GSAP autoAlpha overrides inline during crossfade */
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* Narrow: infinite marquee; avoid space-between bunching */
@@ -1834,7 +1907,7 @@ body.rj-scroll-dark {
   background: var(--rj-white);
   color: var(--rj-black);
   position: relative;
-  padding-bottom: 11.9rem;
+  padding-bottom: 18rem;
 }
 
 .rj-glance__split-wrap {
@@ -2136,6 +2209,10 @@ body.rj-scroll-dark {
 }
 
 @media (min-width: 1024px) {
+  .rj-glance {
+    padding-bottom: 22rem;
+  }
+
   .rj-glance__split-wrap {
     margin-inline: 4rem;
   }
@@ -2471,6 +2548,14 @@ body.rj-scroll-dark {
   color: var(--rj-ask-fg);
   /* Tip row may bleed to viewport edges — never clip chips here */
   overflow: visible;
+  /* Visibility / width / bar motion driven by GSAP in AiPromptInput */
+  opacity: 0;
+  visibility: hidden;
+  transform-origin: 50% 100%;
+}
+
+.rj-ask.is-shown {
+  visibility: visible;
 }
 
 .rj-ask__tips {
@@ -3021,6 +3106,7 @@ body.rj-scroll-dark {
   font-size: 13px;
   font-weight: 300;
   letter-spacing: 0.01em;
+  transform-origin: 50% 100%;
   line-height: 1.2;
   transition: background 0.25s ease, border-color 0.25s ease;
   pointer-events: auto;
@@ -3810,7 +3896,8 @@ body.rj-scroll-dark {
       var(--rj-black) calc(var(--rj-dark-progress, 0) * 100%),
       var(--rj-bg)
     );
-    transition: background-color 0.8s var(--rj-ease-soft);
+    /* Match .rj-page — scrub owns the blend; CSS transition left charcoal lag */
+    transition: none;
   }
 
   .rj-footer {
@@ -4337,8 +4424,9 @@ body.rj-scroll-dark {
   /* Transparent so page/body scrub (white → black) shows through — no hard seam */
   background: transparent;
   color: var(--rj-white);
-  overflow: clip;
-  padding-block: 10rem 2rem;
+  /* Visible so the large display title isn’t clipped by line masks / ascenders */
+  overflow: visible;
+  padding-block: 12rem 2rem;
   font-family: var(--rj-font-sans);
 }
 
@@ -4348,11 +4436,20 @@ body.rj-scroll-dark {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: 100%;
   margin-bottom: 0;
+  padding-top: 2.4rem;
   text-align: center;
   pointer-events: none;
   box-sizing: border-box;
+  overflow: visible;
+}
+
+.rj-solutions-stack__headline .rj-text-reveal__line {
+  /* Extra mask pad — tight display tracking otherwise clips glyph tops */
+  padding: 0.22em 0.28em;
+  margin: -0.22em -0.28em;
 }
 
 .rj-solutions-stack__lede {
@@ -4360,10 +4457,10 @@ body.rj-scroll-dark {
 }
 
 .rj-solutions-stack__pin-height {
-  /* 5 cards → 4 flings × ~1 viewport of scrub + the pinned viewport.
+  /* Intro hold + 4 flings + outro, pinned viewport included.
      Keep this as the ONLY runway (pinSpacing: false) so we don't get a
      second black gap after the stack. */
-  height: 500vh;
+  height: 560vh;
   padding-top: 4vh;
   box-sizing: border-box;
 }
@@ -4375,20 +4472,10 @@ body.rj-scroll-dark {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  height: 100vh;
+  height: auto;
   width: 100%;
   padding-inline: var(--rj-grid-margin);
   box-sizing: border-box;
-}
-
-/* Title + cards column — GSAP may translateY this on compact desktops */
-.rj-solutions-stack__stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  gap: 4.8rem;
-  will-change: transform;
 }
 
 .rj-solutions-stack__list {
@@ -4413,11 +4500,13 @@ body.rj-scroll-dark {
   color: var(--rj-stack-fg);
   background: var(--rj-stack-bg);
   border: none;
-  -webkit-backdrop-filter: blur(40px) saturate(1.15);
-  backdrop-filter: blur(40px) saturate(1.15);
+  /* Lighter blur — 5 layered backdrop-filters under scrub was a major jank source */
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  backdrop-filter: blur(18px) saturate(1.1);
   transform-style: preserve-3d;
   will-change: transform;
   box-shadow: 0 1.2rem 4rem color-mix(in srgb, var(--rj-black) 36%, transparent);
+  backface-visibility: hidden;
 }
 
 /* Shared glass look — tones kept for markup compatibility */
@@ -4567,22 +4656,24 @@ body.rj-scroll-dark {
     padding-block: 12rem 0;
   }
 
-  .rj-solutions-stack__pin {
-    justify-content: flex-start;
-    padding-top: calc(var(--rj-header-height) + 1.2rem);
-    padding-bottom: 3.2rem;
-  }
-
-  .rj-solutions-stack__stage {
-    gap: 6.4rem;
-  }
-
   .rj-solutions-stack__heading {
-    position: relative;
-    inset: auto;
-    flex-shrink: 0;
-    margin-bottom: 0;
-    padding: 0;
+    min-height: 0;
+    margin: 0 0 4rem;
+    padding: 4rem var(--rj-grid-margin) 0;
+  }
+
+  .rj-solutions-stack__pin-height {
+    padding-top: 0;
+  }
+
+  /* Full-viewport pin frame — same engage point as ≥1920 (top top).
+     Centering the list keeps cards mid-screen without pin:center jitter. */
+  .rj-solutions-stack__pin {
+    height: 100vh;
+    min-height: 100vh;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .rj-solutions-stack__list {
@@ -4593,21 +4684,6 @@ body.rj-scroll-dark {
     width: min(100%, 96rem);
     flex: 0 0 auto;
     min-height: 0;
-  }
-
-  /*
-   * Compact desktops: clip the pin so the pre-shifted stage reads as
-   * “title already scrolled past” — letters cut by the top edge, cards
-   * centered. Class is toggled from SolutionsStackSection.
-   */
-  .rj-solutions-stack--scrolled-title .rj-solutions-stack__pin {
-    overflow: hidden;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  .rj-solutions-stack--scrolled-title .rj-solutions-stack__stage {
-    gap: 5.6rem;
   }
 
   .rj-solutions-stack__card-inner {
@@ -4625,12 +4701,13 @@ body.rj-scroll-dark {
 }
 
 @media (min-width: 1024px) {
-  .rj-solutions-stack__stage {
-    gap: 7.2rem;
+  .rj-solutions-stack {
+    padding-block: 16rem 0;
   }
 
-  .rj-solutions-stack--scrolled-title .rj-solutions-stack__stage {
-    gap: 6rem;
+  .rj-solutions-stack__heading {
+    margin-bottom: 4.8rem;
+    padding-top: 5.6rem;
   }
 
   .rj-solutions-stack__list {
@@ -4647,16 +4724,21 @@ body.rj-scroll-dark {
   }
 }
 
-/* ≥1920px: fully visible headline above the stack (no pre-shift) */
+/* ≥1920px: taller title band; cards sit slightly higher in the pin frame */
 @media (min-width: 1920px) {
-  .rj-solutions-stack__pin {
-    overflow: visible;
-    padding-top: calc(var(--rj-header-height) + 1.2rem);
-    padding-bottom: 3.2rem;
+  .rj-solutions-stack {
+    padding-block: 18rem 0;
   }
 
-  .rj-solutions-stack__stage {
-    gap: 6rem;
+  .rj-solutions-stack__heading {
+    min-height: 0;
+    margin: 0 0 6rem;
+    padding: 6.4rem var(--rj-grid-margin) 0;
+  }
+
+  .rj-solutions-stack__pin {
+    justify-content: flex-start;
+    padding-bottom: 3.2rem;
   }
 
   .rj-solutions-stack__list {
@@ -4666,6 +4748,11 @@ body.rj-scroll-dark {
 
 /* Mobile / reduced motion: unwind the pin runway into a simple stack */
 @media (max-width: 767px) {
+  .rj-solutions-stack__heading {
+    margin-bottom: 4.8rem;
+    padding-inline: var(--rj-grid-margin);
+  }
+
   .rj-solutions-stack__pin-height {
     height: auto;
     padding-top: 0;
@@ -4730,13 +4817,8 @@ body.rj-scroll-dark {
 
   .rj-solutions-stack__heading {
     position: relative;
-    margin-bottom: 0;
+    margin-bottom: 4.8rem;
     padding-top: 0;
-  }
-
-  .rj-solutions-stack__stage {
-    gap: 4.8rem;
-    transform: none !important;
   }
 }
 

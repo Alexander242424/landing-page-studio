@@ -18,12 +18,11 @@ What we do (services):
 - Monetization & funnel architecture when relevant
 
 How we work (process):
-1. Discover — map product, funnel, revenue constraints
-2. Diagnose — find highest-friction moments with data + sessions
-3. Prototype — design focused interventions meant to be tested
-4. Validate — experiments and qualitative signal
-5. Ship — partner with the client team in production
-6. Compound — turn wins into a lasting system
+1. Diagnose — find highest-friction moments with data + sessions
+2. Prototype — design focused interventions meant to be tested
+3. Validate — experiments and qualitative signal
+4. Ship — partner with the client team in production
+5. Compound — turn wins into a lasting system
 
 Approach:
 - Quality over quantity — limited clients per year for deep focus

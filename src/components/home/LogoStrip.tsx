@@ -14,7 +14,7 @@ const SLOT_COUNT = 8;
 /** Match styles.css mobile band — marquee below this, even row at/above. */
 const MARQUEE_MQ = "(max-width: 767px)";
 
-/** Crossfade duration (seconds). Previous logo stays visible until swap starts. */
+/** Crossfade duration (seconds). */
 const FADE_DURATION = 0.55;
 /** Pause between slot swaps (seconds), plus random jitter. */
 const SWAP_BASE = 2.1;
@@ -24,6 +24,8 @@ type SlotLayer = "a" | "b";
 
 type SlotState = {
   logo: ClientLogo;
+  /** Logo currently painted on the idle buffer (may lag one swap). */
+  bufferLogo: ClientLogo;
   active: SlotLayer;
 };
 
@@ -31,21 +33,24 @@ function logoById(id: string): ClientLogo {
   return CLIENT_LOGOS.find((logo) => logo.id === id) ?? CLIENT_LOGOS[0]!;
 }
 
-function pickInitial(): ClientLogo[] {
+function pickInitial(): SlotState[] {
   const seeded = LOGO_STRIP_SEED_IDS.map(logoById).slice(0, SLOT_COUNT);
-  if (seeded.length >= SLOT_COUNT) return seeded;
-
-  // Fill any shortfall from the pool (prefer unused ids).
-  const used = new Set(seeded.map((logo) => logo.id));
-  const fillers = CLIENT_LOGOS.filter((logo) => !used.has(logo.id));
-  while (seeded.length < SLOT_COUNT) {
-    const next =
-      fillers[seeded.length % Math.max(fillers.length, 1)] ??
-      CLIENT_LOGOS[seeded.length % CLIENT_LOGOS.length]!;
-    seeded.push(next);
-    used.add(next.id);
+  if (seeded.length < SLOT_COUNT) {
+    const used = new Set(seeded.map((logo) => logo.id));
+    const fillers = CLIENT_LOGOS.filter((logo) => !used.has(logo.id));
+    while (seeded.length < SLOT_COUNT) {
+      const next =
+        fillers[seeded.length % Math.max(fillers.length, 1)] ??
+        CLIENT_LOGOS[seeded.length % CLIENT_LOGOS.length]!;
+      seeded.push(next);
+      used.add(next.id);
+    }
   }
-  return seeded;
+  return seeded.map((logo) => ({
+    logo,
+    bufferLogo: logo,
+    active: "a" as SlotLayer,
+  }));
 }
 
 /**
@@ -88,20 +93,6 @@ function preloadLogo(logo: ClientLogo): Promise<ClientLogo> {
   });
 }
 
-/** Keep only the active layer in normal flow so idle buffers can't widen gaps. */
-function syncIdleLayers(
-  layers: { a: HTMLImageElement | null; b: HTMLImageElement | null } | undefined,
-  active: SlotLayer,
-) {
-  if (!layers) return;
-  if (layers.a) {
-    layers.a.classList.toggle("rj-logo-strip__logo--idle", active !== "a");
-  }
-  if (layers.b) {
-    layers.b.classList.toggle("rj-logo-strip__logo--idle", active !== "b");
-  }
-}
-
 async function preloadWithFallback(
   preferred: ClientLogo,
   visible: ClientLogo[],
@@ -126,8 +117,28 @@ async function preloadWithFallback(
     }
   }
 
-  // Last resort: any already-visible logo's src is assumed loadable.
   return visible[slotIndex] ?? pool[0]!;
+}
+
+async function waitForDecode(img: HTMLImageElement) {
+  if (img.complete && img.naturalWidth > 0) return;
+  try {
+    if (typeof img.decode === "function") {
+      await img.decode();
+      return;
+    }
+  } catch {
+    // fall through to load event
+  }
+  await new Promise<void>((resolve) => {
+    const done = () => {
+      img.removeEventListener("load", done);
+      img.removeEventListener("error", done);
+      resolve();
+    };
+    img.addEventListener("load", done);
+    img.addEventListener("error", done);
+  });
 }
 
 function LogoMarqueeItem({
@@ -173,9 +184,10 @@ export function LogoStrip() {
   const layerRefs = useRef<
     Array<{ a: HTMLImageElement | null; b: HTMLImageElement | null }>
   >([]);
-  const slotsRef = useRef<SlotState[]>(
-    pickInitial().map((logo) => ({ logo, active: "a" as SlotLayer })),
-  );
+  const [slots, setSlots] = useState<SlotState[]>(() => pickInitial());
+  const slotsRef = useRef(slots);
+  slotsRef.current = slots;
+
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isMarquee, setIsMarquee] = useState(false);
   const enteredRef = useRef(false);
@@ -259,6 +271,7 @@ export function LogoStrip() {
           trigger: root,
           start: "top 92%",
           once: true,
+          // Already in view on load — still mark entered so swaps can start.
           onEnter: () => {
             enteredRef.current = true;
           },
@@ -272,6 +285,8 @@ export function LogoStrip() {
 
     return () => {
       ctx.revert();
+      // After revert, items must stay visible (swap loop may already be running).
+      gsap.set(items, { clearProps: "opacity,visibility,transform" });
     };
   }, [reducedMotion, isMarquee]);
 
@@ -284,6 +299,19 @@ export function LogoStrip() {
     let lastSlot = -1;
     let activeTween: gsap.core.Timeline | null = null;
     let swapping = false;
+
+    const revealActive = (slotIndex: number, active: SlotLayer) => {
+      const layers = layerRefs.current[slotIndex];
+      if (!layers) return;
+      const shown = layers[active];
+      const hidden = layers[active === "a" ? "b" : "a"];
+      if (shown) {
+        gsap.set(shown, { autoAlpha: 1 });
+      }
+      if (hidden) {
+        gsap.set(hidden, { autoAlpha: 0 });
+      }
+    };
 
     const schedule = () => {
       if (cancelled || reducedMotion) return;
@@ -306,26 +334,26 @@ export function LogoStrip() {
       if (cancelled || swapping || reducedMotion) return;
       swapping = true;
 
-      const slots = slotsRef.current;
-      let slotIndex = Math.floor(Math.random() * slots.length);
-      if (slots.length > 1) {
+      const currentSlots = slotsRef.current;
+      let slotIndex = Math.floor(Math.random() * currentSlots.length);
+      if (currentSlots.length > 1) {
         let guard = 0;
         while (slotIndex === lastSlot && guard < 6) {
-          slotIndex = Math.floor(Math.random() * slots.length);
+          slotIndex = Math.floor(Math.random() * currentSlots.length);
           guard += 1;
         }
       }
       lastSlot = slotIndex;
 
       const layers = layerRefs.current[slotIndex];
-      const slot = slots[slotIndex];
+      const slot = currentSlots[slotIndex];
       if (!layers || !slot) {
         swapping = false;
         schedule();
         return;
       }
 
-      const visible = slots.map((s) => s.logo);
+      const visible = currentSlots.map((s) => s.logo);
       const preferred = pickNext(visible, slotIndex, CLIENT_LOGOS);
       const nextLogo = await preloadWithFallback(
         preferred,
@@ -346,8 +374,9 @@ export function LogoStrip() {
         return;
       }
 
-      const incomingLayer: SlotLayer = slot.active === "a" ? "b" : "a";
-      const outgoing = layers[slot.active];
+      const outgoingLayer = slot.active;
+      const incomingLayer: SlotLayer = outgoingLayer === "a" ? "b" : "a";
+      const outgoing = layers[outgoingLayer];
       const incoming = layers[incomingLayer];
 
       if (!outgoing || !incoming) {
@@ -356,32 +385,71 @@ export function LogoStrip() {
         return;
       }
 
-      // Paint the incoming buffer while still hidden; keep outgoing at full opacity.
-      incoming.src = nextLogo.src;
-      incoming.alt = nextLogo.alt;
-      gsap.set(incoming, { autoAlpha: 0 });
+      // Paint next mark on the idle buffer via React (keeps src in sync on re-render),
+      // then wait for decode before crossfading. Outgoing stays in-flow the whole time.
+      const previousLogo = slot.logo;
+      setSlots((prev) =>
+        prev.map((s, i) =>
+          i === slotIndex ? { ...s, bufferLogo: nextLogo } : s,
+        ),
+      );
+
+      // Let React commit the new buffer src before decoding.
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve());
+      });
+      await waitForDecode(incoming);
+
+      if (cancelled) {
+        swapping = false;
+        return;
+      }
+
+      // Abort if this slot's active layer changed while we were loading.
+      if (slotsRef.current[slotIndex]?.active !== outgoingLayer) {
+        swapping = false;
+        schedule();
+        return;
+      }
+
       gsap.set(outgoing, { autoAlpha: 1 });
+      gsap.set(incoming, { autoAlpha: 0 });
+
+      const finish = (committed: boolean) => {
+        activeTween = null;
+        swapping = false;
+        if (cancelled) return;
+
+        if (committed) {
+          gsap.set(incoming, { autoAlpha: 1 });
+          gsap.set(outgoing, { autoAlpha: 0 });
+          // Promote idle → active; park the previous mark on the new idle buffer.
+          setSlots((prev) =>
+            prev.map((s, i) =>
+              i === slotIndex
+                ? {
+                    logo: nextLogo,
+                    bufferLogo: previousLogo,
+                    active: incomingLayer,
+                  }
+                : s,
+            ),
+          );
+        } else {
+          // Interrupted — restore previous buffer and keep outgoing visible.
+          setSlots((prev) =>
+            prev.map((s, i) =>
+              i === slotIndex ? { ...s, bufferLogo: previousLogo } : s,
+            ),
+          );
+          revealActive(slotIndex, outgoingLayer);
+        }
+        schedule();
+      };
 
       activeTween = gsap.timeline({
-        onComplete: () => {
-          activeTween = null;
-          swapping = false;
-          if (cancelled) return;
-          // Keep outgoing hidden but with a valid src for the next cycle.
-          gsap.set(outgoing, { autoAlpha: 0 });
-          gsap.set(incoming, { autoAlpha: 1 });
-          outgoing.alt = "";
-          outgoing.setAttribute("aria-hidden", "true");
-          incoming.alt = nextLogo.alt;
-          incoming.removeAttribute("aria-hidden");
-          syncIdleLayers(layers, incomingLayer);
-          slotsRef.current = slotsRef.current.map((s, i) =>
-            i === slotIndex
-              ? { logo: nextLogo, active: incomingLayer }
-              : s,
-          );
-          schedule();
-        },
+        onComplete: () => finish(true),
+        onInterrupt: () => finish(false),
       });
 
       activeTween.to(
@@ -418,18 +486,24 @@ export function LogoStrip() {
       });
       // Ensure every slot ends visible with its active layer.
       slotsRef.current.forEach((slot, i) => {
-        const layers = layerRefs.current[i];
-        if (!layers) return;
-        const active = layers[slot.active];
-        const idle = layers[slot.active === "a" ? "b" : "a"];
-        if (active) gsap.set(active, { autoAlpha: 1 });
-        if (idle) gsap.set(idle, { autoAlpha: 0 });
-        syncIdleLayers(layers, slot.active);
+        revealActive(i, slot.active);
       });
     };
   }, [reducedMotion, isMarquee]);
 
-  const initial = slotsRef.current;
+  // After React commits which layer is active, clear GSAP leftovers on the
+  // in-flow mark so a parent re-render can never leave both layers hidden.
+  useEffect(() => {
+    slots.forEach((slot, i) => {
+      const layers = layerRefs.current[i];
+      if (!layers) return;
+      const active = layers[slot.active];
+      const idle = layers[slot.active === "a" ? "b" : "a"];
+      if (active) gsap.set(active, { autoAlpha: 1 });
+      if (idle) gsap.set(idle, { autoAlpha: 0 });
+    });
+  }, [slots]);
+
   const marqueeLogos = LOGO_STRIP_SEED_IDS.map(logoById);
 
   return (
@@ -439,7 +513,10 @@ export function LogoStrip() {
       aria-label="Clients and partners"
     >
       {/* Mobile marquee — visibility via CSS (max-width: 767px); both trees avoid hydration flash */}
-      <div className="rj-logo-strip__viewport" aria-hidden={isMarquee ? undefined : true}>
+      <div
+        className="rj-logo-strip__viewport"
+        aria-hidden={isMarquee ? undefined : true}
+      >
         <ul
           className={
             reducedMotion
@@ -454,7 +531,6 @@ export function LogoStrip() {
               index={index}
             />
           ))}
-          {/* Duplicate set for seamless loop; hidden from AT */}
           {marqueeLogos.map((logo, index) => (
             <LogoMarqueeItem
               key={`m2-${logo.id}`}
@@ -467,62 +543,92 @@ export function LogoStrip() {
       </div>
 
       {/* Desktop / tablet even row */}
-      <ul className="rj-logo-strip__row" aria-hidden={isMarquee ? true : undefined}>
-        {initial.map((slot, index) => (
-          <li
-            key={`slot-${index}`}
-            ref={(el) => {
-              slotRefs.current[index] = el;
-            }}
-            className="rj-logo-strip__item"
-          >
-            <span className="rj-logo-strip__slot">
-              <img
-                ref={(el) => {
-                  if (!layerRefs.current[index]) {
-                    layerRefs.current[index] = { a: null, b: null };
+      <ul
+        className="rj-logo-strip__row"
+        aria-hidden={isMarquee ? true : undefined}
+      >
+        {slots.map((slot, index) => {
+          const logoA = slot.active === "a" ? slot.logo : slot.bufferLogo;
+          const logoB = slot.active === "b" ? slot.logo : slot.bufferLogo;
+          const aActive = slot.active === "a";
+          const bActive = slot.active === "b";
+
+          return (
+            <li
+              key={`slot-${index}`}
+              ref={(el) => {
+                slotRefs.current[index] = el;
+              }}
+              className="rj-logo-strip__item"
+            >
+              <span className="rj-logo-strip__slot">
+                <img
+                  ref={(el) => {
+                    if (!layerRefs.current[index]) {
+                      layerRefs.current[index] = { a: null, b: null };
+                    }
+                    layerRefs.current[index]!.a = el;
+                  }}
+                  className={
+                    aActive
+                      ? "rj-logo-strip__logo"
+                      : "rj-logo-strip__logo rj-logo-strip__logo--idle"
                   }
-                  layerRefs.current[index]!.a = el;
-                }}
-                className="rj-logo-strip__logo"
-                src={slot.logo.src}
-                alt={slot.logo.alt}
-                width={120}
-                height={28}
-                decoding="async"
-                loading={index < 4 ? "eager" : "lazy"}
-                fetchPriority="low"
-                onError={(event) => {
-                  const img = event.currentTarget;
-                  const fallback =
-                    CLIENT_LOGOS.find((logo) => logo.src !== img.src) ??
-                    CLIENT_LOGOS[0];
-                  if (fallback && img.src !== fallback.src) {
-                    img.src = fallback.src;
-                    img.alt = fallback.alt;
+                  src={logoA.src}
+                  alt={aActive ? slot.logo.alt : ""}
+                  width={120}
+                  height={28}
+                  decoding="async"
+                  loading={index < 4 ? "eager" : "lazy"}
+                  fetchPriority="low"
+                  aria-hidden={aActive ? undefined : true}
+                  draggable={false}
+                  onError={(event) => {
+                    const img = event.currentTarget;
+                    const fallback =
+                      CLIENT_LOGOS.find((logo) => logo.src !== img.src) ??
+                      CLIENT_LOGOS[0];
+                    if (fallback && img.src !== fallback.src) {
+                      img.src = fallback.src;
+                      img.alt = fallback.alt;
+                    }
+                  }}
+                />
+                <img
+                  ref={(el) => {
+                    if (!layerRefs.current[index]) {
+                      layerRefs.current[index] = { a: null, b: null };
+                    }
+                    layerRefs.current[index]!.b = el;
+                  }}
+                  className={
+                    bActive
+                      ? "rj-logo-strip__logo"
+                      : "rj-logo-strip__logo rj-logo-strip__logo--idle"
                   }
-                }}
-              />
-              <img
-                ref={(el) => {
-                  if (!layerRefs.current[index]) {
-                    layerRefs.current[index] = { a: null, b: null };
-                  }
-                  layerRefs.current[index]!.b = el;
-                }}
-                className="rj-logo-strip__logo rj-logo-strip__logo--idle"
-                src={slot.logo.src}
-                alt=""
-                width={120}
-                height={28}
-                decoding="async"
-                loading="lazy"
-                aria-hidden="true"
-                style={{ opacity: 0, visibility: "hidden" }}
-              />
-            </span>
-          </li>
-        ))}
+                  src={logoB.src}
+                  alt={bActive ? slot.logo.alt : ""}
+                  width={120}
+                  height={28}
+                  decoding="async"
+                  loading="lazy"
+                  aria-hidden={bActive ? undefined : true}
+                  draggable={false}
+                  onError={(event) => {
+                    const img = event.currentTarget;
+                    const fallback =
+                      CLIENT_LOGOS.find((logo) => logo.src !== img.src) ??
+                      CLIENT_LOGOS[0];
+                    if (fallback && img.src !== fallback.src) {
+                      img.src = fallback.src;
+                      img.alt = fallback.alt;
+                    }
+                  }}
+                />
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

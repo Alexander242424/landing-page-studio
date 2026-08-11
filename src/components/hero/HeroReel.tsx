@@ -268,10 +268,10 @@ export function HeroReel() {
           <h1
             ref={logoRef}
             className="rj-hero__logo rj-hero__headline rj-awards-title"
-            aria-label="Growth product performance agency"
+            aria-label="We turn your product experience into revenue."
           >
-            <span className="rj-hero__line">Growth product</span>
-            <span className="rj-hero__line">performance agency</span>
+            <span className="rj-hero__line">We turn your product</span>
+            <span className="rj-hero__line">experience into revenue.</span>
           </h1>
         </div>
 
@@ -281,8 +281,9 @@ export function HeroReel() {
               ref={descriptionRef}
               className="rj-hero__tagline rj-hero__description rj-text-reveal"
             >
-              We grow your product and revenue by boosting user experience and
-              metrics that drive conversion, activation, trials.
+              Helping product teams drive growth through UX, conversions,
+              <br className="rj-hero__description-break" />
+              activations, revenue, and retention that compound.
             </p>
             <div
               ref={actionsRef}

@@ -7,8 +7,8 @@ export type Solution = {
 /** Canonical Solutions / Challenges We Solve — keep footer & #solutions in sync. */
 export const SOLUTIONS: Solution[] = [
   {
-    title: "Conversion Rate optimization (CRO)",
-    body: "We fix the screens and steps where people stall—so more of the same traffic signs up, activates, and pays.",
+    title: "Product Performance Optimization",
+    body: "We lift CRO, activation, retention, and LTV together—fixing the screens and steps where people stall so the same traffic converts, compounds, and pays more over time.",
     video: "/challenges/c1.mp4",
   },
   {

@@ -5,6 +5,8 @@ import {
   useRef,
   useState,
 } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Logo } from "@/components/brand/Logo";
 import {
   OPEN_LEAD_CHAT_EVENT,
@@ -25,6 +27,11 @@ import {
   normalizeAuditUrl,
 } from "@/lib/croAudit";
 import { UXLAB_SYSTEM_PROMPT } from "@/lib/uxlabKnowledge";
+
+gsap.registerPlugin(ScrollTrigger);
+
+/** Show dock around the middle of the showreel (#home-reel). */
+const DOCK_REEL_PROGRESS = 0.45;
 
 const TIPS = [
   "Book a call",
@@ -389,6 +396,10 @@ function useTypewriterPlaceholder(paused: boolean) {
 export function AiPromptInput() {
   const inputId = useId();
   const calContainerId = `my-cal-inline-30min-${useId().replace(/:/g, "")}`;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLFormElement>(null);
+  const tipsRef = useRef<HTMLDivElement>(null);
+  const chipRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const calRef = useRef<HTMLDivElement>(null);
@@ -405,10 +416,14 @@ export function AiPromptInput() {
     email: "",
   });
   const scanRafRef = useRef<number | null>(null);
+  const dockShownPrevRef = useRef(false);
+  const dockTlRef = useRef<gsap.core.Timeline | null>(null);
 
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [open, setOpen] = useState(false);
+  /** Past ~mid showreel — toggles dock visibility. */
+  const [pastDockGate, setPastDockGate] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
@@ -461,6 +476,207 @@ export function AiPromptInput() {
     croStepRef.current = croStep;
   }, [croStep]);
 
+  // Dock: appear once around mid-showreel, then stay (no hide on scroll back).
+  // Also visible while chat is open (e.g. Let's talk from the hero).
+  useEffect(() => {
+    let cancelled = false;
+    let raf = 0;
+    let trigger: ScrollTrigger | null = null;
+
+    const latch = () => {
+      setPastDockGate(true);
+      trigger?.kill();
+      trigger = null;
+    };
+
+    const attach = () => {
+      if (cancelled) return;
+      const reel = document.getElementById("home-reel");
+      if (!reel) {
+        raf = requestAnimationFrame(attach);
+        return;
+      }
+
+      trigger = ScrollTrigger.create({
+        trigger: reel,
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          if (self.progress >= DOCK_REEL_PROGRESS) latch();
+        },
+        onRefresh: (self) => {
+          if (self.progress >= DOCK_REEL_PROGRESS) latch();
+        },
+      });
+      if (trigger.progress >= DOCK_REEL_PROGRESS) latch();
+    };
+
+    attach();
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      trigger?.kill();
+    };
+  }, []);
+
+  const dockShown = pastDockGate || open;
+
+  // Entrance: narrow bar rises (opacity + scale) → stretch to full → chips stagger in.
+  useEffect(() => {
+    const root = rootRef.current;
+    const bar = barRef.current;
+    if (!root || !bar) return;
+    if (dockShown === dockShownPrevRef.current) return;
+
+    const showing = dockShown;
+    dockShownPrevRef.current = dockShown;
+
+    const tips = tipsRef.current;
+    const chips = chipRefs.current.filter(Boolean) as HTMLButtonElement[];
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    dockTlRef.current?.kill();
+    dockTlRef.current = null;
+
+    if (showing) {
+      root.classList.add("is-shown");
+
+      // Measure full dock width from CSS, then start 30% narrower.
+      gsap.set(root, { width: "", autoAlpha: 0 });
+      const fullWidth = root.getBoundingClientRect().width;
+      const startWidth = Math.max(fullWidth * 0.7, Math.min(280, fullWidth));
+
+      if (reduced) {
+        gsap.set(root, { autoAlpha: 1, width: fullWidth, clearProps: "transform" });
+        gsap.set(bar, { autoAlpha: 1, clearProps: "transform" });
+        if (tips) gsap.set(tips, { autoAlpha: 1, clearProps: "transform" });
+        gsap.set(chips, { autoAlpha: 1, clearProps: "transform" });
+        return () => {
+          dockShownPrevRef.current = false;
+        };
+      }
+
+      // Collapse tip row so it doesn’t leave a gap above the bar during phase 1–2.
+      if (tips) {
+        gsap.set(tips, { autoAlpha: 0, gridTemplateRows: "0fr" });
+      }
+      gsap.set(chips, { autoAlpha: 0, y: 10, scale: 0.94 });
+      gsap.set(root, {
+        autoAlpha: 1,
+        width: startWidth,
+      });
+      gsap.set(bar, {
+        autoAlpha: 0,
+        y: 28,
+        scale: 0.9,
+        transformOrigin: "50% 100%",
+      });
+
+      const tl = gsap.timeline({
+        defaults: { ease: "expo.out" },
+        onComplete: () => {
+          gsap.set(root, { clearProps: "width" });
+          gsap.set(bar, { clearProps: "transform" });
+          if (tips) gsap.set(tips, { clearProps: "gridTemplateRows" });
+        },
+      });
+      dockTlRef.current = tl;
+
+      // 1) Input rises from below with opacity + small scale (already at −30% width)
+      tl.to(
+        bar,
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.55,
+        },
+        0,
+      );
+      // 2) Stretch dock to full width
+      tl.to(
+        root,
+        {
+          width: fullWidth,
+          duration: 0.6,
+        },
+        0.32,
+      );
+      // 3) Tip buttons one-by-one
+      if (tips) {
+        tl.to(
+          tips,
+          { autoAlpha: 1, gridTemplateRows: "1fr", duration: 0.28 },
+          0.68,
+        );
+      }
+      tl.to(
+        chips,
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.38,
+          stagger: 0.09,
+        },
+        0.72,
+      );
+
+      return () => {
+        tl.kill();
+        dockShownPrevRef.current = false;
+      };
+    }
+
+    if (reduced) {
+      root.classList.remove("is-shown");
+      gsap.set(root, { autoAlpha: 0, clearProps: "width,transform" });
+      gsap.set(bar, { autoAlpha: 0, clearProps: "transform" });
+      if (tips) gsap.set(tips, { autoAlpha: 0, clearProps: "transform" });
+      gsap.set(chips, { autoAlpha: 0, clearProps: "transform" });
+      return () => {
+        dockShownPrevRef.current = true;
+      };
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        root.classList.remove("is-shown");
+        gsap.set(root, { autoAlpha: 0, clearProps: "width,transform" });
+        gsap.set(bar, { autoAlpha: 0, clearProps: "transform" });
+        if (tips) gsap.set(tips, { autoAlpha: 0, clearProps: "transform" });
+        gsap.set(chips, { autoAlpha: 0, clearProps: "transform" });
+      },
+    });
+    dockTlRef.current = tl;
+    tl.to(
+      chips,
+      { autoAlpha: 0, y: 8, duration: 0.18, stagger: 0.03, ease: "power2.in" },
+      0,
+    );
+    if (tips) {
+      tl.to(tips, { autoAlpha: 0, duration: 0.18, ease: "power2.in" }, 0.1);
+    }
+    tl.to(
+      bar,
+      {
+        autoAlpha: 0,
+        y: 18,
+        scale: 0.94,
+        duration: 0.28,
+        ease: "power2.in",
+      },
+      0.06,
+    );
+    tl.to(root, { autoAlpha: 0, duration: 0.22, ease: "power2.in" }, 0.12);
+
+    return () => {
+      tl.kill();
+      dockShownPrevRef.current = true;
+    };
+  }, [dockShown]);
+
   useEffect(() => {
     const el = listRef.current;
     if (!el || !open) return;
@@ -478,6 +694,7 @@ export function AiPromptInput() {
   useEffect(() => {
     return () => {
       revealRef.current.cancelled = true;
+      dockTlRef.current?.kill();
       if (scanRafRef.current != null) {
         cancelAnimationFrame(scanRafRef.current);
       }
@@ -1244,19 +1461,26 @@ export function AiPromptInput() {
 
   return (
     <div
-      className={`rj-ask${open ? " is-open" : ""}`}
+      ref={rootRef}
+      className={`rj-ask${open ? " is-open" : ""}${dockShown ? " is-shown" : ""}`}
       role="complementary"
       aria-label="Ask UXLAB"
+      aria-hidden={dockShown ? undefined : true}
+      inert={dockShown ? undefined : true}
     >
       <div
+        ref={tipsRef}
         className="rj-ask__tips"
         aria-hidden={open}
         data-lenis-prevent
       >
         <div className="rj-ask__row" data-lenis-prevent>
-          {TIPS.map((tip) => (
+          {TIPS.map((tip, index) => (
             <button
               key={tip}
+              ref={(el) => {
+                chipRefs.current[index] = el;
+              }}
               type="button"
               className="rj-ask__chip"
               tabIndex={open ? -1 : 0}
@@ -1387,7 +1611,7 @@ export function AiPromptInput() {
         </div>
       </div>
 
-      <form className="rj-ask__bar" onSubmit={onSubmit}>
+      <form ref={barRef} className="rj-ask__bar" onSubmit={onSubmit}>
         <div className="rj-ask__value">
           <label className="sr-only" htmlFor={inputId}>
             Ask UXLAB
