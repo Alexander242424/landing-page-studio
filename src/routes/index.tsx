@@ -1,20 +1,67 @@
-import { useLayoutEffect, useRef } from "react";
+import { lazy, Suspense, useLayoutEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
-import { ApproachSection } from "@/components/home/ApproachSection";
-import { ChallengesSection } from "@/components/home/ChallengesSection";
-import { GlanceSection } from "@/components/home/GlanceSection";
 import { HomeIntro } from "@/components/home/HomeIntro";
-import { HomeVideoSection } from "@/components/home/HomeVideoSection";
-import { BlogSection } from "@/components/home/BlogSection";
-import { FaqSection } from "@/components/home/FaqSection";
 import { LogoStrip } from "@/components/home/LogoStrip";
-import { OurProcessSection } from "@/components/home/OurProcessSection";
 import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
-import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { playHomeEntrance } from "@/lib/homeEntrance";
+
+/** Below-fold sections — split so GSAP/media work is not on the critical path. */
+const GlanceSection = lazy(() =>
+  import("@/components/home/GlanceSection").then((m) => ({
+    default: m.GlanceSection,
+  })),
+);
+const ChallengesSection = lazy(() =>
+  import("@/components/home/ChallengesSection").then((m) => ({
+    default: m.ChallengesSection,
+  })),
+);
+const SolutionsStackSection = lazy(() =>
+  import("@/components/home/SolutionsStackSection").then((m) => ({
+    default: m.SolutionsStackSection,
+  })),
+);
+const OurProcessSection = lazy(() =>
+  import("@/components/home/OurProcessSection").then((m) => ({
+    default: m.OurProcessSection,
+  })),
+);
+const ApproachSection = lazy(() =>
+  import("@/components/home/ApproachSection").then((m) => ({
+    default: m.ApproachSection,
+  })),
+);
+const HomeVideoSection = lazy(() =>
+  import("@/components/home/HomeVideoSection").then((m) => ({
+    default: m.HomeVideoSection,
+  })),
+);
+const FaqSection = lazy(() =>
+  import("@/components/home/FaqSection").then((m) => ({
+    default: m.FaqSection,
+  })),
+);
+const BlogSection = lazy(() =>
+  import("@/components/home/BlogSection").then((m) => ({
+    default: m.BlogSection,
+  })),
+);
+const SiteFooter = lazy(() =>
+  import("@/components/layout/SiteFooter").then((m) => ({
+    default: m.SiteFooter,
+  })),
+);
+
+function Deferred({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <Suspense fallback={null}>{children}</Suspense>;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,16 +99,35 @@ function HomePage() {
         <HeroReel />
         <LogoStrip />
         <HomeIntro />
-        <GlanceSection />
-        <ChallengesSection />
-        <OurProcessSection />
-        <ApproachSection />
-        <HomeVideoSection />
-        <FaqSection />
-        <BlogSection />
+        <Deferred>
+          <GlanceSection />
+        </Deferred>
+        <Deferred>
+          <ChallengesSection />
+        </Deferred>
+        <Deferred>
+          <SolutionsStackSection />
+        </Deferred>
+        <Deferred>
+          <OurProcessSection />
+        </Deferred>
+        <Deferred>
+          <ApproachSection />
+        </Deferred>
+        <Deferred>
+          <HomeVideoSection />
+        </Deferred>
+        <Deferred>
+          <FaqSection />
+        </Deferred>
+        <Deferred>
+          <BlogSection />
+        </Deferred>
       </main>
 
-      <SiteFooter />
+      <Deferred>
+        <SiteFooter />
+      </Deferred>
     </div>
   );
 }

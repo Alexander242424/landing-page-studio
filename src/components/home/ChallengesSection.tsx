@@ -71,7 +71,17 @@ export function ChallengesSection() {
         if (media && video instanceof HTMLVideoElement) {
           gsap.set(media, { opacity: 0 });
 
+          const ensureSrc = () => {
+            if (video.dataset.srcAttached === "1") return;
+            const dataSrc = video.getAttribute("data-src");
+            if (!dataSrc) return;
+            video.src = dataSrc;
+            video.dataset.srcAttached = "1";
+            video.load();
+          };
+
           const play = () => {
+            ensureSrc();
             void video.play().catch(() => undefined);
             gsap.to(media, { opacity: 1, duration: 0.45, ease: "power2.out" });
           };
@@ -142,7 +152,7 @@ export function ChallengesSection() {
               </div>
               <ArrowLink
                 href="#contact"
-                className="rj-challenges__cta"
+                className="rj-link-active rj-challenges__cta"
                 onClick={(event: MouseEvent<HTMLAnchorElement>) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -156,11 +166,11 @@ export function ChallengesSection() {
               <CropMarks />
               <div className="rj-challenges__media-video">
                 <video
-                  src={item.video}
+                  data-src={item.video}
                   muted
                   loop
                   playsInline
-                  preload="metadata"
+                  preload="none"
                 />
               </div>
             </div>

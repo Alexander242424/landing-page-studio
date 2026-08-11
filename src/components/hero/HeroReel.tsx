@@ -1,24 +1,35 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { createAwardsCharReveal } from "@/lib/textReveal";
+import { LazyVideo } from "@/components/media/LazyVideo";
+import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
+import { ArrowLink } from "@/components/ui/ArrowLink";
+import { openContactChat } from "@/lib/askChat";
+import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const HERO_VIDEO = "/video/hero.mp4";
+const HERO_POSTER = "/video/hero-poster.jpg";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
 
 /**
  * Rejouice-matched hero + showreel:
  * - Awards char reveal on 2-line static headline
- * - Description entrance via playHomeEntrance; scroll-cue fade here
+ * - Description via createTextReveal (same masked word reveal as HomeIntro / approach)
  * - Scrubbed headline (+ mobile description) parallax, reel clip-path grow + video parallax
  * - Mobile uses a lighter animation budget to avoid touch scroll jitter
+ *
+ * Load sequence (with playHomeEntrance): header → video → title → description
  */
 export function HeroReel() {
+  const { lenis } = useSmoothScroll();
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
@@ -26,43 +37,87 @@ export function HeroReel() {
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const scrollToHref = (href: string) => {
+    const id = href.replace("#", "");
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    if (lenis) {
+      lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+    } else {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const onProcessClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    scrollToHref("#process");
+  };
+
+  const onTalkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    openContactChat();
+  };
+
   useEffect(() => {
     const hero = heroRef.current;
     const logo = logoRef.current;
+    const description = descriptionRef.current;
+    const actions = actionsRef.current;
     const bottom = bottomRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
     const frame = frameRef.current;
-    const video = videoRef.current;
     if (!hero || !logo || !reel || !videoWrap || !frame) return;
 
     const cleanups: Array<() => void> = [];
 
-    // SplitText outside gsap.context so ctx.revert() cannot double-revert it.
+    // DOM-mutating splits outside gsap.context so ctx.revert() cannot double-revert.
+    // Title after video starts (~0.22s in playHomeEntrance); description as title settles.
     cleanups.push(
       createAwardsCharReveal(logo, {
         playOnLoad: true,
-        delay: 0.2,
+        delay: 0.52,
         duration: 1.5,
         stagger: 0.05,
         yStagger: 0.016,
       }),
     );
 
+    if (description) {
+      cleanups.push(
+        createTextReveal(description, {
+          playOnLoad: true,
+          delay: 1.7,
+        }),
+      );
+    }
+
     const ctx = gsap.context(() => {
+      if (actions) {
+        gsap.set(actions, { autoAlpha: 0, y: 14 });
+        gsap.to(actions, {
+          autoAlpha: 1,
+          y: 0,
+          delay: 2.55,
+          duration: 1,
+          ease: "expo.out",
+        });
+      }
+
       if (icon) {
         gsap.set(icon, { autoAlpha: 0, y: -14 });
         gsap.to(icon, {
           autoAlpha: 1,
           y: 0,
-          delay: 1.05,
+          delay: 1.35,
           duration: 1.2,
           ease: "expo.out",
         });
         gsap.to(icon, {
           y: 8,
-          delay: 2.4,
+          delay: 2.7,
           duration: 1.15,
           ease: "power1.inOut",
           yoyo: true,
@@ -194,19 +249,12 @@ export function HeroReel() {
       cleanups.push(() => mm.revert());
     }, rootRef);
 
-    const play = () => {
-      void video?.play().catch(() => undefined);
-    };
-    play();
-    video?.addEventListener("loadeddata", play);
-
     // Avoid ScrollTrigger.refresh on mobile address-bar resize (layout thrash).
     const onOrientation = () => ScrollTrigger.refresh();
     window.addEventListener("orientationchange", onOrientation);
     requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
-      video?.removeEventListener("loadeddata", play);
       window.removeEventListener("orientationchange", onOrientation);
       cleanups.forEach((fn) => fn());
       ctx.revert();
@@ -230,10 +278,33 @@ export function HeroReel() {
 
         <div ref={bottomRef} className="rj-hero__bottom">
           <div className="rj-hero__taglines">
-            <p className="rj-hero__tagline rj-hero__description">
+            <p
+              ref={descriptionRef}
+              className="rj-hero__tagline rj-hero__description rj-text-reveal"
+            >
               We grow your product and revenue by boosting user experience,
               journeys, and metrics that drive conversion, activation, trials.
             </p>
+            <div
+              ref={actionsRef}
+              className="rj-hero__actions"
+              aria-label="Hero actions"
+            >
+              <ArrowLink
+                href="#process"
+                className="rj-link-active rj-hero__cta"
+                onClick={onProcessClick}
+              >
+                Our process
+              </ArrowLink>
+              <ArrowLink
+                href="#contact"
+                className="rj-link-active rj-hero__cta"
+                onClick={onTalkClick}
+              >
+                Let&apos;s talk
+              </ArrowLink>
+            </div>
           </div>
           <div className="rj-hero__controls">
             <div ref={iconRef} className="rj-hero__icon-wrap" aria-hidden="true">
@@ -265,16 +336,18 @@ export function HeroReel() {
       >
         <div ref={videoWrapRef} className="rj-reel__videos">
           <div ref={frameRef} className="rj-reel__video-frame">
-            <video
+            <LazyVideo
               ref={videoRef}
               className="rj-reel__video"
-              src="/video/hero.mp4"
+              src={HERO_VIDEO}
+              poster={HERO_POSTER}
               muted
               loop
               playsInline
-              preload="auto"
-              autoPlay
-              draggable={false}
+              preload="metadata"
+              autoPlayWhenVisible
+              // Warm shortly before the showreel enters view — not on first paint.
+              rootMargin="240px 0px"
             />
           </div>
         </div>

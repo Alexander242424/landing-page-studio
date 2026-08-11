@@ -12,4 +12,18 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    build: {
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes("node_modules/gsap")) return "gsap";
+            if (id.includes("node_modules/lenis")) return "lenis";
+            return undefined;
+          },
+        },
+      },
+    },
+  },
 });

@@ -1,7 +1,7 @@
 /**
  * Client / partner marks for the homepage logo strip.
- * Sourced from Rejouice (Prismic `brands_logos` + award/widget SVGs);
- * additional case-study names as Aeonik path wordmarks to fill the pool.
+ * Primary pool: UXLAB Framer “Featured engagements” SVGs.
+ * A few prior marks kept as extras so the crossfade pool stays larger than the 8 slots.
  */
 export type ClientLogo = {
   id: string;
@@ -10,46 +10,38 @@ export type ClientLogo = {
 };
 
 export const CLIENT_LOGOS: ClientLogo[] = [
+  // Featured engagements (UXLAB)
+  { id: "calendly", src: "/logos/calendly.svg", alt: "Calendly" },
+  { id: "stan", src: "/logos/stan.svg", alt: "Stan" },
+  { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes" },
+  { id: "nespresso", src: "/logos/nespresso.svg", alt: "Nespresso" },
+  { id: "softr", src: "/logos/softr.svg", alt: "softr" },
+  { id: "zara", src: "/logos/zara.svg", alt: "ZARA" },
+  { id: "polymarket", src: "/logos/polymarket.svg", alt: "Polymarket" },
+  { id: "easy", src: "/logos/easy.svg", alt: "easy" },
+  {
+    id: "forbes-travel-guide",
+    src: "/logos/forbes-travel-guide.svg",
+    alt: "Forbes Travel Guide",
+  },
+  { id: "pipedrive", src: "/logos/pipedrive.svg", alt: "pipedrive" },
+  // Extras for crossfade variety
   { id: "rivian", src: "/logos/rivian.svg", alt: "Rivian" },
-  { id: "rivian-mark", src: "/logos/rivian-mark.svg", alt: "Rivian" },
   { id: "oura", src: "/logos/oura.svg", alt: "Oura" },
-  { id: "ov-loop", src: "/logos/ov-loop.svg", alt: "OV Loop" },
   { id: "moxion", src: "/logos/moxion.svg", alt: "Moxion" },
-  { id: "moxion-alt", src: "/logos/moxion-alt.svg", alt: "Moxion" },
-  { id: "moxion-wordmark", src: "/logos/moxion-wordmark.svg", alt: "Moxion" },
-  { id: "hyperframe", src: "/logos/hyperframe.svg", alt: "Hyperframe" },
-  { id: "hyperframe-alt", src: "/logos/hyperframe-alt.svg", alt: "Hyperframe" },
   { id: "rappi", src: "/logos/rappi.svg", alt: "Rappi" },
-  { id: "proof", src: "/logos/proof.svg", alt: "Proof" },
-  { id: "proof-alt", src: "/logos/proof-alt.svg", alt: "Proof" },
-  { id: "noovo", src: "/logos/noovo.svg", alt: "Noovo" },
-  { id: "tensr", src: "/logos/tensr.svg", alt: "Tensr" },
-  { id: "eight-vc", src: "/logos/eight-vc.svg", alt: "8VC" },
-  { id: "fwa", src: "/logos/fwa.svg", alt: "FWA" },
+  { id: "hyperframe", src: "/logos/hyperframe.svg", alt: "Hyperframe" },
   { id: "awwwards", src: "/logos/awwwards.svg", alt: "Awwwards" },
-  { id: "behance", src: "/logos/behance.svg", alt: "Behance" },
-  { id: "webby", src: "/logos/webby.svg", alt: "Webby Awards" },
-  { id: "tensor", src: "/logos/tensor.svg", alt: "Tensor" },
-  { id: "terminal", src: "/logos/terminal.svg", alt: "Terminal" },
-  { id: "icomat", src: "/logos/icomat.svg", alt: "ICOMAT" },
-  { id: "intrepid", src: "/logos/intrepid.svg", alt: "Intrepid" },
-  { id: "unspun", src: "/logos/unspun.svg", alt: "Unspun" },
-  { id: "gencell", src: "/logos/gencell.svg", alt: "GenCell" },
-  { id: "duchateau", src: "/logos/duchateau.svg", alt: "Du Chateau" },
-  { id: "list-across", src: "/logos/list-across.svg", alt: "List Across" },
-  { id: "pinch", src: "/logos/pinch.svg", alt: "Pinch" },
-  { id: "connect-homes", src: "/logos/connect-homes.svg", alt: "Connect Homes" },
-  { id: "engineered-floors", src: "/logos/engineered-floors.svg", alt: "Engineered Floors" },
 ];
 
-/** Prefer authentic Rejouice strip marks for the initial visible set. */
+/** Initial visible set — Featured engagements order (8 slots). */
 export const LOGO_STRIP_SEED_IDS = [
-  "rivian",
-  "oura",
-  "moxion",
-  "eight-vc",
-  "rappi",
-  "hyperframe",
-  "ov-loop",
-  "proof",
+  "calendly",
+  "stan",
+  "forbes",
+  "nespresso",
+  "softr",
+  "zara",
+  "polymarket",
+  "easy",
 ] as const;

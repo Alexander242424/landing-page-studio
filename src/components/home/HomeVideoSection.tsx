@@ -1,22 +1,22 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { LazyVideo } from "@/components/media/LazyVideo";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Rejouice home-video: clip-path inset(10%) → inset(0%) scrubbed on scroll.
  * Mobile skips clip-path scrub (expensive / jittery on touch).
+ * Video source attaches only near viewport (LazyVideo).
  */
 export function HomeVideoSection() {
   const rootRef = useRef<HTMLElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     const wrap = wrapRef.current;
-    const video = videoRef.current;
     if (!root || !wrap) return;
 
     const ctx = gsap.context(() => {
@@ -40,18 +40,11 @@ export function HomeVideoSection() {
       });
     }, root);
 
-    const play = () => {
-      void video?.play().catch(() => undefined);
-    };
-    play();
-    video?.addEventListener("loadeddata", play);
-
     const onOrientation = () => ScrollTrigger.refresh();
     window.addEventListener("orientationchange", onOrientation);
     requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
-      video?.removeEventListener("loadeddata", play);
       window.removeEventListener("orientationchange", onOrientation);
       ctx.revert();
     };
@@ -66,16 +59,15 @@ export function HomeVideoSection() {
     >
       <div ref={wrapRef} className="rj-home-video__wrap">
         <div className="rj-home-video__media">
-          <video
-            ref={videoRef}
+          <LazyVideo
             className="rj-home-video__video"
             src="/video/portfolio-loop.mp4"
             muted
             playsInline
             loop
-            autoPlay
-            preload="auto"
-            draggable={false}
+            preload="metadata"
+            autoPlayWhenVisible
+            rootMargin="500px 0px"
           />
         </div>
       </div>

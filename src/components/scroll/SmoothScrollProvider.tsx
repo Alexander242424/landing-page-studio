@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import Lenis from "lenis";
+import type Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -38,6 +38,7 @@ function prefersNativeTouchScroll() {
  * Lenis + GSAP ScrollTrigger sync matching Rejouice
  * (lerp 0.1, scrubbed hero parallax driven by Lenis scroll).
  * On touch devices Lenis is skipped so ScrollTrigger rides native scroll.
+ * Lenis is dynamically imported so mobile never downloads the chunk.
  */
 export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
@@ -48,29 +49,38 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const instance = new Lenis({
-      lerp: 0.1,
-      smoothWheel: true,
-      syncTouch: false,
-      wheelMultiplier: 1,
-      touchMultiplier: 1,
-      autoRaf: false,
-      overscroll: true,
+    let cancelled = false;
+    let instance: Lenis | null = null;
+    let ticker: ((time: number) => void) | null = null;
+
+    void import("lenis").then(({ default: LenisCtor }) => {
+      if (cancelled) return;
+
+      instance = new LenisCtor({
+        lerp: 0.1,
+        smoothWheel: true,
+        syncTouch: false,
+        wheelMultiplier: 1,
+        touchMultiplier: 1,
+        autoRaf: false,
+        overscroll: true,
+      });
+
+      instance.on("scroll", ScrollTrigger.update);
+
+      ticker = (time: number) => {
+        instance?.raf(time * 1000);
+      };
+      gsap.ticker.add(ticker);
+      gsap.ticker.lagSmoothing(0);
+
+      setLenis(instance);
     });
 
-    instance.on("scroll", ScrollTrigger.update);
-
-    const ticker = (time: number) => {
-      instance.raf(time * 1000);
-    };
-    gsap.ticker.add(ticker);
-    gsap.ticker.lagSmoothing(0);
-
-    setLenis(instance);
-
     return () => {
-      gsap.ticker.remove(ticker);
-      instance.destroy();
+      cancelled = true;
+      if (ticker) gsap.ticker.remove(ticker);
+      instance?.destroy();
       setLenis(null);
     };
   }, []);

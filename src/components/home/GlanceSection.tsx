@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { LazyVideo } from "@/components/media/LazyVideo";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { cn } from "@/lib/utils";
 
@@ -162,7 +163,15 @@ function LogoMark({ src }: { src: string }) {
   return (
     <div className="rj-glance__logos">
       <div className="rj-glance__logo is-active">
-        <img src={src} alt="" draggable={false} />
+        <img
+          src={src}
+          alt=""
+          width={96}
+          height={28}
+          decoding="async"
+          loading="lazy"
+          draggable={false}
+        />
       </div>
     </div>
   );
@@ -179,19 +188,27 @@ function WidgetCard({ widget }: { widget: GlanceWidget }) {
     >
       {widget.backgroundImage ? (
         <div className="rj-glance__bg">
-          <img src={widget.backgroundImage} alt="" draggable={false} />
+          <img
+            src={widget.backgroundImage}
+            alt=""
+            width={880}
+            height={650}
+            decoding="async"
+            loading="lazy"
+            draggable={false}
+          />
         </div>
       ) : null}
       {widget.backgroundVideo ? (
         <div className="rj-glance__bg">
-          <video
+          <LazyVideo
             src={widget.backgroundVideo}
             muted
             playsInline
             loop
-            autoPlay
             preload="metadata"
-            draggable={false}
+            autoPlayWhenVisible
+            rootMargin="280px 0px"
           />
         </div>
       ) : null}
