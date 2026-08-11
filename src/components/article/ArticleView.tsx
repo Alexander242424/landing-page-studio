@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { ArticleAsideCta } from "@/components/article/ArticleAsideCta";
 import { articleHeadingId } from "@/components/article/articleHeadingId";
 import { ArticleToc } from "@/components/article/ArticleToc";
 import { BlogGrid } from "@/components/blog/BlogGrid";
@@ -23,17 +22,18 @@ type ArticleViewProps = {
 /**
  * Light, SEO / GEO / LLM-optimized article body.
  * Semantic article markup + answer capsule + FAQ for generative engines.
- * Desktop: sticky TOC | reading column | sticky CTA.
+ * Desktop: sticky TOC | reading column. Related band is full page width (Home).
  */
 export function ArticleView({ article }: ArticleViewProps) {
   const related = getRelatedArticles(article.slug);
 
   return (
-    <article
-      className="rj-article"
-      itemScope
-      itemType="https://schema.org/Article"
-    >
+    <>
+      <article
+        className="rj-article"
+        itemScope
+        itemType="https://schema.org/Article"
+      >
       <header className="rj-article__header">
         <nav className="rj-article__crumbs" aria-label="Breadcrumb">
           <ol>
@@ -76,17 +76,6 @@ export function ArticleView({ article }: ArticleViewProps) {
         <meta itemProp="description" content={article.description} />
         <link itemProp="image" href={absoluteUrl(article.image)} />
       </header>
-
-      <figure className="rj-article__hero">
-        <img
-          src={article.image}
-          alt={article.imageAlt}
-          width={1600}
-          height={900}
-          itemProp="image"
-          fetchPriority="high"
-        />
-      </figure>
 
       <div className="rj-article__layout">
         <aside
@@ -173,16 +162,13 @@ export function ArticleView({ article }: ArticleViewProps) {
             </Accordion>
           </section>
         </div>
-
-        <aside
-          className="rj-article__rail rj-article__rail--cta"
-          aria-label="Get in touch"
-        >
-          <div className="rj-article__rail-sticky">
-            <ArticleAsideCta variant="rail" />
-          </div>
-        </aside>
       </div>
+
+      <p className="rj-article__entities" hidden>
+        Entities: {article.entities.join(", ")}. Keywords:{" "}
+        {article.keywords.join(", ")}. Path: {articlePath(article.slug)}.
+      </p>
+      </article>
 
       {related.length > 0 ? (
         <section
@@ -195,12 +181,7 @@ export function ArticleView({ article }: ArticleViewProps) {
           <BlogGrid articles={related} />
         </section>
       ) : null}
-
-      <p className="rj-article__entities" hidden>
-        Entities: {article.entities.join(", ")}. Keywords:{" "}
-        {article.keywords.join(", ")}. Path: {articlePath(article.slug)}.
-      </p>
-    </article>
+    </>
   );
 }
 

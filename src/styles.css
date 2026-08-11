@@ -1040,6 +1040,18 @@ ul {
   content: none;
 }
 
+/* Mobile: +15% on hero-bottom copy + CTA labels (desktop sizes unchanged) */
+@media (max-width: 767px) {
+  .rj-hero__tagline,
+  .rj-hero__description {
+    font-size: calc(1.15 * clamp(14px, 3.6vw, 18px));
+  }
+
+  .rj-hero__cta {
+    font-size: calc(1.4rem * 1.15);
+  }
+}
+
 .rj-hero__controls {
   position: absolute;
   right: 1rem;
@@ -1938,7 +1950,7 @@ body.rj-scroll-dark .rj-page__main {
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
-  column-gap: 2.4rem; /* ~24px at 10px root */
+  column-gap: 1.6rem; /* ~16px at 10px root */
   width: max-content;
   will-change: transform;
   cursor: grab;
@@ -2227,7 +2239,7 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-glance__track {
-    column-gap: 2.4rem; /* 24px */
+    column-gap: 1.6rem; /* 16px */
     padding-left: 2.4rem;
     padding-right: 0;
   }
@@ -2533,6 +2545,10 @@ body.rj-scroll-dark .rj-page__main {
   --rj-ask-width: min(594px, calc(100% - 32px));
   /* Matches ask column gutters (32px / 20px total inset) */
   --rj-ask-inline: 16px;
+  /* Matches .rj-ask__bar min-height — chat is absolutely anchored above the bar */
+  --rj-ask-bar-h: 60px;
+  --rj-ask-chat-gap: 10px;
+  --rj-ask-chat-h: min(580px, calc(90dvh - 7.2rem));
 
   position: fixed;
   left: 0;
@@ -2559,15 +2575,15 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-ask__tips {
+  position: relative;
+  z-index: 2;
   width: 100%;
   display: grid;
   grid-template-rows: 1fr;
   opacity: 1;
-  transform: translateY(0);
   transition:
-    opacity 0.45s var(--rj-ask-ease),
-    transform 0.45s var(--rj-ask-ease),
-    grid-template-rows 0.45s var(--rj-ask-ease);
+    opacity 0.35s var(--rj-ask-ease),
+    grid-template-rows 0.35s var(--rj-ask-ease);
   pointer-events: none;
   /* Do not clip the chip row — horizontal scroll lives on .rj-ask__row */
   overflow: visible;
@@ -2576,7 +2592,6 @@ body.rj-scroll-dark .rj-page__main {
 .rj-ask.is-open .rj-ask__tips {
   grid-template-rows: 0fr;
   opacity: 0;
-  transform: translateY(8px);
   pointer-events: none;
   overflow: hidden;
 }
@@ -2600,54 +2615,105 @@ body.rj-scroll-dark .rj-page__main {
   pointer-events: auto;
 }
 
-/* Keep chat the same width as the input bar; animate open/close */
+/*
+ * Chat is out of flex flow and anchored above the bar so tip collapse cannot
+ * shift its viewport position (the old in-flow grid 0fr→1fr + tips collapse “jump”).
+ * Shell opacity/visibility snap with no transform — backdrop-filter must not sit under
+ * an animating opacity/transform ancestor or blur arrives a frame (or second) late.
+ * Entrance motion is on chat children only.
+ */
 .rj-ask__chat-shell {
+  position: absolute;
+  left: 0;
   width: 100%;
-  display: grid;
-  grid-template-rows: 0fr;
+  bottom: calc(var(--rj-ask-bar-h) + var(--rj-ask-chat-gap));
+  height: var(--rj-ask-chat-h);
+  z-index: 1;
   opacity: 0;
-  transform: translateY(16px) scale(0.985);
-  transform-origin: bottom center;
-  margin-bottom: 0;
+  visibility: hidden;
+  /* Close can fade; open must snap opacity so blur is not delayed */
   transition:
-    grid-template-rows 0.55s var(--rj-ask-ease),
-    opacity 0.4s var(--rj-ask-ease),
-    transform 0.55s var(--rj-ask-ease),
-    margin-bottom 0.55s var(--rj-ask-ease);
+    opacity 0.2s var(--rj-ask-ease),
+    visibility 0s linear 0.2s;
   pointer-events: none;
 }
 
 .rj-ask.is-open .rj-ask__chat-shell {
-  grid-template-rows: 1fr;
   opacity: 1;
-  transform: translateY(0) scale(1);
-  margin-bottom: 10px;
+  visibility: visible;
   pointer-events: auto;
+  transition:
+    opacity 0s linear 0s,
+    visibility 0s linear 0s;
 }
 
 .rj-ask__chat {
+  position: relative;
   width: 100%;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  /* Height only when open — otherwise tips get pushed to the top of the viewport */
-  max-height: 90dvh;
-  height: auto;
   border-radius: 22px;
   border: 1px solid var(--rj-ask-bar-edge);
-  background: var(--rj-ask-bar);
-  -webkit-backdrop-filter: blur(40px) saturate(1.4);
-  backdrop-filter: blur(40px) saturate(1.4);
+  /* Tint on the panel; blur lives on ::before so it is not tied to content motion */
+  background: transparent;
   box-shadow:
     0 24px 80px -28px var(--rj-ask-shadow),
     inset 0 1px 0 color-mix(in srgb, var(--rj-white) 12%, transparent);
 }
 
-.rj-ask.is-open .rj-ask__chat {
-  /* Fixed height so messages become the scrollport (not height:auto + clip) */
-  height: min(580px, calc(90dvh - 7.2rem));
-  max-height: min(580px, calc(90dvh - 7.2rem));
+/* Dedicated glass layer — full opacity on the first open frame (no fade/transform) */
+.rj-ask__chat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--rj-ask-bar);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  backdrop-filter: blur(40px) saturate(1.4);
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+.rj-ask.is-shown .rj-ask__chat::before {
+  will-change: backdrop-filter;
+}
+
+.rj-ask__chat > * {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.32s var(--rj-ask-ease),
+    transform 0.45s var(--rj-ask-ease);
+}
+
+.rj-ask.is-open .rj-ask__chat > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rj-ask__tips,
+  .rj-ask__chat-shell,
+  .rj-ask.is-open .rj-ask__chat-shell,
+  .rj-ask__chat > *,
+  .rj-ask.is-open .rj-ask__chat > * {
+    transition: none;
+  }
+
+  .rj-ask__chat > * {
+    transform: none;
+    opacity: 1;
+  }
+
+  .rj-ask:not(.is-open) .rj-ask__chat > * {
+    opacity: 0;
+  }
 }
 
 .rj-ask__chat-header {
@@ -3165,7 +3231,7 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-ask__bar {
   width: 100%;
-  min-height: 60px;
+  min-height: var(--rj-ask-bar-h);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3180,6 +3246,7 @@ body.rj-scroll-dark .rj-page__main {
     inset 0 1px 0 color-mix(in srgb, var(--rj-white) 12%, transparent);
   pointer-events: auto;
   position: relative;
+  z-index: 2;
   color: var(--rj-ask-fg);
   transition: box-shadow 0.35s var(--rj-ask-ease);
 }
@@ -3304,9 +3371,8 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 @media (min-width: 768px) {
-  .rj-ask.is-open .rj-ask__chat {
-    height: 580px;
-    max-height: 580px;
+  .rj-ask {
+    --rj-ask-chat-h: 580px;
   }
 }
 
@@ -3314,19 +3380,12 @@ body.rj-scroll-dark .rj-page__main {
   .rj-ask {
     --rj-ask-width: min(540px, calc(100% - 20px));
     --rj-ask-inline: 10px;
+    --rj-ask-chat-h: calc(90dvh - 7.2rem);
     bottom: calc(4px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
   }
 
   .rj-ask__chat {
-    /* Keep chat under the input bar / safe area */
-    max-height: calc(90dvh - 7.2rem);
-    height: auto;
     border-radius: 20px;
-  }
-
-  .rj-ask.is-open .rj-ask__chat {
-    height: calc(90dvh - 7.2rem);
-    max-height: calc(90dvh - 7.2rem);
   }
 
   /*
@@ -4460,6 +4519,7 @@ body.rj-scroll-dark .rj-page__main {
   /* Intro hold + 4 flings + outro, pinned viewport included.
      Keep this as the ONLY runway (pinSpacing: false) so we don't get a
      second black gap after the stack. */
+  width: 100%;
   height: 560vh;
   padding-top: 4vh;
   box-sizing: border-box;
@@ -4481,8 +4541,12 @@ body.rj-scroll-dark .rj-page__main {
 .rj-solutions-stack__list {
   position: relative;
   z-index: 2;
+  /* margin-inline + align-self: survive GSAP pin-spacer (display:flex row)
+     so the max-width stack stays viewport-centered on wide desktops */
   width: min(100%, 92rem);
   height: min(72vh, 52rem);
+  margin-inline: auto;
+  align-self: center;
   perspective: 28vw;
   transform-style: preserve-3d;
 }
@@ -4724,7 +4788,8 @@ body.rj-scroll-dark .rj-page__main {
   }
 }
 
-/* ≥1920px: taller title band; cards sit slightly higher in the pin frame */
+/* ≥1920px: taller title band; keep stack mid-viewport and scale width up
+   so a 1080px card doesn’t sit under the logo with a void on the right */
 @media (min-width: 1920px) {
   .rj-solutions-stack {
     padding-block: 18rem 0;
@@ -4737,12 +4802,15 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-solutions-stack__pin {
-    justify-content: flex-start;
-    padding-bottom: 3.2rem;
+    justify-content: center;
+    /* Optical lift vs true center — still mid-frame, not flush under header */
+    padding-top: 2.4rem;
+    padding-bottom: 8rem;
   }
 
   .rj-solutions-stack__list {
-    height: min(62vh, 54rem);
+    width: min(100%, clamp(108rem, 58vw, 140rem));
+    height: min(66vh, 58rem);
   }
 }
 
@@ -4767,7 +4835,8 @@ body.rj-scroll-dark .rj-page__main {
   .rj-solutions-stack__list {
     display: flex;
     flex-direction: column;
-    gap: var(--rj-stack-gap);
+    /* Hairline + card-inner padding-block own the rhythm between stacked cards */
+    gap: 0;
     height: auto;
     perspective: none;
   }
@@ -4785,7 +4854,9 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-solutions-stack__card-inner {
-    padding: 0;
+    /* Top hairline + equal vertical padding (mobile dark stack only) */
+    padding: 4.8rem 0;
+    border-top: 1px solid color-mix(in srgb, var(--rj-white) 14%, transparent);
   }
 }
 
@@ -4852,7 +4923,12 @@ html[data-rj-route="article"] body {
 
 .rj-article {
   --rj-article-read-max: 72rem;
+  --rj-article-toc-rail: 20rem;
   --rj-article-rail-gap: 3.2rem;
+  --rj-article-layout-max: calc(
+    var(--rj-article-toc-rail) + var(--rj-article-rail-gap) +
+      var(--rj-article-read-max)
+  );
   --rj-article-sticky-top: calc(var(--rj-header-height) + 2.4rem);
   width: 100%;
   max-width: var(--rj-article-read-max);
@@ -4961,38 +5037,6 @@ html[data-rj-route="article"] body {
   }
 }
 
-.rj-article-cta-rail {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.2rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid var(--rj-border);
-}
-
-.rj-article-cta-rail h2 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 300;
-  letter-spacing: var(--rj-tracking-heading);
-  line-height: 1.2;
-  color: var(--rj-black);
-}
-
-.rj-article-cta-rail p {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 300;
-  letter-spacing: var(--rj-tracking-caption);
-  line-height: 1.45;
-  color: var(--rj-fg-muted);
-}
-
-.rj-article-cta-rail__btn {
-  margin-top: 0.4rem;
-  color: var(--rj-black);
-}
-
 .rj-article__crumbs ol {
   display: flex;
   flex-wrap: wrap;
@@ -5046,7 +5090,7 @@ html[data-rj-route="article"] body {
 
 .rj-article__title {
   margin: 0;
-  max-width: 18ch;
+  max-width: none;
   font-size: clamp(3.2rem, 7vw, 5.6rem);
   font-weight: 300;
   letter-spacing: var(--rj-tracking-title);
@@ -5064,33 +5108,6 @@ html[data-rj-route="article"] body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--rj-fg-muted);
-}
-
-.rj-article__hero {
-  width: 100%;
-  max-width: var(--rj-article-read-max);
-  margin: 0 auto 4rem;
-  overflow: hidden;
-  border-radius: 4px;
-  background: var(--rj-paper-warm);
-}
-
-/* Wider than the reading column; inset by grid margins (mobile stays column-width). */
-@media (min-width: 768px) {
-  .rj-article__hero {
-    width: min(110rem, calc(100vw - 2 * var(--rj-grid-margin)));
-    max-width: none;
-    margin-left: calc(50% - min(55rem, calc(50vw - var(--rj-grid-margin))));
-    margin-right: calc(50% - min(55rem, calc(50vw - var(--rj-grid-margin))));
-  }
-}
-
-.rj-article__hero img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
 }
 
 .rj-article__answer {
@@ -5114,8 +5131,7 @@ html[data-rj-route="article"] body {
 
 .rj-article__takeaways h2,
 .rj-article__section h2,
-.rj-article__faq h2,
-.rj-article__cta h2 {
+.rj-article__faq h2 {
   margin: 0 0 1.6rem;
   font-size: clamp(2.2rem, 3vw, 3rem);
   font-weight: 300;
@@ -5259,39 +5275,8 @@ html[data-rj-route="article"] body {
   margin: 0;
 }
 
-.rj-article__cta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.4rem;
-  margin: 0 0 6rem;
-  padding: 3rem 2.4rem;
-  border-radius: 4px;
-  background: var(--rj-black);
-  color: var(--rj-white);
-}
-
-.rj-article__cta h2 {
-  margin: 0;
-  color: var(--rj-white);
-}
-
-.rj-article__cta p {
-  margin: 0;
-  max-width: 42rem;
-  font-size: 1.6rem;
-  font-weight: 300;
-  letter-spacing: var(--rj-tracking-body);
-  line-height: 1.45;
-  color: color-mix(in srgb, var(--rj-white) 78%, transparent);
-}
-
-.rj-article__cta-btn {
-  margin-top: 0.6rem;
-  color: var(--rj-white);
-}
-
 .rj-article__related {
+  width: 100%;
   margin: 6rem 0 0;
   padding-top: 4rem;
   border-top: none;
@@ -5315,18 +5300,6 @@ html[data-rj-route="article"] body {
     padding-bottom: 14rem;
   }
 
-  .rj-article__title {
-    max-width: 16ch;
-  }
-
-  .rj-article__hero {
-    margin-bottom: 5rem;
-  }
-
-  .rj-article__cta {
-    padding: 4rem 4.2rem;
-  }
-
   .rj-article__faq-trigger {
     padding: 2.6rem 0;
     font-size: 2rem;
@@ -5338,26 +5311,25 @@ html[data-rj-route="article"] body {
   }
 }
 
-/* Wide desktop: sticky TOC + reading column + sticky CTA in side rails. */
+/* Wide desktop: sticky TOC + reading column in one shared container. */
 @media (min-width: 1200px) {
   .rj-article {
-    max-width: min(140rem, 100%);
+    max-width: min(var(--rj-article-layout-max), 100%);
   }
 
-  .rj-article__header,
-  .rj-article__related {
-    max-width: var(--rj-article-read-max);
-    margin-inline: auto;
+  .rj-article__header {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
   }
 
   .rj-article__layout {
     display: grid;
     grid-template-columns:
-      minmax(15rem, 20rem)
-      minmax(0, var(--rj-article-read-max))
-      minmax(15rem, 22rem);
+      minmax(15rem, var(--rj-article-toc-rail))
+      minmax(0, 1fr);
     column-gap: var(--rj-article-rail-gap);
-    justify-content: center;
+    justify-content: stretch;
     align-items: start;
   }
 
@@ -5403,11 +5375,6 @@ html[data-rj-route="article"] body {
   .rj-article-toc__link.is-active::before,
   .rj-article-toc__link[aria-current="location"]::before {
     background: var(--rj-black);
-  }
-
-  /* Rail CTA replaces the dark end block on wide screens. */
-  .rj-article__cta--end {
-    display: none;
   }
 
   .rj-article__related {

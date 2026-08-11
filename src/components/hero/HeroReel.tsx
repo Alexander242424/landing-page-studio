@@ -18,7 +18,9 @@ const DESKTOP_MQ = "(min-width: 1024px)";
  * Rejouice-matched hero + showreel:
  * - Awards char reveal on 2-line static headline
  * - Description via createTextReveal (same masked word reveal as HomeIntro / approach)
- * - Scrubbed headline (+ mobile description) parallax, reel clip-path grow + video parallax
+ * - Scrubbed headline parallax; reel clip-path grow (desktop) + video parallax
+ * - Taglines sit in normal hero flow on all breakpoints (no mobile bottom scrub —
+ *   that desynced them from the showreel while the video scrolled)
  * - Mobile uses a lighter animation budget to avoid touch scroll jitter
  *
  * Load sequence (with playHomeEntrance): header → video → title → description
@@ -30,7 +32,6 @@ export function HeroReel() {
   const logoRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const videoWrapRef = useRef<HTMLDivElement>(null);
@@ -64,7 +65,6 @@ export function HeroReel() {
     const logo = logoRef.current;
     const description = descriptionRef.current;
     const actions = actionsRef.current;
-    const bottom = bottomRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
@@ -127,47 +127,32 @@ export function HeroReel() {
 
       const mm = gsap.matchMedia();
 
-      // Mobile: subtle dual-speed parallax; skip clip-path scrub (main jank source).
+      // Mobile: headline parallax only; skip clip-path scrub (main jank source).
+      // Taglines stay in document flow like desktop so they leave with the reel.
       mm.add(MOBILE_MQ, () => {
         gsap.set(frame, { clipPath: "inset(0% round 0rem)" });
 
-        const heroTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: hero,
-            // Soft scrub damps finger-sample noise without feeling laggy.
-            scrub: 0.45,
-            start: "top top",
-            end: "bottom top",
-            invalidateOnRefresh: true,
-          },
-        });
-
-        // Headline lags (smaller y); bottom/description leads (larger y).
-        heroTl.fromTo(
-          logo,
-          { y: 0 },
-          {
-            y: () => hero.offsetHeight * 0.16,
-            duration: 1,
-            ease: "none",
-            force3D: true,
-          },
-          0,
-        );
-
-        if (bottom) {
-          heroTl.fromTo(
-            bottom,
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: hero,
+              // Soft scrub damps finger-sample noise without feeling laggy.
+              scrub: 0.45,
+              start: "top top",
+              end: "bottom top",
+              invalidateOnRefresh: true,
+            },
+          })
+          .fromTo(
+            logo,
             { y: 0 },
             {
-              y: () => hero.offsetHeight * 0.34,
+              y: () => hero.offsetHeight * 0.16,
               duration: 1,
               ease: "none",
               force3D: true,
             },
-            0,
           );
-        }
 
         // Mild video drift only — ±50% + clip-path fought native touch scroll.
         gsap.fromTo(
@@ -187,9 +172,9 @@ export function HeroReel() {
         );
 
         return () => {
-          const clear = [logo, videoWrap, frame];
-          if (bottom) clear.push(bottom);
-          gsap.set(clear, { clearProps: "transform,clipPath" });
+          gsap.set([logo, videoWrap, frame], {
+            clearProps: "transform,clipPath",
+          });
         };
       });
 
@@ -275,7 +260,7 @@ export function HeroReel() {
           </h1>
         </div>
 
-        <div ref={bottomRef} className="rj-hero__bottom">
+        <div className="rj-hero__bottom">
           <div className="rj-hero__taglines">
             <p
               ref={descriptionRef}
