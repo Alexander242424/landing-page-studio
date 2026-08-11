@@ -1259,7 +1259,8 @@ body.rj-scroll-dark {
 .rj-logo-strip {
   background: var(--rj-white);
   color: var(--rj-black);
-  padding: 5.2rem var(--rj-grid-margin);
+  /* +40px vertical breathing room above/below the marks */
+  padding: calc(5.2rem + 40px) var(--rj-grid-margin);
 }
 
 .rj-logo-strip__row {
@@ -1289,12 +1290,16 @@ body.rj-scroll-dark {
   max-height: 2.2rem;
   object-fit: contain;
   object-position: center;
+  /* Force solid black on light band — kills washed/grey source fills */
+  filter: brightness(0);
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 @media (min-width: 1024px) {
   .rj-logo-strip {
     /* Rejouice uses ~22rem; we sit earlier (post-hero) so keep generous but tighter */
-    padding-block: 10rem;
+    padding-block: calc(10rem + 40px);
   }
 
   .rj-logo-strip__row {
