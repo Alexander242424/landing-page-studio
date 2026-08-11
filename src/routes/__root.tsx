@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SmoothScrollProvider } from "@/components/scroll/SmoothScrollProvider";
+import { AnalyticsBeacon } from "@/components/analytics/AnalyticsBeacon";
 import { SITE, absoluteUrl, defaultMeta } from "@/lib/site";
 
 function NotFoundComponent() {
@@ -140,6 +141,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <SmoothScrollProvider>
+        <AnalyticsBeacon />
         <Outlet />
       </SmoothScrollProvider>
     </QueryClientProvider>
