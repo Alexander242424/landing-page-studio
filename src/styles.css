@@ -66,8 +66,9 @@
 }
 
 :root {
-  /* Rejouice mobile rem (~2.667vw), overridden at 768px */
-  font-size: 2.667vw;
+  /* Rejouice mobile rem (~2.667vw ≈ 10px at 375px). Cap at 10px so
+     tablet widths under 768px don't inflate every rem-based control. */
+  font-size: min(2.667vw, 10px);
   --rj-header-height: 4.7rem;
   --rj-svh: 1svh;
 
