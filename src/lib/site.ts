@@ -28,8 +28,10 @@ export const SITE = {
   email: "alex@uxlab.digital",
   locale: "en_US",
   language: "en",
-  ogImage: "/video/hero-poster.jpg",
+  ogImage: "/og.png",
   favicon: "/favicon.ico",
+  faviconPng: "/favicon.png",
+  appleTouchIcon: "/apple-touch-icon.png",
   themeColor: "#0a0a0a",
   location: {
     city: "Warsaw",
@@ -111,6 +113,8 @@ export function defaultLinks(path = "/"): SiteMetaLink[] {
   return [
     { rel: "canonical", href: absoluteUrl(path) },
     { rel: "icon", href: SITE.favicon, type: "image/x-icon" },
+    { rel: "icon", href: SITE.faviconPng, type: "image/png" },
+    { rel: "apple-touch-icon", href: SITE.appleTouchIcon },
     {
       rel: "alternate",
       type: "text/plain",
