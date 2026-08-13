@@ -26,6 +26,12 @@ import {
   faviconUrlForDomain,
   normalizeAuditUrl,
 } from "@/lib/croAudit";
+import {
+  resolveChatActions,
+  resolveGeneralActionIntent,
+  type ChatAction,
+  type ChatActionId,
+} from "@/lib/chatActions";
 import { UXLAB_SYSTEM_PROMPT } from "@/lib/uxlabKnowledge";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -105,21 +111,6 @@ const PRICING_REPLY = [
   "",
   "But I’m just an AI — you’d have to talk to the team for real numbers.",
 ].join("\n");
-
-const PRICING_ACTIONS = [
-  { id: "book", label: "Book a call" },
-  { id: "project", label: "Tell me about a project" },
-  { id: "explore", label: "Keep exploring" },
-] as const;
-
-type PricingActionId = (typeof PRICING_ACTIONS)[number]["id"];
-
-const CRO_AUDIT_ACTIONS = [
-  { id: "book", label: "Book a call" },
-  { id: "explore", label: "Keep exploring" },
-] as const;
-
-type CroAuditActionId = (typeof CRO_AUDIT_ACTIONS)[number]["id"];
 
 type ScanCardState = {
   domain: string;
@@ -252,9 +243,9 @@ function ThinkingIndicator() {
     >
       <span className="rj-ask__thinking-label">Thinking</span>
       <span className="rj-ask__thinking-dots" aria-hidden="true">
-        <span />
-        <span />
-        <span />
+        <span>.</span>
+        <span>.</span>
+        <span>.</span>
       </span>
     </div>
   );
@@ -418,6 +409,10 @@ export function AiPromptInput() {
   const scanRafRef = useRef<number | null>(null);
   const dockShownPrevRef = useRef(false);
   const dockTlRef = useRef<gsap.core.Timeline | null>(null);
+  /** CTA strip already shown once in this general thread. */
+  const actionsShownRef = useRef(false);
+  /** Cal / lead / CRO capture already in play this session. */
+  const commercialStartedRef = useRef(false);
 
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
@@ -432,10 +427,22 @@ export function AiPromptInput() {
   );
   const [croStep, setCroStep] = useState<CroAuditStep | null>(null);
   const [scanCard, setScanCard] = useState<ScanCardState | null>(null);
-  const [pricingActions, setPricingActions] = useState(false);
-  const [croAuditActions, setCroAuditActions] = useState(false);
+  const [chatActions, setChatActions] = useState<ChatAction[]>([]);
   const [showCal, setShowCal] = useState(false);
   const [inputHint, setInputHint] = useState<string | null>(null);
+
+  function clearChatActions() {
+    setChatActions([]);
+  }
+
+  function showResolvedActions(
+    input: Parameters<typeof resolveChatActions>[0],
+  ) {
+    const actions = resolveChatActions(input);
+    if (actions.length === 0) return;
+    setChatActions(actions);
+    actionsShownRef.current = true;
+  }
 
   const scanning = croStep === "scanning";
   const canSend = Boolean(value.trim()) && !pending && !scanning;
@@ -685,8 +692,7 @@ export function AiPromptInput() {
     messages,
     open,
     pending,
-    pricingActions,
-    croAuditActions,
+    chatActions,
     showCal,
     scanCard,
   ]);
@@ -727,7 +733,6 @@ export function AiPromptInput() {
     croStepRef.current = null;
     setCroStep(null);
     setScanCard(null);
-    setCroAuditActions(false);
   }
 
   async function pushScriptedReply(text: string, intent?: Parameters<typeof logChatEvent>[0]["intent"]) {
@@ -788,7 +793,8 @@ export function AiPromptInput() {
     resetNewsletterFlow();
     leadAnswersRef.current = { email: "", goal: "", company: "" };
     setLeadStep("email");
-    setPricingActions(false);
+    commercialStartedRef.current = true;
+    clearChatActions();
     setShowCal(false);
     setInputHint(null);
     setPending(false);
@@ -819,7 +825,7 @@ export function AiPromptInput() {
     newsletterEmailRef.current = "";
     setNewsletterStep("email");
     newsletterStepRef.current = "email";
-    setPricingActions(false);
+    clearChatActions();
     setShowCal(false);
     setInputHint(null);
     setPending(false);
@@ -847,7 +853,8 @@ export function AiPromptInput() {
     leadStepRef.current = null;
     resetNewsletterFlow();
     resetCroFlow();
-    setPricingActions(false);
+    commercialStartedRef.current = true;
+    clearChatActions();
     setShowCal(false);
     setInputHint(null);
     setPending(false);
@@ -886,7 +893,7 @@ export function AiPromptInput() {
   }
 
   async function runPricingFlow(userText: string) {
-    setPricingActions(false);
+    clearChatActions();
     resetCroFlow();
     resetNewsletterFlow();
     setShowCal(false);
@@ -910,7 +917,11 @@ export function AiPromptInput() {
 
     await pushScriptedReply(PRICING_REPLY, "pricing");
     if (!revealRef.current.cancelled) {
-      setPricingActions(true);
+      showResolvedActions({
+        intent: "pricing",
+        messageCount: 1,
+        userText,
+      });
     }
   }
 
@@ -923,7 +934,8 @@ export function AiPromptInput() {
     leadStepRef.current = null;
     resetNewsletterFlow();
     resetCroFlow();
-    setPricingActions(false);
+    commercialStartedRef.current = true;
+    clearChatActions();
     setShowCal(false);
     setInputHint(null);
     setPending(false);
@@ -1067,7 +1079,10 @@ export function AiPromptInput() {
       setCroStep("done");
       await pushScriptedReply(CRO.done(email), "cro");
       if (!revealRef.current.cancelled) {
-        setCroAuditActions(true);
+        showResolvedActions({
+          intent: "cro_done",
+          messageCount: 1,
+        });
         logChatEvent({
           eventType: "lead_complete",
           intent: "cro",
@@ -1081,10 +1096,10 @@ export function AiPromptInput() {
     }
   }
 
-  function onPricingAction(id: PricingActionId) {
+  function onChatAction(id: ChatActionId) {
     logChatEvent({
-      eventType: "pricing_action",
-      intent: "pricing",
+      eventType: "chat_action",
+      intent: id === "cro" ? "cro" : id === "book" ? "cal" : "general",
       metadata: { actionId: id },
     });
 
@@ -1094,8 +1109,7 @@ export function AiPromptInput() {
     }
 
     if (id === "project") {
-      setPricingActions(false);
-      setCroAuditActions(false);
+      clearChatActions();
       setShowCal(false);
       setInputHint("Describe your project…");
       setOpen(true);
@@ -1103,23 +1117,12 @@ export function AiPromptInput() {
       return;
     }
 
-    setPricingActions(false);
-    setInputHint(null);
-  }
-
-  function onCroAuditAction(id: CroAuditActionId) {
-    logChatEvent({
-      eventType: "cro_action",
-      intent: "cro",
-      metadata: { actionId: id },
-    });
-
-    if (id === "book") {
-      void startCalBookingFlow("Book a call");
+    if (id === "cro") {
+      void startCroAuditFlow("Start CRO audit");
       return;
     }
 
-    setCroAuditActions(false);
+    clearChatActions();
     setInputHint(null);
   }
 
@@ -1254,6 +1257,7 @@ export function AiPromptInput() {
       logChatEvent({
         eventType: "intent_open",
         intent: "general",
+        content: displayText,
         metadata: {
           source: "first_message",
           ...(asUrl ? { url: asUrl.href, domain: asUrl.domain } : {}),
@@ -1336,6 +1340,16 @@ export function AiPromptInput() {
           content: fullText,
           metadata: { messageId: assistantId, scripted: false },
         });
+
+        const userMessageCount =
+          messages.filter((m) => m.role === "user").length + 1;
+        showResolvedActions({
+          intent: resolveGeneralActionIntent(displayText),
+          messageCount: userMessageCount,
+          userText: displayText,
+          recentlyShown: actionsShownRef.current,
+          commercialStarted: commercialStartedRef.current,
+        });
       }
     } catch (error) {
       console.error("[AiPromptInput] Gemini error", error);
@@ -1366,8 +1380,7 @@ export function AiPromptInput() {
 
     const prompt = value.trim();
     setValue("");
-    setPricingActions(false);
-    setCroAuditActions(false);
+    clearChatActions();
     setInputHint(null);
 
     const cro = croStepRef.current;
@@ -1412,8 +1425,7 @@ export function AiPromptInput() {
 
   function onTip(tip: (typeof TIPS)[number]) {
     setValue("");
-    setPricingActions(false);
-    setCroAuditActions(false);
+    clearChatActions();
     setInputHint(null);
     logChatEvent({
       eventType: "chip_click",
@@ -1444,8 +1456,9 @@ export function AiPromptInput() {
       scanRafRef.current = null;
     }
     setPending(false);
-    setPricingActions(false);
-    setCroAuditActions(false);
+    clearChatActions();
+    actionsShownRef.current = false;
+    commercialStartedRef.current = false;
     setShowCal(false);
     setInputHint(null);
     setScanCard(null);
@@ -1536,9 +1549,6 @@ export function AiPromptInput() {
                   className={`rj-ask__bubble${msg.streaming ? " is-streaming" : ""}`}
                 >
                   {msg.text}
-                  {msg.streaming ? (
-                    <span className="rj-ask__caret" aria-hidden="true" />
-                  ) : null}
                 </div>
               </div>
             ))}
@@ -1557,37 +1567,18 @@ export function AiPromptInput() {
               </div>
             ) : null}
 
-            {pricingActions && !pending && !showCal ? (
+            {chatActions.length > 0 && !pending && !showCal ? (
               <div
                 className="rj-ask__actions rj-ask__msg--enter"
                 role="group"
-                aria-label="Pricing next steps"
+                aria-label="Suggested next steps"
               >
-                {PRICING_ACTIONS.map((action) => (
+                {chatActions.map((action) => (
                   <button
                     key={action.id}
                     type="button"
                     className="rj-ask__action"
-                    onClick={() => onPricingAction(action.id)}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-
-            {croAuditActions && !pending && !showCal ? (
-              <div
-                className="rj-ask__actions rj-ask__msg--enter"
-                role="group"
-                aria-label="CRO Audit next steps"
-              >
-                {CRO_AUDIT_ACTIONS.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className="rj-ask__action"
-                    onClick={() => onCroAuditAction(action.id)}
+                    onClick={() => onChatAction(action.id)}
                   >
                     {action.label}
                   </button>

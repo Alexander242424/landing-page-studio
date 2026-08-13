@@ -3166,96 +3166,88 @@ body.rj-scroll-dark .rj-page__main {
   border-bottom-right-radius: 5px;
 }
 
-.rj-ask__caret {
-  display: inline-block;
-  width: 0.45em;
-  height: 1em;
-  margin-left: 1px;
-  vertical-align: -0.12em;
-  background: color-mix(in srgb, var(--rj-white) 70%, transparent);
-  border-radius: 1px;
-  animation: rj-ask-caret 0.9s steps(1) infinite;
-}
-
-@keyframes rj-ask-caret {
-  50% {
-    opacity: 0;
-  }
-}
-
 .rj-ask__bubble--thinking {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   min-height: 18px;
-  padding-block: 13px;
-  padding-inline: 16px 18px;
+  padding-block: 11px;
+  padding-inline: 15px;
 }
 
 .rj-ask__thinking {
   display: inline-flex;
-  align-items: center;
-  gap: 7px;
+  align-items: baseline;
+  font-family: var(--rj-font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }
 
 .rj-ask__thinking-label {
-  font-size: 0.9375rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--rj-white) 42%, transparent) 0%,
-    color-mix(in srgb, var(--rj-white) 92%, transparent) 45%,
-    color-mix(in srgb, var(--rj-white) 42%, transparent) 90%
+    color-mix(in srgb, var(--rj-white) 42%, transparent) 35%,
+    color-mix(in srgb, var(--rj-white) 92%, transparent) 50%,
+    color-mix(in srgb, var(--rj-white) 42%, transparent) 65%,
+    color-mix(in srgb, var(--rj-white) 42%, transparent) 100%
   );
-  background-size: 220% 100%;
+  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: transparent;
-  animation: rj-ask-thinking-shimmer 1.8s ease-in-out infinite;
+  animation: rj-ask-thinking-shimmer 2s linear infinite;
 }
 
 .rj-ask__thinking-dots {
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 1px;
+  margin-left: 1px;
 }
 
 .rj-ask__thinking-dots span {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--rj-white) 62%, transparent);
-  animation: rj-ask-thinking-dot 1.2s ease-in-out infinite;
+  display: inline-block;
+  color: color-mix(in srgb, var(--rj-white) 55%, transparent);
+  -webkit-text-fill-color: color-mix(in srgb, var(--rj-white) 55%, transparent);
+  animation: rj-ask-thinking-dot 1.4s ease-in-out infinite;
+}
+
+.rj-ask__thinking-dots span:nth-child(1) {
+  animation-delay: 0s;
 }
 
 .rj-ask__thinking-dots span:nth-child(2) {
-  animation-delay: 0.16s;
+  animation-delay: 0.2s;
 }
 
 .rj-ask__thinking-dots span:nth-child(3) {
-  animation-delay: 0.32s;
+  animation-delay: 0.4s;
 }
 
 @keyframes rj-ask-thinking-shimmer {
   0% {
-    background-position: 100% 50%;
+    background-position: 200% center;
   }
   100% {
-    background-position: -100% 50%;
+    background-position: -200% center;
   }
 }
 
 @keyframes rj-ask-thinking-dot {
   0%,
-  80%,
-  100% {
-    opacity: 0.28;
-    transform: translateY(0) scale(0.85);
+  20% {
+    opacity: 0.15;
+    transform: translateY(0);
   }
   40% {
     opacity: 1;
-    transform: translateY(-2.5px) scale(1);
+    transform: translateY(-1px);
+  }
+  60%,
+  100% {
+    opacity: 0.15;
+    transform: translateY(0);
   }
 }
 
@@ -4120,7 +4112,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-footer__tagline {
   margin: 0;
   max-width: 28rem;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   letter-spacing: var(--rj-tracking-body);
   line-height: 1.3;
   color: var(--rj-fg);
@@ -4130,7 +4122,7 @@ body.rj-scroll-dark .rj-page__main {
   margin: 0;
   padding: 0;
   font-family: inherit;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 300;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -4157,7 +4149,7 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-footer__list a {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   letter-spacing: var(--rj-tracking-body);
   line-height: 1.2;
   color: var(--rj-fg);
@@ -4288,13 +4280,13 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-footer__tagline {
-    font-size: 2rem;
+    font-size: 1.6rem;
     letter-spacing: var(--rj-tracking-lead);
     line-height: 1.25;
   }
 
   .rj-footer__list a {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 
   .rj-footer__action {

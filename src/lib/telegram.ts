@@ -12,6 +12,19 @@ type TelegramChatEvent = {
   created_at: string;
 };
 
+const MESSAGE_MAX_CHARS = 400;
+
+/** Useful lead/contact keys — everything else is noise for Telegram. */
+const CONTACT_FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  email: "Email",
+  company: "Company",
+  goal: "Goal",
+  url: "URL",
+  domain: "Domain",
+  website: "Website",
+};
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -19,19 +32,83 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;");
 }
 
-function shortSession(sessionId: string) {
-  return sessionId.length > 10 ? `${sessionId.slice(0, 8)}…` : sessionId;
+function formatWhen(iso: string) {
+  try {
+    return new Date(iso).toLocaleString("en-GB", {
+      timeZone: "Europe/Warsaw",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
 }
 
-function metaLines(metadata: Record<string, unknown> | undefined) {
+function truncate(value: string, max = MESSAGE_MAX_CHARS) {
+  const trimmed = value.trim();
+  if (trimmed.length <= max) return trimmed;
+  return `${trimmed.slice(0, max - 1).trimEnd()}…`;
+}
+
+function headlineFor(row: TelegramChatEvent): string {
+  const intent = row.intent ?? "general";
+
+  if (row.event_type === "newsletter_complete") {
+    return "📧 Newsletter signup";
+  }
+
+  if (row.event_type === "lead_complete") {
+    if (intent === "cro") return "🔍 CRO audit lead";
+    if (intent === "contact") return "🎯 New lead";
+    return "🎯 New lead";
+  }
+
+  if (row.event_type === "intent_open") {
+    switch (intent) {
+      case "contact":
+        return "🎯 Contact chat started";
+      case "newsletter":
+        return "📧 Newsletter chat started";
+      case "cro":
+        return "🔍 CRO audit started";
+      case "cal":
+        return "📅 Booking started";
+      case "pricing":
+        return "💬 Pricing chat started";
+      default:
+        return "💬 Chat started";
+    }
+  }
+
+  return `ℹ️ ${escapeHtml(row.event_type)}`;
+}
+
+function contactLines(metadata: Record<string, unknown> | undefined): string[] {
   if (!metadata || typeof metadata !== "object") return [];
+
+  const hasUrl =
+    typeof metadata.url === "string" && metadata.url.trim().length > 0;
+
   const lines: string[] = [];
-  for (const [key, value] of Object.entries(metadata)) {
-    if (value == null || value === "") continue;
-    if (typeof value === "object") continue;
-    lines.push(`• <b>${escapeHtml(key)}</b>: ${escapeHtml(String(value))}`);
+  for (const [key, label] of Object.entries(CONTACT_FIELD_LABELS)) {
+    // Prefer full URL over bare domain when both exist.
+    if (key === "domain" && hasUrl) continue;
+    const raw = metadata[key];
+    if (raw == null || raw === "") continue;
+    if (typeof raw === "object") continue;
+    const value = String(raw).trim();
+    if (!value) continue;
+    lines.push(`<b>${label}:</b> ${escapeHtml(value)}`);
   }
   return lines;
+}
+
+function messageBlock(content: string | null | undefined): string | null {
+  if (!content?.trim()) return null;
+  return `“${escapeHtml(truncate(content))}”`;
 }
 
 export function shouldNotifyTelegram(row: TelegramChatEvent): boolean {
@@ -43,45 +120,23 @@ export function shouldNotifyTelegram(row: TelegramChatEvent): boolean {
 }
 
 export function formatTelegramMessage(row: TelegramChatEvent): string {
-  const when = new Date(row.created_at).toLocaleString("en-GB", {
-    timeZone: "Europe/Warsaw",
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-  const session = shortSession(row.session_id);
-  const intent = row.intent ? escapeHtml(row.intent) : "general";
-  const extras = metaLines(row.metadata as Record<string, unknown> | undefined);
+  const lines: string[] = [`<b>${headlineFor(row)}</b>`];
 
-  if (row.event_type === "intent_open") {
-    return [
-      `💬 <b>Chat started</b>`,
-      `Intent: <b>${intent}</b>`,
-      `Session: <code>${escapeHtml(session)}</code>`,
-      `When: ${escapeHtml(when)}`,
-      ...extras,
-    ].join("\n");
+  const message = messageBlock(row.content);
+  if (message) {
+    lines.push("", message);
   }
 
-  if (
-    row.event_type === "lead_complete" ||
-    row.event_type === "newsletter_complete"
-  ) {
-    const kind =
-      row.event_type === "newsletter_complete" ? "Newsletter" : "Lead";
-    return [
-      `🎯 <b>New ${kind}</b>`,
-      `Intent: <b>${intent}</b>`,
-      `Session: <code>${escapeHtml(session)}</code>`,
-      `When: ${escapeHtml(when)}`,
-      ...extras,
-    ].join("\n");
+  const contacts = contactLines(
+    row.metadata as Record<string, unknown> | undefined,
+  );
+  if (contacts.length > 0) {
+    lines.push("", ...contacts);
   }
 
-  return [
-    `ℹ️ <b>Chat event</b> (${escapeHtml(row.event_type)})`,
-    `Intent: <b>${intent}</b>`,
-    `Session: <code>${escapeHtml(session)}</code>`,
-  ].join("\n");
+  lines.push("", escapeHtml(formatWhen(row.created_at)));
+
+  return lines.join("\n");
 }
 
 function chatIds(): string[] {

@@ -183,7 +183,7 @@ export const CASES: CaseStudy[] = [
         text: "We mapped the first fourteen days — from unboxing to the first score that actually changed behavior. Every surface had one job: reduce friction to the next meaningful action. Visual language stayed restrained: generous type, quiet color, imagery that feels human rather than clinical.",
         media: [
           {
-            src: "/glance/oura-metalab.jpg",
+            src: "/glance/oura-case.jpg",
             alt: "Oura product moment — lifestyle and interface",
             layout: "portrait",
           },
@@ -198,17 +198,18 @@ export const CASES: CaseStudy[] = [
         type: "media",
         media: [
           {
-            src: "/glance/oura-case.jpg",
+            src: "/glance/oura.jpg",
             alt: "Oura case visual — brand atmosphere",
             layout: "pair",
           },
           {
-            src: "/glance/oura.jpg",
+            src: "/cases/oura/cover.jpg",
             alt: "Oura ring and product context",
             layout: "pair",
           },
         ],
       },
+
       // Suno: chapter + TextAnd1/2Images sequence
       {
         type: "lede",
@@ -307,7 +308,7 @@ export const CASES: CaseStudy[] = [
       line: "+71,000 pre-orders",
       emphasis: "after brand reveal — ~$5.68B.",
     },
-    heroSrc: "/glance/rivian-metalab.jpg",
+    heroSrc: "/glance/rivian.jpg",
   }),
   stubCase({
     slug: "tensr",
@@ -317,6 +318,7 @@ export const CASES: CaseStudy[] = [
       line: "+1799% activations",
       emphasis: "performance-led redesign.",
     },
+    // Still for /work hero + OG (glance card uses work-01.mp4).
     heroSrc: "/glance/tensr-metalab.jpg",
   }),
   stubCase({
@@ -327,7 +329,7 @@ export const CASES: CaseStudy[] = [
       line: "+395% conversion rate",
       emphasis: "in 3 weeks.",
     },
-    heroSrc: "/glance/moxion-metalab.jpg",
+    heroSrc: "/glance/moxion.jpg",
   }),
   stubCase({
     slug: "hyperframe",
@@ -347,7 +349,7 @@ export const CASES: CaseStudy[] = [
       line: "End-to-end brand system",
       emphasis: "from launch to scale.",
     },
-    heroSrc: "/glance/noovo-metalab.jpg",
+    heroSrc: "/glance/pergola.jpg",
   }),
   stubCase({
     slug: "rappi",

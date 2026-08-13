@@ -68,7 +68,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("rivian"),
     logo: "/glance/rivian.svg",
     logoInk: "light",
-    backgroundImage: "/glance/rivian-metalab.jpg",
+    backgroundVideo: "/glance/rivian.mp4",
     linkLabel: "Case Study",
   },
   {
@@ -79,7 +79,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("oura"),
     logo: "/glance/oura.svg",
     logoInk: "light",
-    backgroundImage: "/glance/oura-metalab.jpg",
+    backgroundImage: "/glance/oura-case.jpg",
     linkLabel: "Case Study",
   },
   {
@@ -90,7 +90,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("tensr"),
     logo: "/glance/tensr.svg",
     logoInk: "light",
-    backgroundImage: "/glance/tensr-metalab.jpg",
+    backgroundVideo: "/glance/work-01.mp4",
     linkLabel: "Case Study",
   },
   {
@@ -101,7 +101,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("moxion"),
     logo: "/glance/moxion.svg",
     logoInk: "light",
-    backgroundImage: "/glance/moxion-metalab.jpg",
+    backgroundImage: "/glance/moxion.jpg",
     linkLabel: "Case Study",
   },
   {
@@ -112,7 +112,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("hyperframe"),
     logo: "/glance/hyperframe.svg",
     logoInk: "light",
-    backgroundImage: "/glance/hyperframe-metalab.jpg",
+    backgroundVideo: "/glance/work-02.mp4",
     linkLabel: "Case Study",
   },
   {
@@ -127,7 +127,7 @@ const CASES: GlanceWidget[] = [
     }),
     logo: "/glance/rivian.svg",
     logoInk: "light",
-    backgroundImage: "/glance/rivian-still-metalab.jpg",
+    backgroundImage: "/glance/rivian.jpg",
     linkLabel: "Case Study",
   },
   {
@@ -138,7 +138,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("noovo"),
     logo: "/glance/noovo.svg",
     logoInk: "dark",
-    backgroundImage: "/glance/noovo-metalab.jpg",
+    backgroundImage: "/glance/pergola.jpg",
     linkLabel: "Case Study",
   },
   {
@@ -149,7 +149,7 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("rappi"),
     logo: "/glance/rappi.svg",
     logoInk: "light",
-    backgroundImage: "/glance/rappi-metalab.jpg",
+    backgroundVideo: "/glance/work-03.mp4",
     linkLabel: "Case Study",
   },
 ];
@@ -210,7 +210,8 @@ function WidgetCard({
             width={880}
             height={650}
             decoding="async"
-            loading="lazy"
+            // Eager: transform-based marquees are unreliable with native lazy-load.
+            loading="eager"
             draggable={false}
           />
         </div>

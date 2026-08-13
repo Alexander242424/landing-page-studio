@@ -10,6 +10,7 @@ export type ChatEventType =
   | "assistant_message"
   | "pricing_action"
   | "cro_action"
+  | "chat_action"
   | "lead_complete"
   | "newsletter_complete"
   | "chat_close";
