@@ -269,9 +269,10 @@ export function HeroReel() {
               ref={descriptionRef}
               className="rj-hero__tagline rj-hero__description rj-text-reveal"
             >
-              Helping product teams drive growth through UX, conversions,
+              UXLab drives growth for your product through UX, AI
+              transformation, conversions,
               <br className="rj-hero__description-break" />
-              activations, revenue, and retention that compound.
+              activations and retention that compound.
             </p>
             <div
               ref={actionsRef}

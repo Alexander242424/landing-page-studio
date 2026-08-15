@@ -787,7 +787,7 @@ ul {
   line-height: 1.14;
 }
 
-/* Title + description + CTAs as one vertically centered unit */
+/* Title + description + CTAs — anchored near bottom, space before the reel */
 .rj-hero__copy {
   position: absolute;
   inset: 0;
@@ -795,11 +795,12 @@ ul {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1.6rem;
+  justify-content: flex-end;
+  gap: calc(1.6rem + 8px);
   overflow: hidden;
   padding-inline: 1rem;
-  padding-top: calc(var(--rj-header-height) * 0.35);
+  padding-top: calc(var(--rj-header-height) + 0.8rem);
+  padding-bottom: 6rem;
   box-sizing: border-box;
   pointer-events: none;
   will-change: transform;
@@ -878,7 +879,8 @@ ul {
 
   .rj-hero__copy {
     padding-inline: 4rem;
-    gap: 2rem;
+    padding-bottom: 7.2rem;
+    gap: calc(2rem + 8px);
   }
 
   .rj-hero__headline,
@@ -944,7 +946,7 @@ ul {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(1.4rem + 8px);
+  gap: calc(1.4rem + 16px);
   width: 100%;
   text-align: center;
 }
@@ -1048,11 +1050,12 @@ ul {
 /* Mobile: +15% on hero-bottom copy only — CTAs stay 1.4rem like header Let's talk */
 @media (max-width: 767px) {
   .rj-hero__copy {
-    gap: calc(1.6rem + 8px);
+    gap: calc(1.6rem + 16px);
+    padding-bottom: 4.8rem;
   }
 
   .rj-hero__taglines {
-    gap: calc(1.4rem + 16px);
+    gap: calc(1.4rem + 24px);
   }
 
   .rj-hero__tagline,
@@ -1190,11 +1193,12 @@ ul {
 
   .rj-hero__copy {
     padding-inline: 4rem;
-    gap: 2.4rem;
+    padding-bottom: 8.4rem;
+    gap: calc(2.4rem + 8px);
   }
 
   .rj-hero__taglines {
-    gap: calc(2rem + 8px);
+    gap: calc(2rem + 16px);
   }
 
   .rj-hero__description {
