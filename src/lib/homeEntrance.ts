@@ -28,11 +28,12 @@ export function playHomeEntrance(root: HTMLElement): () => void {
   }
 
   const desktop = window.matchMedia("(min-width: 1024px)").matches;
+  // Rest matches CSS / scroll scrub start; from stays ~14pp more inset.
   const restClip = desktop
-    ? "inset(12% round 2.4rem)"
+    ? "inset(21.5% round 2.4rem)"
     : "inset(0% round 0rem)";
   const fromClip = desktop
-    ? "inset(26% round 3rem)"
+    ? "inset(35.5% round 3rem)"
     : "inset(16% round 1.4rem)";
 
   gsap.set(header, { autoAlpha: 0, y: -18 });

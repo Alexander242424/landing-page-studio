@@ -19,6 +19,8 @@ const FADE_DURATION = 0.55;
 /** Pause between slot swaps (seconds), plus random jitter. */
 const SWAP_BASE = 2.1;
 const SWAP_JITTER = 1.4;
+/** Watchdog: force any blank active layer back to visible. */
+const WATCHDOG_MS = 900;
 
 type SlotLayer = "a" | "b";
 
@@ -141,6 +143,28 @@ async function waitForDecode(img: HTMLImageElement) {
   });
 }
 
+/** Opacity only — never visibility:hidden (avoids blank in-flow slots). */
+function showLayer(el: HTMLElement | null) {
+  if (!el) return;
+  gsap.killTweensOf(el);
+  gsap.set(el, { opacity: 1, visibility: "visible" });
+}
+
+function hideLayer(el: HTMLElement | null) {
+  if (!el) return;
+  gsap.killTweensOf(el);
+  gsap.set(el, { opacity: 0, visibility: "visible" });
+}
+
+function forceSlotVisible(
+  layers: { a: HTMLImageElement | null; b: HTMLImageElement | null } | undefined,
+  active: SlotLayer,
+) {
+  if (!layers) return;
+  showLayer(layers[active]);
+  hideLayer(layers[active === "a" ? "b" : "a"]);
+}
+
 function LogoMarqueeItem({
   logo,
   index,
@@ -240,7 +264,7 @@ export function LogoStrip() {
     };
   }, []);
 
-  // Entrance: stagger fade/slide up when the strip enters the viewport.
+  // Entrance: stagger fade/slide up — opacity + transform only (never autoAlpha).
   useEffect(() => {
     if (isMarquee) {
       enteredRef.current = true;
@@ -253,16 +277,24 @@ export function LogoStrip() {
     const items = slotRefs.current.filter(Boolean) as HTMLLIElement[];
     if (!items.length) return;
 
+    const forceItemsVisible = () => {
+      gsap.set(items, {
+        opacity: 1,
+        visibility: "visible",
+        clearProps: "transform",
+      });
+    };
+
     if (reducedMotion) {
-      gsap.set(items, { clearProps: "opacity,visibility,transform" });
+      forceItemsVisible();
       enteredRef.current = true;
       return;
     }
 
     const ctx = gsap.context(() => {
-      gsap.set(items, { autoAlpha: 0, y: 18 });
+      gsap.set(items, { opacity: 0, visibility: "visible", y: 18 });
       gsap.to(items, {
-        autoAlpha: 1,
+        opacity: 1,
         y: 0,
         duration: 0.85,
         stagger: 0.06,
@@ -271,13 +303,16 @@ export function LogoStrip() {
           trigger: root,
           start: "top 92%",
           once: true,
-          // Already in view on load — still mark entered so swaps can start.
           onEnter: () => {
             enteredRef.current = true;
           },
         },
         onComplete: () => {
-          gsap.set(items, { clearProps: "transform" });
+          forceItemsVisible();
+          enteredRef.current = true;
+        },
+        onInterrupt: () => {
+          forceItemsVisible();
           enteredRef.current = true;
         },
       });
@@ -286,7 +321,7 @@ export function LogoStrip() {
     return () => {
       ctx.revert();
       // After revert, items must stay visible (swap loop may already be running).
-      gsap.set(items, { clearProps: "opacity,visibility,transform" });
+      forceItemsVisible();
     };
   }, [reducedMotion, isMarquee]);
 
@@ -296,21 +331,38 @@ export function LogoStrip() {
 
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let watchdog: ReturnType<typeof setInterval> | undefined;
     let lastSlot = -1;
     let activeTween: gsap.core.Timeline | null = null;
     let swapping = false;
 
-    const revealActive = (slotIndex: number, active: SlotLayer) => {
-      const layers = layerRefs.current[slotIndex];
-      if (!layers) return;
-      const shown = layers[active];
-      const hidden = layers[active === "a" ? "b" : "a"];
-      if (shown) {
-        gsap.set(shown, { autoAlpha: 1 });
-      }
-      if (hidden) {
-        gsap.set(hidden, { autoAlpha: 0 });
-      }
+    const assertAllSlotsVisible = () => {
+      slotsRef.current.forEach((slot, i) => {
+        const item = slotRefs.current[i];
+        if (
+          item &&
+          (Number(gsap.getProperty(item, "opacity")) < 0.95 ||
+            getComputedStyle(item).visibility === "hidden")
+        ) {
+          gsap.set(item, {
+            opacity: 1,
+            visibility: "visible",
+            clearProps: "transform",
+          });
+        }
+
+        const layers = layerRefs.current[i];
+        if (!layers) return;
+        const shown = layers[slot.active];
+        // If the active in-flow layer is blank, force it back — never leave a hole.
+        if (
+          shown &&
+          (Number(gsap.getProperty(shown, "opacity")) < 0.95 ||
+            getComputedStyle(shown).visibility === "hidden")
+        ) {
+          forceSlotVisible(layers, slot.active);
+        }
+      });
     };
 
     const schedule = () => {
@@ -353,6 +405,9 @@ export function LogoStrip() {
         return;
       }
 
+      // Guarantee the current mark stays fully visible before any buffer work.
+      forceSlotVisible(layers, slot.active);
+
       const visible = currentSlots.map((s) => s.logo);
       const preferred = pickNext(visible, slotIndex, CLIENT_LOGOS);
       const nextLogo = await preloadWithFallback(
@@ -380,6 +435,7 @@ export function LogoStrip() {
       const incoming = layers[incomingLayer];
 
       if (!outgoing || !incoming) {
+        forceSlotVisible(layers, outgoingLayer);
         swapping = false;
         schedule();
         return;
@@ -407,13 +463,14 @@ export function LogoStrip() {
 
       // Abort if this slot's active layer changed while we were loading.
       if (slotsRef.current[slotIndex]?.active !== outgoingLayer) {
+        forceSlotVisible(layers, slotsRef.current[slotIndex]?.active ?? outgoingLayer);
         swapping = false;
         schedule();
         return;
       }
 
-      gsap.set(outgoing, { autoAlpha: 1 });
-      gsap.set(incoming, { autoAlpha: 0 });
+      showLayer(outgoing);
+      hideLayer(incoming);
 
       const finish = (committed: boolean) => {
         activeTween = null;
@@ -421,8 +478,8 @@ export function LogoStrip() {
         if (cancelled) return;
 
         if (committed) {
-          gsap.set(incoming, { autoAlpha: 1 });
-          gsap.set(outgoing, { autoAlpha: 0 });
+          showLayer(incoming);
+          hideLayer(outgoing);
           // Promote idle → active; park the previous mark on the new idle buffer.
           setSlots((prev) =>
             prev.map((s, i) =>
@@ -435,6 +492,10 @@ export function LogoStrip() {
                 : s,
             ),
           );
+          // Post-swap assert after React className flip.
+          requestAnimationFrame(() => {
+            forceSlotVisible(layerRefs.current[slotIndex], incomingLayer);
+          });
         } else {
           // Interrupted — restore previous buffer and keep outgoing visible.
           setSlots((prev) =>
@@ -442,7 +503,7 @@ export function LogoStrip() {
               i === slotIndex ? { ...s, bufferLogo: previousLogo } : s,
             ),
           );
-          revealActive(slotIndex, outgoingLayer);
+          forceSlotVisible(layers, outgoingLayer);
         }
         schedule();
       };
@@ -452,10 +513,11 @@ export function LogoStrip() {
         onInterrupt: () => finish(false),
       });
 
+      // Overlapping opacity crossfade — both layers stay visibility:visible.
       activeTween.to(
         incoming,
         {
-          autoAlpha: 1,
+          opacity: 1,
           duration: FADE_DURATION,
           ease: "power2.inOut",
         },
@@ -464,7 +526,7 @@ export function LogoStrip() {
       activeTween.to(
         outgoing,
         {
-          autoAlpha: 0,
+          opacity: 0,
           duration: FADE_DURATION,
           ease: "power2.inOut",
         },
@@ -473,11 +535,13 @@ export function LogoStrip() {
     };
 
     waitForEntrance();
+    watchdog = setInterval(assertAllSlotsVisible, WATCHDOG_MS);
 
     return () => {
       cancelled = true;
       swapping = false;
       if (timer) clearTimeout(timer);
+      if (watchdog) clearInterval(watchdog);
       activeTween?.kill();
       layerRefs.current.forEach((layers) => {
         if (!layers) return;
@@ -486,8 +550,17 @@ export function LogoStrip() {
       });
       // Ensure every slot ends visible with its active layer.
       slotsRef.current.forEach((slot, i) => {
-        revealActive(i, slot.active);
+        forceSlotVisible(layerRefs.current[i], slot.active);
       });
+      // Also force every slot <li> visible after entrance interrupt.
+      const items = slotRefs.current.filter(Boolean) as HTMLLIElement[];
+      if (items.length) {
+        gsap.set(items, {
+          opacity: 1,
+          visibility: "visible",
+          clearProps: "transform",
+        });
+      }
     };
   }, [reducedMotion, isMarquee]);
 
@@ -495,12 +568,7 @@ export function LogoStrip() {
   // in-flow mark so a parent re-render can never leave both layers hidden.
   useEffect(() => {
     slots.forEach((slot, i) => {
-      const layers = layerRefs.current[i];
-      if (!layers) return;
-      const active = layers[slot.active];
-      const idle = layers[slot.active === "a" ? "b" : "a"];
-      if (active) gsap.set(active, { autoAlpha: 1 });
-      if (idle) gsap.set(idle, { autoAlpha: 0 });
+      forceSlotVisible(layerRefs.current[i], slot.active);
     });
   }, [slots]);
 

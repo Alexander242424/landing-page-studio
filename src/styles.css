@@ -785,24 +785,24 @@ ul {
   font-style: normal;
   letter-spacing: -0.014rem;
   line-height: 1.14;
-  /* Reserve space for description + CTAs (px — independent of mobile vw-rem) */
-  --rj-hero-bottom-band: clamp(148px, 30vh, 210px);
 }
 
-.rj-hero__headline-stage {
+/* Title + description + CTAs as one vertically centered unit */
+.rj-hero__copy {
   position: absolute;
   inset: 0;
   z-index: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1.6rem;
   overflow: hidden;
   padding-inline: 1rem;
-  /* Mobile: optical center between header and bottom description */
-  padding-top: calc(var(--rj-header-height) + 0.8rem);
-  padding-bottom: var(--rj-hero-bottom-band);
+  padding-top: calc(var(--rj-header-height) * 0.35);
   box-sizing: border-box;
   pointer-events: none;
+  will-change: transform;
 }
 
 .rj-hero__logo {
@@ -863,14 +863,6 @@ ul {
     font-size: clamp(5.2rem, 2rem + 6.5vw, 14rem);
   }
 
-  .rj-hero {
-    --rj-hero-bottom-band: calc(4.8rem + 1.8rem * 1.3 * 3 + 2rem + 4.4rem);
-  }
-
-  .rj-hero__bottom {
-    padding-bottom: 4.8rem;
-  }
-
   .rj-hero__description {
     max-width: min(55.1rem, 78%);
     font-size: clamp(1.55rem, 1.1rem + 0.45vw, 2rem);
@@ -884,10 +876,9 @@ ul {
     white-space: nowrap;
   }
 
-  .rj-hero__headline-stage {
+  .rj-hero__copy {
     padding-inline: 4rem;
-    /* Keep padding-top/bottom from base: flex-center the headline in the
-       band between header bottom and description top (same as mobile). */
+    gap: 2rem;
   }
 
   .rj-hero__headline,
@@ -948,26 +939,12 @@ ul {
   will-change: transform;
 }
 
-.rj-hero__bottom {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  will-change: transform;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-inline: 1rem;
-  padding-bottom: 3.2rem;
-}
-
 .rj-hero__taglines {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.4rem;
+  gap: calc(1.4rem + 8px);
   width: 100%;
   text-align: center;
 }
@@ -997,6 +974,7 @@ ul {
   align-items: center;
   gap: 0.8rem;
   margin: 0;
+  pointer-events: auto;
 }
 
 /* Pill buttons under the hero copy — match header Let's talk type.
@@ -1069,6 +1047,14 @@ ul {
 
 /* Mobile: +15% on hero-bottom copy only — CTAs stay 1.4rem like header Let's talk */
 @media (max-width: 767px) {
+  .rj-hero__copy {
+    gap: calc(1.6rem + 8px);
+  }
+
+  .rj-hero__taglines {
+    gap: calc(1.4rem + 16px);
+  }
+
   .rj-hero__tagline,
   .rj-hero__description {
     font-size: calc(1.15 * clamp(14px, 3.6vw, 18px));
@@ -1078,9 +1064,16 @@ ul {
 .rj-hero__controls {
   position: absolute;
   right: 1rem;
-  bottom: 4.8rem;
-  display: flex;
+  bottom: 0.4rem;
+  z-index: 2;
+  display: none;
   align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+  .rj-hero__controls {
+    display: flex;
+  }
 }
 
 .rj-hero__icon {
@@ -1123,7 +1116,8 @@ ul {
 
   .rj-reel__video-frame {
     will-change: clip-path;
-    clip-path: inset(12% round 2.4rem);
+    /* Start ~25% narrower than prior 12% inset (76% → ~57% width) */
+    clip-path: inset(21.5% round 2.4rem);
   }
 }
 
@@ -1192,17 +1186,15 @@ ul {
     font-weight: 300;
     letter-spacing: -0.016rem;
     line-height: 1.75rem;
-    /* Bottom copy band: padding-bottom + ~3 lines of description + CTAs */
-    --rj-hero-bottom-band: calc(4.8rem + 2.76rem * 1.3 * 3 + 2rem + 4.8rem);
   }
 
-  .rj-hero__bottom {
+  .rj-hero__copy {
     padding-inline: 4rem;
-    padding-bottom: 4.8rem;
+    gap: 2.4rem;
   }
 
   .rj-hero__taglines {
-    gap: 2rem;
+    gap: calc(2rem + 8px);
   }
 
   .rj-hero__description {
@@ -1231,7 +1223,7 @@ ul {
 
   .rj-hero__controls {
     right: 4rem;
-    bottom: 4.8rem;
+    bottom: 0.8rem;
   }
 
   .rj-hero__icon {
@@ -1539,9 +1531,9 @@ body.rj-scroll-dark .rj-page__main {
 .rj-logo-strip__row {
   display: flex;
   align-items: center;
-  /* Equal free space between logo *edges* (not equal columns). */
-  justify-content: space-between;
-  gap: 1.2rem;
+  /* Even columns — a blank/collapsed mark cannot open a giant space-between hole. */
+  justify-content: center;
+  gap: clamp(1rem, 2.2vw, 2rem);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1578,8 +1570,8 @@ body.rj-scroll-dark .rj-page__main {
   align-items: center;
   width: max-content;
   max-width: none;
-  /* Generous fixed gap — marks use scale(1.058), so keep room past layout boxes */
-  gap: 3.5rem;
+  /* No flex gap — item margin makes translate(-50%) seam match inter-logo spacing */
+  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1619,14 +1611,21 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-logo-strip__item {
   display: flex;
-  /* Size to the mark — equal flex columns left uneven optical holes. */
-  flex: 0 1 auto;
+  /* Equal flex basis keeps spacing even if a mark is momentarily blank. */
+  flex: 1 1 0;
   align-items: center;
   justify-content: center;
   min-width: 0;
   /* Room for scaled marks (1.058 ≈ 1.15×0.92) without clipping */
   height: calc(2.2rem * 1.058);
   overflow: visible;
+  /* Marquee track uses margin (not gap) so -50% loop seam equals item spacing */
+  margin-inline-end: 3.5rem;
+}
+
+.rj-logo-strip__row > .rj-logo-strip__item {
+  /* Desktop row uses flex gap instead of item margin */
+  margin-inline-end: 0;
 }
 
 .rj-logo-strip__slot {
@@ -1652,6 +1651,9 @@ body.rj-scroll-dark .rj-page__main {
   filter: brightness(0);
   -webkit-user-drag: none;
   user-select: none;
+  /* Active in-flow layer must always paint — never visibility:hidden */
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Inactive crossfade layer — out of flow so it cannot inflate item width */
@@ -1661,9 +1663,9 @@ body.rj-scroll-dark .rj-page__main {
   top: 50%;
   transform: translate(-50%, -50%) scale(1.058);
   pointer-events: none;
-  /* Default hidden; GSAP autoAlpha overrides inline during crossfade */
+  /* Opacity only — keep visibility so a race cannot blank the slot permanently */
   opacity: 0;
-  visibility: hidden;
+  visibility: visible;
 }
 
 /* Narrow: infinite marquee; avoid space-between bunching */
@@ -1683,6 +1685,7 @@ body.rj-scroll-dark .rj-page__main {
   .rj-logo-strip__item {
     flex: 0 0 auto;
     min-width: auto;
+    margin-inline-end: 3.5rem;
   }
 
   .rj-logo-strip__logo {
@@ -1704,8 +1707,7 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-logo-strip__row {
-    /* Min gap only — space-between distributes leftover evenly */
-    gap: 2rem;
+    gap: clamp(1.5rem, 2.4vw, 2.75rem);
   }
 
   .rj-logo-strip__item {
@@ -1721,6 +1723,7 @@ body.rj-scroll-dark .rj-page__main {
 @media (prefers-reduced-motion: reduce) {
   .rj-logo-strip__item {
     opacity: 1;
+    visibility: visible;
     transform: none;
   }
 
@@ -1989,10 +1992,10 @@ body.rj-scroll-dark .rj-page__main {
   position: relative;
   overflow: hidden;
   border-radius: 0.3rem;
-  /* Mobile: ~10% wider than prior 28.2rem; uniform taller cards */
+  /* Mobile: ~10% wider than prior 28.2rem; size variants match UXLab asset ratios */
   width: 31rem;
   flex: 0 0 31rem;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 992 / 1150;
   height: auto;
   display: block;
   cursor: pointer;
@@ -2007,10 +2010,17 @@ body.rj-scroll-dark .rj-page__main {
   outline-offset: 3px;
 }
 
-.rj-glance__widget--small,
-.rj-glance__widget--medium,
+/* Match UXLab.zip frame ratios: 992×880 / 992×988 / 992×1150 */
+.rj-glance__widget--small {
+  aspect-ratio: 992 / 880;
+}
+
+.rj-glance__widget--medium {
+  aspect-ratio: 992 / 988;
+}
+
 .rj-glance__widget--full {
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 992 / 1150;
 }
 
 .rj-glance__widget--light,
@@ -2042,6 +2052,12 @@ body.rj-scroll-dark .rj-page__main {
   line-height: 1.14;
   color: var(--rj-white);
   pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .rj-glance__card {
+    padding: calc(1.6rem + 8px) calc(2rem + 8px);
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2133,17 +2149,13 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-glance__card-logos {
-  flex: 0 0 auto;
-  height: 3.2rem;
-  min-width: 8.4rem;
-  max-width: 48%;
+  flex: 0 1 auto;
+  height: 2.8rem;
+  width: auto;
+  /* Cap ultra-wide wordmarks (e.g. bankrollu) so they don’t crowd the CTA */
+  max-width: min(14rem, 52%);
   position: relative;
   margin-left: auto;
-}
-
-/* Force brand marks white — no mix-blend / theme inversions */
-.rj-glance__card-logos img {
-  filter: brightness(0) invert(1);
 }
 
 .rj-glance__logos {
@@ -2153,11 +2165,12 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-glance__logo {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  height: 100%;
+  width: 100%;
   opacity: 0;
   pointer-events: none;
   transition:
@@ -2179,12 +2192,12 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-glance__logo img {
   display: block;
-  max-height: 100%;
   height: 100%;
+  max-height: 100%;
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  object-position: right;
+  object-position: right center;
 }
 
 .rj-glance__bg {
@@ -2350,27 +2363,28 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-glance__track {
-    column-gap: 1.6rem; /* 16px */
-    padding-left: 2.4rem;
+    column-gap: 1.92rem; /* +20% vs 1.6rem */
+    padding-left: 2.88rem;
     padding-right: 0;
   }
 
   .rj-glance__widget {
-    border-radius: 0.6rem;
-    width: 52.8rem;
-    flex: 0 0 52.8rem;
+    border-radius: 0.72rem;
+    /* Desktop: slightly narrower; height follows aspect-ratio */
+    width: 56rem;
+    flex: 0 0 56rem;
   }
 
   .rj-glance__widget--small {
-    aspect-ratio: 440 / 325;
+    aspect-ratio: 992 / 880;
   }
 
   .rj-glance__widget--medium {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 992 / 988;
   }
 
   .rj-glance__widget--full {
-    aspect-ratio: 440 / 503;
+    aspect-ratio: 992 / 1150;
   }
 
   .rj-glance__track {
@@ -2391,7 +2405,8 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-glance__card-logos {
-    height: 3.8rem;
+    height: 3.2rem;
+    max-width: min(18rem, 48%);
   }
 
   .rj-glance__drive-title,
@@ -5620,6 +5635,371 @@ html[data-rj-route="case"] body {
   .rj-resources__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 3.6rem 2.4rem;
+  }
+}
+
+/* ─── Work index (/work) — dark Metalab-style case list ─── */
+html[data-rj-route="work"],
+html[data-rj-route="work"] body {
+  background: var(--rj-black);
+  color: var(--rj-white);
+}
+
+html[data-rj-route="work"] body {
+  --rj-bg: var(--rj-black);
+  --rj-fg: var(--rj-white);
+  --rj-fg-muted: var(--rj-muted);
+  --rj-border: color-mix(in srgb, var(--rj-white) 14%, transparent);
+}
+
+.rj-page--work {
+  background: var(--rj-black);
+  color: var(--rj-white);
+}
+
+.rj-work-page {
+  padding: calc(var(--rj-header-height) + 3.2rem) var(--rj-grid-margin) 8rem;
+  font-family: var(--rj-font-sans);
+  color: var(--rj-white);
+  background: var(--rj-black);
+}
+
+.rj-work__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.6rem;
+  max-width: 72rem;
+  margin-bottom: 3.2rem;
+}
+
+.rj-work__crumbs.rj-article__crumbs li:not(:last-child)::after {
+  color: color-mix(in srgb, var(--rj-white) 32%, transparent);
+}
+
+.rj-work__crumbs.rj-article__crumbs a {
+  color: color-mix(in srgb, var(--rj-white) 62%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rj-work__crumbs.rj-article__crumbs a:hover {
+    color: var(--rj-white);
+  }
+}
+
+.rj-work__title {
+  margin: 0;
+  font-size: clamp(4rem, 9vw, 7.2rem);
+  font-weight: 300;
+  letter-spacing: var(--rj-tracking-title);
+  line-height: 0.98;
+  color: var(--rj-white);
+}
+
+.rj-work__lede {
+  margin: 0;
+  max-width: 54rem;
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: var(--rj-tracking-body);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--rj-white) 72%, transparent);
+}
+
+.rj-work__list {
+  width: 100%;
+}
+
+.rj-work__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid color-mix(in srgb, var(--rj-white) 14%, transparent);
+}
+
+.rj-work__row {
+  position: relative;
+  border-bottom: 1px solid color-mix(in srgb, var(--rj-white) 14%, transparent);
+}
+
+.rj-work__row-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rj-work__row-link--static {
+  cursor: default;
+}
+
+.rj-work__row-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.6rem;
+  align-items: start;
+  margin-inline: calc(-1 * var(--rj-grid-margin));
+  padding: 2rem var(--rj-grid-margin);
+  background: transparent;
+  transition:
+    background-color 0.4s var(--rj-ease-soft),
+    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rj-work__brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 2.4rem;
+}
+
+.rj-work__logo {
+  display: block;
+  width: auto;
+  height: 2rem;
+  max-width: min(14rem, 48vw);
+  object-fit: contain;
+  object-position: left center;
+  filter: brightness(0) invert(1);
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.rj-work__client {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: var(--rj-tracking-body);
+  line-height: 1.2;
+  color: var(--rj-white);
+}
+
+.rj-work__client--fallback {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rj-work__copy {
+  min-width: 0;
+}
+
+.rj-work__description {
+  margin: 0;
+  max-width: 48rem;
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: var(--rj-tracking-body);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--rj-white) 72%, transparent);
+}
+
+.rj-work__cta {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-top: 0;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s var(--rj-ease-soft),
+    margin-top 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rj-work__cta-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.rj-work__cta .rj-arrow {
+  display: inline-flex;
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--rj-white);
+}
+
+.rj-work__preview {
+  display: none;
+  min-width: 0;
+  overflow: hidden;
+  justify-self: center;
+  align-self: center;
+  pointer-events: none;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    grid-template-columns 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s var(--rj-ease-soft);
+}
+
+.rj-work__preview-inner {
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.rj-work__preview-frame {
+  width: min(28rem, 100%);
+  max-width: 100%;
+  aspect-ratio: 16 / 11;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--rj-white) 6%, transparent);
+  transform: scale(0.96);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rj-work__preview-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rj-work__services {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rj-work__services li {
+  font-size: 1.2rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--rj-white) 55%, transparent);
+}
+
+.rj-work__row--listed .rj-work__description,
+.rj-work__row--listed .rj-work__client,
+.rj-work__row--listed .rj-work__logo {
+  opacity: 0.72;
+}
+
+@media (min-width: 768px) {
+  .rj-work-page {
+    padding-top: calc(var(--rj-header-height) + 4.8rem);
+    padding-bottom: 10rem;
+  }
+
+  .rj-work__header {
+    gap: 2rem;
+    margin-bottom: 4.8rem;
+  }
+
+  .rj-work__lede {
+    font-size: 1.8rem;
+  }
+
+  .rj-work__row-grid {
+    grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr) auto;
+    column-gap: 3.2rem;
+    row-gap: 0;
+    align-items: center;
+    padding-block: 2.2rem;
+  }
+
+  .rj-work__row--linkable .rj-work__row-grid {
+    grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr) 0fr auto;
+    transition:
+      grid-template-columns 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.4s var(--rj-ease-soft),
+      padding 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .rj-work__logo {
+    height: 2.2rem;
+    max-width: 14rem;
+  }
+
+  .rj-work__description {
+    font-size: 1.6rem;
+  }
+
+  .rj-work__services {
+    align-items: flex-end;
+    text-align: right;
+    min-width: 12rem;
+  }
+
+  .rj-work__preview {
+    display: grid;
+    grid-template-columns: 0fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rj-work-page {
+    padding-bottom: 14rem;
+  }
+
+  .rj-work__row-grid {
+    column-gap: 4rem;
+    padding-block: 2.4rem;
+  }
+
+  .rj-work__row--linkable .rj-work__row-grid {
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr) 0fr auto;
+  }
+
+  .rj-work__preview-frame {
+    width: min(32rem, 28vw);
+  }
+}
+
+/* Desktop hover expand — Metalab in-row preview */
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  .rj-work__row--linkable:hover .rj-work__row-grid,
+  .rj-work__row--linkable:focus-within .rj-work__row-grid {
+    grid-template-columns: minmax(11rem, 16rem) minmax(0, 0.95fr) minmax(0, 1fr) auto;
+    padding-block: 3.2rem;
+    background: color-mix(in srgb, var(--rj-white) 6%, var(--rj-black));
+  }
+
+  .rj-work__row--linkable:hover .rj-work__preview,
+  .rj-work__row--linkable:focus-within .rj-work__preview {
+    grid-template-columns: 1fr;
+    max-height: 28rem;
+    opacity: 1;
+  }
+
+  .rj-work__row--linkable:hover .rj-work__preview-frame,
+  .rj-work__row--linkable:focus-within .rj-work__preview-frame {
+    transform: scale(1);
+  }
+
+  .rj-work__row--linkable:hover .rj-work__cta,
+  .rj-work__row--linkable:focus-within .rj-work__cta {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 1.6rem;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+  .rj-work__row--linkable:hover .rj-work__row-grid,
+  .rj-work__row--linkable:focus-within .rj-work__row-grid {
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 0.9fr) minmax(20rem, 32rem) auto;
+    padding-block: 3.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rj-work__row-grid,
+  .rj-work__row--linkable .rj-work__row-grid,
+  .rj-work__preview,
+  .rj-work__preview-frame,
+  .rj-work__cta {
+    transition: none;
   }
 }
 

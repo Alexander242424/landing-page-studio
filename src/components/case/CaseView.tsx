@@ -21,12 +21,14 @@ function CaseMediaFigure({
   src,
   alt,
   layout = "wide",
+  aspectRatio,
   priority = false,
   reveal = false,
 }: {
   src: string;
   alt: string;
   layout?: CaseMedia["layout"];
+  aspectRatio?: string;
   priority?: boolean;
   reveal?: boolean;
 }) {
@@ -34,6 +36,7 @@ function CaseMediaFigure({
     <figure
       className={cn("rj-case__figure", `rj-case__figure--${layout ?? "wide"}`)}
       data-reveal={reveal ? "media" : undefined}
+      style={aspectRatio ? { aspectRatio } : undefined}
     >
       <div className="rj-case__figure-frame">
         <img
@@ -109,6 +112,7 @@ function CaseBlockView({ block }: { block: CaseBlock }) {
               src={item.src}
               alt={item.alt}
               layout={item.layout ?? (mediaCount >= 2 ? "portrait" : "wide")}
+              aspectRatio={item.aspectRatio}
               reveal
             />
           ))}
@@ -140,6 +144,7 @@ function CaseBlockView({ block }: { block: CaseBlock }) {
           src={item.src}
           alt={item.alt}
           layout={item.layout ?? "wide"}
+          aspectRatio={item.aspectRatio}
           reveal
         />
       ))}
@@ -317,6 +322,7 @@ export function CaseView({ caseStudy }: CaseViewProps) {
             src={caseStudy.hero.src}
             alt={caseStudy.hero.alt}
             layout="full"
+            aspectRatio={caseStudy.hero.aspectRatio}
             priority
           />
         </div>
@@ -408,7 +414,7 @@ export function buildCaseJsonLd(caseStudy: CaseStudy, canonicalUrl: string) {
             "@type": "ListItem",
             position: 2,
             name: "Work",
-            item: absoluteUrl("/#glance"),
+            item: absoluteUrl("/work"),
           },
           {
             "@type": "ListItem",

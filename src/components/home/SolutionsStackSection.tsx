@@ -4,7 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { LazyVideo } from "@/components/media/LazyVideo";
 import { openContactChat } from "@/lib/askChat";
-import { SOLUTIONS } from "@/lib/solutions";
+import { SOLUTIONS, solutionChatContext } from "@/lib/solutions";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 import { cn } from "@/lib/utils";
 
@@ -247,7 +247,9 @@ export function SolutionsStackSection() {
                           onClick={(event: MouseEvent<HTMLAnchorElement>) => {
                             event.preventDefault();
                             event.stopPropagation();
-                            openContactChat();
+                            openContactChat({
+                              service: solutionChatContext(item),
+                            });
                           }}
                         >
                           Let&apos;s talk

@@ -12,7 +12,8 @@ export type ClientLogo = {
 export const CLIENT_LOGOS: ClientLogo[] = [
   // Featured engagements (UXLAB)
   { id: "calendly", src: "/logos/calendly.svg", alt: "Calendly" },
-  { id: "stan", src: "/logos/stan.svg", alt: "Stan" },
+  /* Asset is Tapmy wordmark (+ mark); strip uses brightness(0) — black paths are strip-safe. */
+  { id: "stan", src: "/logos/stan.svg", alt: "Tapmy" },
   { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes" },
   { id: "nespresso", src: "/logos/nespresso.svg", alt: "Nespresso" },
   { id: "softr", src: "/logos/softr.svg", alt: "softr" },

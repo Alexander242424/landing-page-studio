@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { openContactChat } from "@/lib/askChat";
-import { SOLUTIONS } from "@/lib/solutions";
+import { SOLUTIONS, solutionChatContext } from "@/lib/solutions";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -155,7 +155,9 @@ export function ChallengesSection() {
                 onClick={(event: MouseEvent<HTMLAnchorElement>) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  openContactChat();
+                  openContactChat({
+                    service: solutionChatContext(item),
+                  });
                 }}
               >
                 Learn more

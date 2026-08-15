@@ -26,6 +26,8 @@ export type CaseMedia = {
    * portrait = tall single / split tile
    */
   layout?: "full" | "wide" | "pair" | "portrait";
+  /** CSS aspect-ratio (e.g. "992 / 1150") when media shouldn't use the layout default. */
+  aspectRatio?: string;
 };
 
 /**
@@ -73,6 +75,13 @@ export type CaseHeadline = {
   emphasis: string;
 };
 
+/**
+ * In-repo cases database (like articles.ts — not a CMS).
+ *
+ * `hasPage`:
+ * - `true`  → detail route at /work/$slug, sitemap entry, list hover + “View case”
+ * - `false` → listed on /work only (name/meta); getCase() returns undefined so /work/$slug 404s
+ */
 export type CaseStudy = {
   slug: string;
   client: string;
@@ -87,6 +96,14 @@ export type CaseStudy = {
   meta: CaseMetaField[];
   services: string[];
   hero: CaseMedia;
+  /**
+   * When false, case is index-only (listed on /work without a detail page).
+   * Prefer this over inventing placeholder clients — set false when a name
+   * should appear in the list before a write-up ships.
+   */
+  hasPage: boolean;
+  /** Work-list hover reveal; defaults to hero.src when omitted. */
+  hoverImage?: string;
   stats?: CaseStatsSection;
   blocks: CaseBlock[];
   ogImage: string;
@@ -94,6 +111,8 @@ export type CaseStudy = {
   datePublished: string;
   dateModified: string;
 };
+
+export const WORK_PATH = "/work";
 
 export function formatCaseHeadline(headline: CaseHeadline): string {
   return `${headline.line} ${headline.emphasis}`;
@@ -105,6 +124,8 @@ export const CASES: CaseStudy[] = [
     client: "Oura",
     logo: "/logos/oura.svg",
     title: "Oura",
+    hasPage: true,
+    hoverImage: "/glance/oura.jpg",
     headline: {
       line: "Category-defining wearables",
       emphasis: "brand & product experience.",
@@ -300,83 +321,185 @@ export const CASES: CaseStudy[] = [
     datePublished: "2024-09-12",
     dateModified: "2026-08-11",
   },
-  stubCase({
-    slug: "rivian",
-    client: "Rivian",
-    logo: "/logos/rivian.svg",
+  publishedStub({
+    slug: "bankrollu",
+    client: "Bankroll U",
+    logo: "/logos/bankrollu.svg",
     headline: {
-      line: "+71,000 pre-orders",
-      emphasis: "after brand reveal — ~$5.68B.",
+      line: "Sports markets, clear",
+      emphasis: "at the next play.",
     },
-    heroSrc: "/glance/rivian.jpg",
+    description:
+      "How UXLAB clarified sports-market moments so the next play reads instantly — product surfaces that keep conviction high when the clock is moving.",
+    heroSrc: "/cases/bankrollu/hero.jpg",
+    glanceSrc: "/glance/bankrollu.jpg",
+    aspectRatio: "992 / 880",
+    services: ["Product design", "CRO", "Activation"],
+    intro:
+      "Bankroll U lives in the seconds between plays — odds, conviction, and the next move. We shaped product surfaces that keep markets readable when attention is scarce and the clock is moving.",
+    vision:
+      "Make every market moment feel decisive — clear enough to act, calm enough to trust.",
+    narrativeHeading: "Clarity under game-day pressure.",
+    narrative: [
+      "Sports markets fail when the interface adds noise to an already loud moment. The work was hierarchy: what must read in a glance, what can wait, and how conviction stays intact from browse to bet.",
+      "We partnered on product patterns that protect speed without sacrificing trust — so the next play feels inevitable, not improvised.",
+    ],
   }),
-  stubCase({
-    slug: "tensr",
-    client: "Tensr",
-    logo: "/logos/tensr.svg",
+  publishedStub({
+    slug: "grono",
+    client: "Grono",
+    logo: "/logos/grono.svg",
     headline: {
-      line: "+1799% activations",
-      emphasis: "performance-led redesign.",
+      line: "A week of content",
+      emphasis: "from one calm surface.",
     },
-    // Still for /work hero + OG (glance card uses work-01.mp4).
-    heroSrc: "/glance/tensr-metalab.jpg",
+    description:
+      "How UXLAB turned Grono’s content engine into one calm surface — planning a week of output without the chaos of a crowded dashboard.",
+    heroSrc: "/cases/grono/hero.jpg",
+    glanceSrc: "/glance/grono.jpg",
+    aspectRatio: "992 / 1150",
+    services: ["Product design", "Brand systems", "Activation"],
+    intro:
+      "Grono helps teams turn one idea into a week of content. The product had to feel composed — a single surface that absorbs planning chaos instead of mirroring it.",
+    vision:
+      "One calm place to see the week ahead — so publishing feels like rhythm, not scramble.",
+    narrativeHeading: "Composition over dashboard sprawl.",
+    narrative: [
+      "Content tools often grow by adding panes. We designed for composure: a primary plane that holds the week, secondary detail that appears only when it earns attention, and language that stays human while the system stays precise.",
+      "The result is a product rhythm creators can live in — less hunting, more shipping.",
+    ],
   }),
-  stubCase({
-    slug: "moxion",
-    client: "Moxion",
-    logo: "/logos/moxion-wordmark.svg",
+  publishedStub({
+    slug: "nespresso",
+    client: "Nespresso",
+    logo: "/logos/nespresso.svg",
     headline: {
-      line: "+395% conversion rate",
-      emphasis: "in 3 weeks.",
+      line: "Premium coffee commerce",
+      emphasis: "designed for mobile.",
     },
-    heroSrc: "/glance/moxion.jpg",
+    description:
+      "How UXLAB shaped premium coffee commerce for mobile — ritual, assortment, and checkout that feel as considered as the cup.",
+    heroSrc: "/cases/nespresso/hero.jpg",
+    glanceSrc: "/glance/nespresso.jpg",
+    aspectRatio: "992 / 988",
+    services: ["Product design", "CRO", "Ecommerce"],
+    intro:
+      "Nespresso’s commerce experience has to carry premium ritual on a small screen — assortment, subscription, and checkout without losing the brand’s quiet confidence.",
+    vision:
+      "Make mobile feel like the boutique: curated, unhurried, and ready when the ritual begins.",
+    narrativeHeading: "Ritual-first commerce on mobile.",
+    narrative: [
+      "Premium fails when mobile feels like a compressed desktop. We focused on the moments that define the cup: discovering the right blend, understanding membership, and completing purchase without breaking the mood.",
+      "Hierarchy, imagery, and flow stayed restrained — so conversion feels like continuation of the brand, not a detour into a form.",
+    ],
   }),
-  stubCase({
-    slug: "hyperframe",
-    client: "Hyperframe",
-    logo: "/logos/hyperframe.svg",
+  publishedStub({
+    slug: "foundrae",
+    client: "Foundrae",
+    logo: "/logos/foundrae.svg",
     headline: {
-      line: "+150% LTV:CAC",
-      emphasis: "across launch funnels.",
+      line: "Jewelry storytelling",
+      emphasis: "that invites the shop.",
     },
-    heroSrc: "/glance/hyperframe-metalab.jpg",
+    description:
+      "How UXLAB built jewelry storytelling that invites the shop — narrative surfaces that lead with meaning, then make purchase feel inevitable.",
+    heroSrc: "/cases/foundrae/hero.jpg",
+    glanceSrc: "/glance/foundrae.jpg",
+    aspectRatio: "992 / 1150",
+    services: ["Product design", "Brand systems", "Ecommerce"],
+    intro:
+      "Foundrae sells meaning as much as metal. The digital experience had to honor symbolism first — then open a clear path into the shop without diluting the story.",
+    vision:
+      "Let the story invite the hand — then make the shop feel like the natural next page.",
+    narrativeHeading: "Story that earns the purchase.",
+    narrative: [
+      "Jewelry commerce often jumps to SKU grids. We designed a sequence where narrative sets desire, product detail confirms craft, and commerce stays quiet until the decision is ready.",
+      "Visual language stayed editorial and spacious — so the brand’s mythology survives the scroll into checkout.",
+    ],
   }),
-  stubCase({
-    slug: "noovo",
-    client: "Noovo",
-    logo: "/logos/noovo.svg",
+  publishedStub({
+    slug: "boostra",
+    client: "Boostra",
+    logo: "/logos/boostra.svg",
     headline: {
-      line: "End-to-end brand system",
-      emphasis: "from launch to scale.",
+      line: "Conversion analysis",
+      emphasis: "teams can act on.",
     },
-    heroSrc: "/glance/pergola.jpg",
+    description:
+      "How UXLAB turned conversion analysis into something teams can act on — clear signal, prioritized friction, and interventions meant to ship.",
+    heroSrc: "/cases/boostra/hero.jpg",
+    glanceSrc: "/glance/boostra.jpg",
+    aspectRatio: "992 / 880",
+    services: ["CRO", "Product design", "Experimentation"],
+    intro:
+      "Boostra helps teams see where conversion breaks. The product job was not more charts — it was turning analysis into a short list of moves people can ship this sprint.",
+    vision:
+      "Make friction readable and prioritized — so diagnosis becomes the next experiment, not another report.",
+    narrativeHeading: "Insight that survives the standup.",
+    narrative: [
+      "Analytics products fail when signal stays trapped in dashboards. We shaped hierarchy for what matters now, language that speaks to product and growth in the same breath, and surfaces that point to intervention — not just observation.",
+      "The system is built for velocity: find the leak, design the fix, measure the lift, compound the win.",
+    ],
   }),
-  stubCase({
-    slug: "rappi",
-    client: "Rappi",
-    logo: "/logos/rappi.svg",
+  publishedStub({
+    slug: "stan",
+    client: "Stan",
+    logo: "/logos/stan.svg",
     headline: {
-      line: "$5M+ in new business",
-      emphasis: "in 90 days.",
+      line: "Creator profiles",
+      emphasis: "built for exclusive access.",
     },
-    heroSrc: "/glance/rappi-metalab.jpg",
+    description:
+      "How UXLAB shaped creator profiles for exclusive access — identity, membership, and gated moments that feel premium without friction.",
+    heroSrc: "/cases/stan/hero.jpg",
+    glanceSrc: "/glance/stan.jpg",
+    aspectRatio: "992 / 1150",
+    services: ["Product design", "Brand systems", "Activation"],
+    intro:
+      "Stan is where creators meet their closest audience. Profiles had to feel like a destination — exclusive without being opaque, premium without slowing the join.",
+    vision:
+      "Make access feel intentional — a profile that sells belonging before it asks for a signup.",
+    narrativeHeading: "Membership as a product moment.",
+    narrative: [
+      "Creator platforms often bury exclusivity under generic social chrome. We designed profile and gate moments that lead with identity, make the offer obvious, and keep the path to join short enough to convert on impulse.",
+      "The result is a surface creators can own — and fans can enter without losing the sense that they were invited.",
+    ],
   }),
 ];
 
-/** Minimal case page so glance cards can deep-link before a full write-up ships. */
-function stubCase({
+/**
+ * First-section case page for glance clients — mirrors Oura’s opening rhythm
+ * (hero + meta already in CaseView; body: intro lede → vision → media → narrative → media).
+ */
+function publishedStub({
   slug,
   client,
   logo,
   headline,
+  description,
   heroSrc,
+  glanceSrc,
+  aspectRatio,
+  services,
+  intro,
+  vision,
+  narrativeHeading,
+  narrative,
   year = "2024",
 }: {
   slug: string;
   client: string;
   logo: string;
   headline: CaseHeadline;
+  description: string;
   heroSrc: string;
+  glanceSrc: string;
+  aspectRatio?: string;
+  services: string[];
+  intro: string;
+  vision: string;
+  narrativeHeading: string;
+  narrative: string[];
   year?: string;
 }): CaseStudy {
   return {
@@ -384,40 +507,102 @@ function stubCase({
     client,
     logo,
     title: client,
+    hasPage: true,
+    hoverImage: glanceSrc,
     headline,
-    description: `${client} case study — full write-up coming soon.`,
+    description,
     year,
     meta: [
       { label: "Client", value: client },
       { label: "Project type", value: "Product" },
-      { label: "Services", value: "Product design, Brand systems, CRO" },
+      {
+        label: "Services",
+        value: services.slice(0, 3).join(", "),
+      },
       { label: "Year", value: year },
     ],
-    services: ["Product design", "Brand systems", "CRO"],
+    services,
     hero: {
       src: heroSrc,
-      alt: `${client} case study`,
+      alt: `${client} case study hero`,
       layout: "full",
+      aspectRatio,
     },
     blocks: [
       {
         type: "lede",
         label: "Introduction",
         align: "full",
-        text: `We're preparing a deeper look at our work with ${client}. In the meantime, reach out if you're building something that needs to perform.`,
+        text: intro,
+      },
+      {
+        type: "lede",
+        label: "The vision",
+        align: "center",
+        text: vision,
+      },
+      {
+        type: "media",
+        media: [
+          {
+            src: glanceSrc,
+            alt: `${client} — product atmosphere`,
+            layout: "full",
+          },
+        ],
+      },
+      {
+        type: "narrative",
+        heading: narrativeHeading,
+        paragraphs: narrative,
+      },
+      {
+        type: "media",
+        media: [
+          {
+            src: heroSrc,
+            alt: `${client} — key product surface`,
+            layout: "wide",
+            aspectRatio,
+          },
+        ],
       },
     ],
     ogImage: heroSrc,
-    keywords: [`${client} case study`, "UXLAB"],
+    keywords: [`${client} case study`, "UXLAB", "product design", "CRO"],
     datePublished: `${year}-01-01`,
-    dateModified: "2026-08-11",
+    dateModified: "2026-08-15",
   };
 }
 
+/** All cases in the database (including listed-only). */
+export function getAllCases(): CaseStudy[] {
+  return CASES;
+}
+
+/** Cases shown on the /work index (every entry in the database). */
+export function getListedCases(): CaseStudy[] {
+  return CASES;
+}
+
+/**
+ * Detail-page lookup. Returns undefined when the slug is missing or `hasPage` is false
+ * so listed-only rows 404 at /work/$slug.
+ */
 export function getCase(slug: string): CaseStudy | undefined {
-  return CASES.find((item) => item.slug === slug);
+  const item = CASES.find((c) => c.slug === slug);
+  if (!item?.hasPage) return undefined;
+  return item;
+}
+
+export function hasCasePage(slug: string): boolean {
+  return CASES.some((c) => c.slug === slug && c.hasPage);
 }
 
 export function casePath(slug: string): string {
-  return `/work/${slug}`;
+  return `${WORK_PATH}/${slug}`;
+}
+
+export function caseHoverImage(caseStudy: CaseStudy): string {
+  return caseStudy.hoverImage ?? caseStudy.hero.src;
 }

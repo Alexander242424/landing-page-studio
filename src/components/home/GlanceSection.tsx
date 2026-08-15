@@ -30,13 +30,8 @@ type GlanceWidget = {
   size: WidgetSize;
   theme: WidgetTheme;
   title: ReactNode;
-  /** Brand mark bottom-right. */
+  /** Brand mark bottom-right (light/white ink for dark cards). */
   logo: string;
-  /**
-   * Native logo ink. White/"light" assets invert on light cards;
-   * black/"dark" assets stay as-is on light cards.
-   */
-  logoInk?: "light" | "dark";
   backgroundImage?: string;
   backgroundVideo?: string;
   linkLabel?: string;
@@ -61,95 +56,63 @@ function caseHeadlineTitle(slug: string): ReactNode {
 /** Heights alternate — no two neighbors share the same size (incl. loop seam). */
 const CASES: GlanceWidget[] = [
   {
-    id: "rivian",
-    caseSlug: "rivian",
+    id: "bankrollu",
+    caseSlug: "bankrollu",
+    size: "small",
+    theme: "dark",
+    title: caseHeadlineTitle("bankrollu"),
+    logo: "/glance/bankrollu.svg",
+    backgroundImage: "/glance/bankrollu.jpg",
+    linkLabel: "Case Study",
+  },
+  {
+    id: "grono",
+    caseSlug: "grono",
+    size: "full",
+    theme: "dark",
+    title: caseHeadlineTitle("grono"),
+    logo: "/glance/grono.svg",
+    backgroundImage: "/glance/grono.jpg",
+    linkLabel: "Case Study",
+  },
+  {
+    id: "nespresso",
+    caseSlug: "nespresso",
     size: "medium",
     theme: "dark",
-    title: caseHeadlineTitle("rivian"),
-    logo: "/glance/rivian.svg",
-    logoInk: "light",
-    backgroundVideo: "/glance/rivian.mp4",
+    title: caseHeadlineTitle("nespresso"),
+    logo: "/glance/nespresso.svg",
+    backgroundImage: "/glance/nespresso.jpg",
     linkLabel: "Case Study",
   },
   {
-    id: "oura",
-    caseSlug: "oura",
+    id: "foundrae",
+    caseSlug: "foundrae",
     size: "full",
     theme: "dark",
-    title: caseHeadlineTitle("oura"),
-    logo: "/glance/oura.svg",
-    logoInk: "light",
-    backgroundImage: "/glance/oura-case.jpg",
+    title: caseHeadlineTitle("foundrae"),
+    logo: "/glance/foundrae.svg",
+    backgroundImage: "/glance/foundrae.jpg",
     linkLabel: "Case Study",
   },
   {
-    id: "tensr",
-    caseSlug: "tensr",
+    id: "boostra",
+    caseSlug: "boostra",
     size: "small",
     theme: "dark",
-    title: caseHeadlineTitle("tensr"),
-    logo: "/glance/tensr.svg",
-    logoInk: "light",
-    backgroundVideo: "/glance/work-01.mp4",
+    title: caseHeadlineTitle("boostra"),
+    logo: "/glance/boostra.svg",
+    backgroundImage: "/glance/boostra.jpg",
     linkLabel: "Case Study",
   },
   {
-    id: "moxion",
-    caseSlug: "moxion",
-    size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("moxion"),
-    logo: "/glance/moxion.svg",
-    logoInk: "light",
-    backgroundImage: "/glance/moxion.jpg",
-    linkLabel: "Case Study",
-  },
-  {
-    id: "hyperframe",
-    caseSlug: "hyperframe",
-    size: "small",
-    theme: "dark",
-    title: caseHeadlineTitle("hyperframe"),
-    logo: "/glance/hyperframe.svg",
-    logoInk: "light",
-    backgroundVideo: "/glance/work-02.mp4",
-    linkLabel: "Case Study",
-  },
-  {
-    id: "rivian-still",
-    caseSlug: "rivian",
+    id: "stan",
+    caseSlug: "stan",
     size: "medium",
     theme: "dark",
-    // Alternate card — intentionally not the primary case headline.
-    title: glanceHeadline({
-      line: "Market-defining launch",
-      emphasis: "strategy, design, performance.",
-    }),
-    logo: "/glance/rivian.svg",
-    logoInk: "light",
-    backgroundImage: "/glance/rivian.jpg",
-    linkLabel: "Case Study",
-  },
-  {
-    id: "noovo",
-    caseSlug: "noovo",
-    size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("noovo"),
-    logo: "/glance/noovo.svg",
-    logoInk: "dark",
-    backgroundImage: "/glance/pergola.jpg",
-    linkLabel: "Case Study",
-  },
-  {
-    id: "rappi",
-    caseSlug: "rappi",
-    size: "small",
-    theme: "dark",
-    title: caseHeadlineTitle("rappi"),
-    logo: "/glance/rappi.svg",
-    logoInk: "light",
-    backgroundVideo: "/glance/work-03.mp4",
+    title: caseHeadlineTitle("stan"),
+    logo: "/glance/stan.svg",
+    backgroundImage: "/glance/stan.jpg",
     linkLabel: "Case Study",
   },
 ];
@@ -161,8 +124,6 @@ function LogoMark({ src }: { src: string }) {
         <img
           src={src}
           alt=""
-          width={96}
-          height={28}
           decoding="async"
           loading="lazy"
           draggable={false}
@@ -207,8 +168,10 @@ function WidgetCard({
           <img
             src={widget.backgroundImage}
             alt=""
-            width={880}
-            height={650}
+            width={992}
+            height={
+              widget.size === "small" ? 880 : widget.size === "medium" ? 988 : 1150
+            }
             decoding="async"
             // Eager: transform-based marquees are unreliable with native lazy-load.
             loading="eager"

@@ -11,6 +11,13 @@ import { Logo } from "@/components/brand/Logo";
 import {
   OPEN_LEAD_CHAT_EVENT,
   OPEN_NEWSLETTER_CHAT_EVENT,
+  askPlaceholderForService,
+  leadCompanyPromptForService,
+  leadGoalForService,
+  leadIntroForService,
+  serviceSystemContext,
+  type AskChatServiceContext,
+  type OpenLeadChatDetail,
 } from "@/lib/askChat";
 import { generateWithGeminiFlash } from "@/lib/ai.functions";
 import { logChatEvent } from "@/lib/chatPersistence";
@@ -70,8 +77,6 @@ type ChatMessage = {
 type LeadStep = "email" | "goal" | "company" | "done";
 
 const LEAD = {
-  intro:
-    "Great — let’s connect you with an expert. What’s the best email to reach you?",
   emailRetry: "Please share a valid email so we can reach you.",
   goal: "Thanks. What’s your main goal right now?",
   company: "Got it. Which company are you with?",
@@ -413,6 +418,8 @@ export function AiPromptInput() {
   const actionsShownRef = useRef(false);
   /** Cal / lead / CRO capture already in play this session. */
   const commercialStartedRef = useRef(false);
+  /** Solutions card that opened this contact session (if any). */
+  const leadServiceRef = useRef<AskChatServiceContext | null>(null);
 
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
@@ -784,19 +791,30 @@ export function AiPromptInput() {
     }
   }
 
-  async function startLeadFlow() {
+  async function startLeadFlow(service?: AskChatServiceContext | null) {
     revealRef.current.cancelled = true;
     await sleep(0);
     revealRef.current = { cancelled: false };
 
     resetCroFlow();
     resetNewsletterFlow();
-    leadAnswersRef.current = { email: "", goal: "", company: "" };
+    leadServiceRef.current = service?.title ? service : null;
+    leadAnswersRef.current = {
+      email: "",
+      goal: leadServiceRef.current
+        ? leadGoalForService(leadServiceRef.current)
+        : "",
+      company: "",
+    };
     setLeadStep("email");
     commercialStartedRef.current = true;
     clearChatActions();
     setShowCal(false);
-    setInputHint(null);
+    setInputHint(
+      leadServiceRef.current
+        ? askPlaceholderForService(leadServiceRef.current)
+        : null,
+    );
     setPending(false);
     setValue("");
     setMessages([]);
@@ -806,11 +824,27 @@ export function AiPromptInput() {
     logChatEvent({
       eventType: "intent_open",
       intent: "contact",
-      metadata: { source: "open_lead_chat" },
+      metadata: {
+        source: "open_lead_chat",
+        ...(leadServiceRef.current
+          ? {
+              service: leadServiceRef.current.slug,
+              serviceTitle: leadServiceRef.current.title,
+            }
+          : {}),
+      },
     });
-    trackEvent("chat_open", { intent: "contact" });
+    trackEvent("chat_open", {
+      intent: "contact",
+      ...(leadServiceRef.current
+        ? { service: leadServiceRef.current.slug }
+        : {}),
+    });
 
-    await pushScriptedReply(LEAD.intro, "contact");
+    await pushScriptedReply(
+      leadIntroForService(leadServiceRef.current),
+      "contact",
+    );
   }
 
   async function startNewsletterFlow() {
@@ -819,6 +853,7 @@ export function AiPromptInput() {
     revealRef.current = { cancelled: false };
 
     resetCroFlow();
+    leadServiceRef.current = null;
     setLeadStep(null);
     leadStepRef.current = null;
     leadAnswersRef.current = { email: "", goal: "", company: "" };
@@ -851,6 +886,7 @@ export function AiPromptInput() {
 
     setLeadStep(null);
     leadStepRef.current = null;
+    leadServiceRef.current = null;
     resetNewsletterFlow();
     resetCroFlow();
     commercialStartedRef.current = true;
@@ -932,6 +968,7 @@ export function AiPromptInput() {
 
     setLeadStep(null);
     leadStepRef.current = null;
+    leadServiceRef.current = null;
     resetNewsletterFlow();
     resetCroFlow();
     commercialStartedRef.current = true;
@@ -1151,6 +1188,13 @@ export function AiPromptInput() {
         return;
       }
       leadAnswersRef.current.email = prompt.trim();
+      const service = leadServiceRef.current;
+      if (service?.title) {
+        leadAnswersRef.current.goal = leadGoalForService(service);
+        setLeadStep("company");
+        await pushScriptedReply(leadCompanyPromptForService(service), "contact");
+        return;
+      }
       setLeadStep("goal");
       await pushScriptedReply(LEAD.goal, "contact");
       return;
@@ -1167,12 +1211,21 @@ export function AiPromptInput() {
       leadAnswersRef.current.company = prompt.trim();
       setLeadStep("done");
       await pushScriptedReply(LEAD.done, "contact");
+      const service = leadServiceRef.current;
       logChatEvent({
         eventType: "lead_complete",
         intent: "contact",
-        metadata: { ...leadAnswersRef.current },
+        metadata: {
+          ...leadAnswersRef.current,
+          ...(service
+            ? { service: service.slug, serviceTitle: service.title }
+            : {}),
+        },
       });
-      trackEvent("lead_submit", { intent: "contact" });
+      trackEvent("lead_submit", {
+        intent: "contact",
+        ...(service ? { service: service.slug } : {}),
+      });
       setLeadStep(null);
       leadStepRef.current = null;
     }
@@ -1218,8 +1271,9 @@ export function AiPromptInput() {
   }
 
   useEffect(() => {
-    const onOpenLead = () => {
-      void startLeadFlow();
+    const onOpenLead = (event: Event) => {
+      const detail = (event as CustomEvent<OpenLeadChatDetail>).detail;
+      void startLeadFlow(detail?.service ?? null);
     };
     const onOpenNewsletter = () => {
       void startNewsletterFlow();
@@ -1291,10 +1345,15 @@ export function AiPromptInput() {
     const assistantId = uid();
 
     try {
+      const service = leadServiceRef.current;
+      const system = service
+        ? `${UXLAB_SYSTEM_PROMPT}\n\n${serviceSystemContext(service)}`
+        : UXLAB_SYSTEM_PROMPT;
+
       const { text } = await generateWithGeminiFlash({
         data: {
           prompt: modelPrompt,
-          system: UXLAB_SYSTEM_PROMPT,
+          system,
           history: prior,
         },
       });

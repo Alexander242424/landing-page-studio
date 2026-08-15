@@ -18,7 +18,8 @@ const DESKTOP_MQ = "(min-width: 1024px)";
  * Rejouice-matched hero + showreel:
  * - Awards char reveal on 2-line static headline
  * - Description via createTextReveal (same masked word reveal as HomeIntro / approach)
- * - Scrubbed headline parallax; reel clip-path grow (desktop) + video parallax
+ * - Scrubbed title+description parallax (shared y); reel clip-path grow (desktop)
+ *   + video parallax
  * - Taglines sit in normal hero flow on all breakpoints (no mobile bottom scrub —
  *   that desynced them from the showreel while the video scrolled)
  * - Mobile uses a lighter animation budget to avoid touch scroll jitter
@@ -30,6 +31,7 @@ export function HeroReel() {
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
@@ -63,13 +65,17 @@ export function HeroReel() {
   useEffect(() => {
     const hero = heroRef.current;
     const logo = logoRef.current;
+    const copy = copyRef.current;
     const description = descriptionRef.current;
     const actions = actionsRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
     const frame = frameRef.current;
-    if (!hero || !logo || !reel || !videoWrap || !frame) return;
+    if (!hero || !logo || !copy || !reel || !videoWrap || !frame) return;
+
+    // Title + description/CTAs share one scroll-linked y (move as one unit).
+    const copyUnit = copy;
 
     const cleanups: Array<() => void> = [];
 
@@ -127,7 +133,7 @@ export function HeroReel() {
 
       const mm = gsap.matchMedia();
 
-      // Mobile: headline parallax only; skip clip-path scrub (main jank source).
+      // Mobile: copy-unit parallax only; skip clip-path scrub (main jank source).
       // Taglines stay in document flow like desktop so they leave with the reel.
       mm.add(MOBILE_MQ, () => {
         gsap.set(frame, { clipPath: "inset(0% round 0rem)" });
@@ -144,7 +150,7 @@ export function HeroReel() {
             },
           })
           .fromTo(
-            logo,
+            copyUnit,
             { y: 0 },
             {
               y: () => hero.offsetHeight * 0.16,
@@ -172,7 +178,7 @@ export function HeroReel() {
         );
 
         return () => {
-          gsap.set([logo, videoWrap, frame], {
+          gsap.set([copyUnit, videoWrap, frame], {
             clearProps: "transform,clipPath",
           });
         };
@@ -191,7 +197,7 @@ export function HeroReel() {
             },
           })
           .fromTo(
-            logo,
+            copyUnit,
             { y: 0 },
             {
               y: () => hero.offsetHeight * 0.5,
@@ -211,7 +217,7 @@ export function HeroReel() {
           })
           .fromTo(
             frame,
-            { clipPath: "inset(12% round 2.4rem)" },
+            { clipPath: "inset(21.5% round 2.4rem)" },
             { clipPath: "inset(0% round 0rem)", ease: "none", duration: 1 },
           );
 
@@ -249,7 +255,7 @@ export function HeroReel() {
   return (
     <section ref={rootRef} className="rj-hero-reel" id="hero" aria-label="Hero">
       <div ref={heroRef} className="rj-hero">
-        <div className="rj-hero__headline-stage">
+        <div ref={copyRef} className="rj-hero__copy">
           <h1
             ref={logoRef}
             className="rj-hero__logo rj-hero__headline rj-awards-title"
@@ -258,9 +264,6 @@ export function HeroReel() {
             <span className="rj-hero__line">We turn your product</span>
             <span className="rj-hero__line">experience into revenue.</span>
           </h1>
-        </div>
-
-        <div className="rj-hero__bottom">
           <div className="rj-hero__taglines">
             <p
               ref={descriptionRef}
@@ -291,22 +294,22 @@ export function HeroReel() {
               </ArrowLink>
             </div>
           </div>
-          <div className="rj-hero__controls">
-            <div ref={iconRef} className="rj-hero__icon-wrap" aria-hidden="true">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                fill="none"
-                viewBox="0 0 12 12"
-                className="rj-hero__icon"
-              >
-                <path
-                  fill="currentColor"
-                  d="m5.796 9.246-2.97-2.97-.762.782 4.356 4.356 4.356-4.356-.782-.782-2.96 2.96V1.039H5.806z"
-                />
-              </svg>
-            </div>
+        </div>
+        <div className="rj-hero__controls">
+          <div ref={iconRef} className="rj-hero__icon-wrap" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              fill="none"
+              viewBox="0 0 12 12"
+              className="rj-hero__icon"
+            >
+              <path
+                fill="currentColor"
+                d="m5.796 9.246-2.97-2.97-.762.782 4.356 4.356 4.356-4.356-.782-.782-2.96 2.96V1.039H5.806z"
+              />
+            </svg>
           </div>
         </div>
       </div>
