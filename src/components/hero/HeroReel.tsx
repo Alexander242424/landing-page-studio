@@ -133,49 +133,11 @@ export function HeroReel() {
 
       const mm = gsap.matchMedia();
 
-      // Mobile: copy-unit parallax only; skip clip-path scrub (main jank source).
-      // Taglines stay in document flow like desktop so they leave with the reel.
+      // Mobile: no copy/video parallax — video must not scrub up over the hero text.
       mm.add(MOBILE_MQ, () => {
         gsap.set(frame, { clipPath: "inset(0% round 0rem)" });
-
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: hero,
-              // Soft scrub damps finger-sample noise without feeling laggy.
-              scrub: 0.45,
-              start: "top top",
-              end: "bottom top",
-              invalidateOnRefresh: true,
-            },
-          })
-          .fromTo(
-            copyUnit,
-            { y: 0 },
-            {
-              y: () => hero.offsetHeight * 0.16,
-              duration: 1,
-              ease: "none",
-              force3D: true,
-            },
-          );
-
-        // Mild video drift only — ±50% + clip-path fought native touch scroll.
-        gsap.fromTo(
-          videoWrap,
-          { yPercent: -10 },
-          {
-            yPercent: 10,
-            ease: "none",
-            force3D: true,
-            scrollTrigger: {
-              trigger: reel,
-              scrub: 0.45,
-              start: "top bottom",
-              end: "bottom top",
-            },
-          },
-        );
+        gsap.set(copyUnit, { clearProps: "transform" });
+        gsap.set(videoWrap, { clearProps: "transform" });
 
         return () => {
           gsap.set([copyUnit, videoWrap, frame], {
@@ -269,7 +231,7 @@ export function HeroReel() {
               ref={descriptionRef}
               className="rj-hero__tagline rj-hero__description rj-text-reveal"
             >
-              UXLab drives growth for your product through UX, AI
+              UXLab drives growth of your product through UX, AI
               transformation, conversions,
               <br className="rj-hero__description-break" />
               activations and retention that compound.

@@ -32,7 +32,8 @@ const MOTION_MQ = "(prefers-reduced-motion: reduce)";
  * target on every width ≥768 — pinning the short list at "center center" was
  * fighting Lenis and jerking on engage/release.
  *
- * Mobile / reduced-motion: static vertical stack.
+ * Mobile / reduced-motion: static vertical stack with fade-up on scroll
+ * (same entrance language as Challenges / Glance).
  */
 export function SolutionsStackSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -76,6 +77,33 @@ export function SolutionsStackSection() {
 
       if (!enablePin) {
         gsap.set(cards, { clearProps: "transform,y,z,rotation,scale,zIndex" });
+
+        // Mobile / reduced-motion: per-card fade-up like Challenges / Glance.
+        if (!motionMq.matches) {
+          stackCtx = gsap.context(() => {
+            cards.forEach((card) => {
+              const inner =
+                card.querySelector<HTMLElement>(
+                  ".rj-solutions-stack__card-inner",
+                ) ?? card;
+              gsap.fromTo(
+                inner,
+                { opacity: 0, y: 28 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.9,
+                  ease: "power3.out",
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 88%",
+                    once: true,
+                  },
+                },
+              );
+            });
+          }, root);
+        }
         return;
       }
 

@@ -771,6 +771,7 @@ ul {
 
 .rj-hero {
   position: relative;
+  z-index: 2;
   /* Mobile: 80% viewport. Prefer svh last — dvh resizes with the
      address bar mid-scroll and was a primary source of hero jitter. */
   height: 80dvh;
@@ -785,6 +786,8 @@ ul {
   font-style: normal;
   letter-spacing: -0.014rem;
   line-height: 1.14;
+  /* Solid plane so the reel cannot paint through the copy band */
+  background: var(--rj-black);
 }
 
 /* Title + description + CTAs — anchored near bottom, space before the reel */
@@ -827,8 +830,8 @@ ul {
 
 .rj-hero__headline {
   min-width: 0;
-  /* Mobile root rem is 2.667vw — rem floors explode near 767px. Size with vw/px. */
-  font-size: clamp(36px, 9.2vw, 64px);
+  /* Mobile: +15% vs prior clamp(36px, 9.2vw, 64px) */
+  font-size: clamp(41px, 10.58vw, 74px);
   color: var(--rj-white);
   overflow-wrap: normal;
   word-break: normal;
@@ -904,7 +907,7 @@ ul {
 /* Short viewports: keep headline from colliding with header / bottom copy */
 @media (max-height: 720px) {
   .rj-hero__headline {
-    font-size: min(9.2vw, 7.2vh, 56px);
+    font-size: min(10.58vw, 8.28vh, 64px);
   }
 }
 
@@ -1050,12 +1053,12 @@ ul {
 /* Mobile: +15% on hero-bottom copy only — CTAs stay 1.4rem like header Let's talk */
 @media (max-width: 767px) {
   .rj-hero__copy {
-    gap: calc(1.6rem + 16px);
+    gap: calc(1.6rem + 8px);
     padding-bottom: 4.8rem;
   }
 
   .rj-hero__taglines {
-    gap: calc(1.4rem + 24px);
+    gap: calc(1.4rem + 16px);
   }
 
   .rj-hero__tagline,
@@ -1087,6 +1090,7 @@ ul {
 
 .rj-reel {
   position: relative;
+  z-index: 1;
   /* Stable svh — avoid dvh thrash while the URL bar collapses */
   height: 100svh;
   height: calc(var(--rj-svh, 1svh) * 100);
@@ -1755,6 +1759,12 @@ body.rj-scroll-dark .rj-page__main {
   display: flex;
   flex-direction: column;
   padding: 10rem 1rem 2.9rem;
+}
+
+@media (max-width: 767px) {
+  .rj-intro__tagline {
+    padding-top: 0;
+  }
 }
 
 .rj-intro__tagline-inner {
@@ -4979,6 +4989,14 @@ body.rj-scroll-dark .rj-page__main {
     /* Top hairline + equal vertical padding (mobile dark stack only) */
     padding: 4.8rem 0;
     border-top: 1px solid color-mix(in srgb, var(--rj-white) 14%, transparent);
+  }
+
+  .rj-solutions-stack__card-number {
+    display: none;
+  }
+
+  .rj-solutions-stack__card-bottom {
+    gap: 3.2rem;
   }
 }
 
