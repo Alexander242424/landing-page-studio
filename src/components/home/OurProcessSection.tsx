@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { createAwardsCharReveal } from "@/lib/textReveal";
@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ITEMS = [
+const DEFAULT_ITEMS = [
   {
     title: "Diagnose",
     body: "Behavior data, session review, and competitive context surface the highest-friction moments. We prioritize what moves conversion, retention, or monetization first.",
@@ -29,11 +29,22 @@ const ITEMS = [
   },
 ] as const;
 
+export type ProcessItem = {
+  title: string;
+  body: string;
+};
+
 /**
  * Metalab-style hoverable columns — equal widths collapse/expand on hover,
  * description clipped until the active column doubles in width.
  */
-export function OurProcessSection() {
+export function OurProcessSection({
+  items = DEFAULT_ITEMS,
+  headline = "Our process",
+}: {
+  items?: readonly ProcessItem[];
+  headline?: ReactNode;
+} = {}) {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const columnsRef = useRef<HTMLDivElement>(null);
@@ -42,7 +53,8 @@ export function OurProcessSection() {
   const [fixedColumnWidth, setFixedColumnWidth] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  const count = ITEMS.length;
+  const processItems = items;
+  const count = processItems.length;
   const columnWidth = `${100 / count}%`;
   const columnExpandedWidth = `${(100 / count) * 2}%`;
   const columnContractedWidth = `${(100 - (100 / count) * 2) / (count - 1)}%`;
@@ -198,7 +210,7 @@ export function OurProcessSection() {
           ref={headlineRef}
           className="rj-process__title rj-awards-title"
         >
-          Our process
+          {headline}
         </h2>
       </div>
 
@@ -207,7 +219,7 @@ export function OurProcessSection() {
         className="rj-process__columns"
         onMouseLeave={() => setActive(null)}
       >
-        {ITEMS.map((item, index) => {
+        {processItems.map((item, index) => {
           const isActive = active === index;
           const isNotActive = active !== null && active !== index;
 

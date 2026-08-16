@@ -55,6 +55,11 @@ export const Route = createFileRoute("/work/$slug")({
           type: "text/plain",
           href: absoluteUrl("/llms.txt"),
         },
+        {
+          rel: "alternate",
+          type: "text/plain",
+          href: absoluteUrl("/llms-full.txt"),
+        },
       ],
     };
   },

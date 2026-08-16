@@ -1,5 +1,7 @@
 import { Logo } from "@/components/brand/Logo";
+import { ArrowCue } from "@/components/ui/ArrowLink";
 import { openContactChat, openNewsletterChat } from "@/lib/askChat";
+import { solutionPath } from "@/lib/servicePages";
 import { SOLUTIONS } from "@/lib/solutions";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +53,7 @@ export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
           <ul className="rj-footer__list">
             {SOLUTIONS.map((item) => (
               <li key={item.title}>
-                <a href="#solutions" className="rj-link-active">
+                <a href={solutionPath(item)} className="rj-link-active">
                   {item.title}
                 </a>
               </li>
@@ -77,20 +79,18 @@ export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
             className="rj-footer__action"
             onClick={() => openNewsletterChat()}
           >
-            <span>Subscribe to our newsletter</span>
-            <span className="rj-footer__action-arrow" aria-hidden="true">
-              ↗
-            </span>
+            <ArrowCue className="rj-footer__action-cue">
+              Subscribe to our newsletter
+            </ArrowCue>
           </button>
           <button
             type="button"
             className="rj-footer__action"
             onClick={() => openContactChat()}
           >
-            <span>Get in touch with us</span>
-            <span className="rj-footer__action-arrow" aria-hidden="true">
-              ↗
-            </span>
+            <ArrowCue className="rj-footer__action-cue">
+              Get in touch with us
+            </ArrowCue>
           </button>
 
           <ul className="rj-footer__socials">

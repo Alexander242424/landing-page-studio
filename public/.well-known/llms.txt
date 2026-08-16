@@ -3,7 +3,7 @@
 # Full retrieval index: https://uxlab.digital/llms-full.txt
 # AI policy: https://uxlab.digital/ai.txt
 
-> Growth product performance agency. UXLAB helps teams improve conversion, activation, trials, and LTV through product UX, CRO, experimentation, and AI-native product work.
+> Growth product performance agency. UXLAB helps teams improve conversion, activation, and LTV through product UX, CRO, experimentation, and AI-native product work.
 
 ## Canonical indexes
 - https://uxlab.digital/llms.txt
@@ -13,11 +13,20 @@
 
 ## Primary URLs
 - Home: https://uxlab.digital/
-- Solutions: https://uxlab.digital/#solutions
+- Solutions overview: https://uxlab.digital/#solutions
 - Process: https://uxlab.digital/#process
 - FAQ: https://uxlab.digital/#faq
+- Work / case studies: https://uxlab.digital/work
 - Resources: https://uxlab.digital/resources
 - Contact: https://uxlab.digital/#contact
+
+## Service landing pages
+- https://uxlab.digital/solutions/product-performance
+- https://uxlab.digital/solutions/product-design
+- https://uxlab.digital/solutions/websites
+- https://uxlab.digital/solutions/testing-experimentation
+- https://uxlab.digital/solutions/ai-engineering
+- https://uxlab.digital/solutions/ai-mvp-to-product
 
 ## Articles
 - https://uxlab.digital/resources/how-activation-loops-compound-retention-in-the-first-14-days

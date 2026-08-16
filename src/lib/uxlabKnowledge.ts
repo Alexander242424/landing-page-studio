@@ -10,11 +10,12 @@ Who we are:
 - Tagline spirit: growth through product performance.
 
 What we do (services):
-- Conversion rate optimization (CRO)
-- End-to-end product design
-- User testing & experimentation
-- Product launch
-- AI transformation / experience systems
+- Product metrics performance (CRO, activation, retention, LTV)
+- Product design
+- Websites + funnels
+- Testing & experimentation
+- AI engineering
+- AI MVP to Product — turn vibe-coded / rough MVPs into products users can trust
 - Monetization & funnel architecture when relevant
 
 How we work (process):

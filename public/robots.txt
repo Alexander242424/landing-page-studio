@@ -7,7 +7,7 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-# OpenAI
+# OpenAI / ChatGPT
 User-agent: GPTBot
 Allow: /
 Disallow: /admin
@@ -23,7 +23,7 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-# Anthropic
+# Anthropic / Claude
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin
@@ -58,6 +58,12 @@ Disallow: /admin
 Disallow: /admin/
 
 User-agent: Applebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# xAI / Grok
+User-agent: Grok
 Allow: /
 Disallow: /admin
 Disallow: /admin/
@@ -109,9 +115,21 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
+# AI2 / Allen Institute
+User-agent: AI2Bot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Timpi
+User-agent: Timpibot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
 Sitemap: https://uxlab.digital/sitemap.xml
 
-# LLM / GEO indexes (admin is not listed)
+# LLM / GEO indexes
 # https://uxlab.digital/llms.txt
 # https://uxlab.digital/llms-full.txt
 # https://uxlab.digital/ai.txt

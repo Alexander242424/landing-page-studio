@@ -1,10 +1,15 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, type MouseEvent, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { LazyVideo } from "@/components/media/LazyVideo";
 import { openContactChat } from "@/lib/askChat";
-import { SOLUTIONS, solutionChatContext } from "@/lib/solutions";
+import { SOLUTIONS, solutionChatContext, type Solution } from "@/lib/solutions";
+import {
+  solutionHasLanding,
+  solutionPath,
+} from "@/lib/servicePages";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 import { cn } from "@/lib/utils";
 
@@ -32,14 +37,38 @@ const MOTION_MQ = "(prefers-reduced-motion: reduce)";
  * target on every width ≥768 — pinning the short list at "center center" was
  * fighting Lenis and jerking on engage/release.
  *
- * Mobile / reduced-motion: static vertical stack with fade-up on scroll
- * (same entrance language as Challenges / Glance).
+ * Mobile / reduced-motion: static vertical stack; cards fade/slide up in
+ * staggered beats (title → copy/CTA → media) on scroll, like Challenges.
  */
-export function SolutionsStackSection() {
+export function SolutionsStackSection({
+  solutions = SOLUTIONS,
+  excludeSlug,
+  sectionId = "solutions",
+  headline = (
+    <>
+      How we invent
+      <br />
+      your growth
+    </>
+  ),
+  ariaLabel = "How we invent your growth",
+}: {
+  solutions?: readonly Solution[];
+  /** Hide the active service when embedding on a service landing. */
+  excludeSlug?: string;
+  sectionId?: string;
+  headline?: ReactNode;
+  ariaLabel?: string;
+} = {}) {
+  const navigate = useNavigate();
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const pinHeightRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
+  const items = useMemo(
+    () => solutions.filter((item) => item.slug !== excludeSlug),
+    [solutions, excludeSlug],
+  );
 
   useEffect(() => {
     const root = rootRef.current;
@@ -76,31 +105,46 @@ export function SolutionsStackSection() {
         desktopMq.matches && !motionMq.matches && cards.length > 1;
 
       if (!enablePin) {
-        gsap.set(cards, { clearProps: "transform,y,z,rotation,scale,zIndex" });
+        gsap.set(cards, {
+          clearProps: "transform,y,z,rotation,scale,zIndex,opacity",
+        });
+        pinHeight.style.removeProperty("height");
 
-        // Mobile / reduced-motion: per-card fade-up like Challenges / Glance.
+        // Mobile / reduced-motion: staggered fade-up per card (like Challenges).
         if (!motionMq.matches) {
           stackCtx = gsap.context(() => {
             cards.forEach((card) => {
-              const inner =
-                card.querySelector<HTMLElement>(
-                  ".rj-solutions-stack__card-inner",
-                ) ?? card;
-              gsap.fromTo(
-                inner,
-                { opacity: 0, y: 28 },
-                {
-                  opacity: 1,
-                  y: 0,
-                  duration: 0.9,
-                  ease: "power3.out",
-                  scrollTrigger: {
-                    trigger: card,
-                    start: "top 88%",
-                    once: true,
-                  },
-                },
+              const top = card.querySelector<HTMLElement>(
+                ".rj-solutions-stack__card-top",
               );
+              const body = card.querySelector<HTMLElement>(
+                ".rj-solutions-stack__card-body",
+              );
+              const media = card.querySelector<HTMLElement>(
+                ".rj-solutions-stack__card-media",
+              );
+              const parts = [top, body, media].filter(
+                (el): el is HTMLElement => Boolean(el),
+              );
+              if (parts.length === 0) return;
+
+              gsap.set(parts, { opacity: 0, y: 28 });
+
+              ScrollTrigger.create({
+                trigger: card,
+                start: "top 90%",
+                once: true,
+                onEnter: () => {
+                  gsap.to(parts, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.9,
+                    stagger: 0.12,
+                    ease: "power3.out",
+                    overwrite: "auto",
+                  });
+                },
+              });
             });
           }, root);
         }
@@ -108,13 +152,18 @@ export function SolutionsStackSection() {
       }
 
       stackCtx = gsap.context(() => {
-        const gap = 72;
+        // Tight deck peek — large gaps + glass made 6 cards look like a trail bug.
+        const gap = 28;
         const count = cards.length;
         const flingCount = count - 1;
         // Settle after pin engages so card 01 doesn't fling on the same
         // frame as position:fixed — that read as a jump; later cards were fine.
         const introHold = 0.75;
         const outroHold = 0.4;
+        const timelineUnits = introHold + flingCount + outroHold;
+
+        // Keep scrub distance proportional to fling count (was tuned for 5 cards).
+        pinHeight.style.height = `${Math.round(100 * timelineUnits * 1.05)}vh`;
 
         cards.forEach((card, index) => {
           gsap.set(card, {
@@ -123,6 +172,8 @@ export function SolutionsStackSection() {
             yPercent: 0,
             scale: 1,
             rotation: 0,
+            // Deeper cards fade so the glass stack doesn't read as a glitch trail.
+            opacity: index === 0 ? 1 : Math.max(0.4, 1 - index * 0.1),
             zIndex: count - index,
             transformOrigin: "50% 50%",
             force3D: true,
@@ -158,6 +209,10 @@ export function SolutionsStackSection() {
               {
                 y: gap * stackIndex,
                 z: -gap * stackIndex,
+                opacity:
+                  stackIndex === 0
+                    ? 1
+                    : Math.max(0.4, 1 - stackIndex * 0.1),
                 ease: "none",
                 duration: 1,
               },
@@ -173,6 +228,7 @@ export function SolutionsStackSection() {
               y: () => -window.innerHeight * 1.2,
               scale: 1.18,
               rotation,
+              opacity: 0,
               ease: "none",
               duration: 1,
             },
@@ -214,36 +270,35 @@ export function SolutionsStackSection() {
     return () => {
       cleanups.forEach((fn) => fn());
     };
-  }, []);
+  }, [items]);
 
   return (
     <section
       ref={rootRef}
-      id="solutions"
+      id={sectionId}
       className="rj-solutions-stack"
-      aria-label="How we invent your growth"
+      aria-label={ariaLabel}
     >
       <div className="rj-solutions-stack__heading">
         <h2
           ref={headlineRef}
           className="rj-solutions-stack__headline rj-awards-title"
         >
-          How we invent
-          <br />
-          your growth
+          {headline}
         </h2>
       </div>
 
       <div ref={pinHeightRef} className="rj-solutions-stack__pin-height">
         <div ref={pinRef} className="rj-solutions-stack__pin">
           <div className="rj-solutions-stack__list" role="list">
-            {SOLUTIONS.map((item, index) => {
+            {items.map((item, index) => {
               const tone = CARD_TONES[index % CARD_TONES.length];
               const num = String(index + 1).padStart(2, "0");
 
               return (
                 <article
                   key={item.title}
+                  id={`solution-${item.slug}`}
                   role="listitem"
                   className={cn(
                     "rj-solutions-stack__card",
@@ -270,17 +325,31 @@ export function SolutionsStackSection() {
                       <div className="rj-solutions-stack__card-body">
                         <p>{item.body}</p>
                         <ArrowLink
-                          href="#contact"
+                          href={
+                            solutionHasLanding(item.slug)
+                              ? solutionPath(item)
+                              : "#contact"
+                          }
                           className="rj-solutions-stack__cta"
                           onClick={(event: MouseEvent<HTMLAnchorElement>) => {
                             event.preventDefault();
                             event.stopPropagation();
+                            if (solutionHasLanding(item.slug)) {
+                              void navigate({
+                                to: "/solutions/$slug",
+                                params: { slug: item.slug },
+                                viewTransition: true,
+                              });
+                              return;
+                            }
                             openContactChat({
                               service: solutionChatContext(item),
                             });
                           }}
                         >
-                          Let&apos;s talk
+                          {solutionHasLanding(item.slug)
+                            ? "Explore"
+                            : "Let's talk"}
                         </ArrowLink>
                       </div>
                       <div className="rj-solutions-stack__card-media">

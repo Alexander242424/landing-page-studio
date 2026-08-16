@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BlogGrid } from "@/components/blog/BlogGrid";
 import { ARTICLES, type Article } from "@/lib/articles";
 import { createTextReveal } from "@/lib/textReveal";
+import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,8 @@ type BlogSectionProps = {
   articles?: Article[];
   /** Skip scroll reveal / card entrance (e.g. embed in article page). */
   skipAnimation?: boolean;
+  /** Extra top padding — service landings sit after the dark solutions stack. */
+  spaciousTop?: boolean;
 };
 
 /**
@@ -19,6 +22,7 @@ type BlogSectionProps = {
 export function BlogSection({
   articles = ARTICLES,
   skipAnimation = false,
+  spaciousTop = false,
 }: BlogSectionProps = {}) {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
@@ -72,7 +76,10 @@ export function BlogSection({
     <section
       ref={rootRef}
       id="resources"
-      className="rj-blog theme-light"
+      className={cn(
+        "rj-blog theme-light",
+        spaciousTop && "rj-blog--spacious-top",
+      )}
       aria-label="Latest articles"
     >
       <div className="rj-blog__inner">

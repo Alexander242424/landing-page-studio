@@ -38,16 +38,22 @@ function resolveHeroLight(hero: HTMLElement): Band {
  * Body bands:
  * - hero (first section): black
  * - mid page (intro / glance): light
- * - approach to #solutions: scrub white → black (same soft ease as theme flip)
- * - past #solutions top: full dark (process+ stay dark)
+ * - approach to dark trigger: scrub white → black (same soft ease as theme flip)
+ * - past dark trigger top: full dark (process+ stay dark)
  * FAQ / blog keep their own theme-light scope.
  *
- * Waits for lazy-mounted #solutions so triggers still arm after Suspense.
+ * Waits for lazy-mounted dark trigger so triggers still arm after Suspense.
+ * Pass `darkTriggerId={null}` to skip the dark scrub (hero ↔ light only).
  */
-export function ScrollThemeBand() {
+export function ScrollThemeBand({
+  darkTriggerId = "solutions",
+}: {
+  darkTriggerId?: string | null;
+} = {}) {
   useEffect(() => {
     let cancelled = false;
     let raf = 0;
+    let attempts = 0;
     let heroTrigger: ScrollTrigger | null = null;
     let darkScrub: ScrollTrigger | null = null;
     let syncHero: (() => void) | null = null;
@@ -63,12 +69,44 @@ export function ScrollThemeBand() {
       }
     };
 
+    const attachHeroOnly = (hero: HTMLElement) => {
+      teardown();
+      setDarkProgress(0);
+      syncHero = () => setBand(resolveHeroLight(hero));
+      heroTrigger = ScrollTrigger.create({
+        trigger: hero,
+        start: "top top",
+        end: "bottom 15%",
+        onEnter: syncHero,
+        onLeave: syncHero,
+        onEnterBack: syncHero,
+        onLeaveBack: syncHero,
+      });
+      window.addEventListener("scroll", syncHero, { passive: true });
+      syncHero();
+      ScrollTrigger.refresh();
+    };
+
     const attach = () => {
       if (cancelled) return;
       const hero = document.getElementById("hero");
-      const solutions = document.getElementById("solutions");
-      if (!hero || !solutions) {
+      if (!hero) {
         raf = requestAnimationFrame(attach);
+        return;
+      }
+
+      if (!darkTriggerId) {
+        attachHeroOnly(hero);
+        return;
+      }
+
+      const solutions = document.getElementById(darkTriggerId);
+      if (!solutions) {
+        if (attempts++ < 90) {
+          raf = requestAnimationFrame(attach);
+          return;
+        }
+        attachHeroOnly(hero);
         return;
       }
 
@@ -138,7 +176,7 @@ export function ScrollThemeBand() {
       setDarkProgress(0);
       setBand("hero");
     };
-  }, []);
+  }, [darkTriggerId]);
 
   return null;
 }

@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HOME_FAQS } from "@/lib/faq";
+import { HOME_FAQS, type HomeFaq } from "@/lib/faq";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,20 +15,26 @@ gsap.registerPlugin(ScrollTrigger);
 /**
  * FAQ accordion — large awards-style headline + Rejouice-token list.
  */
-export function FaqSection() {
+export function FaqSection({
+  faqs = HOME_FAQS,
+  headline = "FAQ",
+}: {
+  faqs?: HomeFaq[];
+  headline?: string;
+} = {}) {
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    const headline = headlineRef.current;
-    if (!root || !headline) return;
+    const headlineEl = headlineRef.current;
+    if (!root || !headlineEl) return;
 
     const cleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
       cleanups.push(
-        createAwardsCharReveal(headline, {
+        createAwardsCharReveal(headlineEl, {
           start: "top 85%",
         }),
       );
@@ -58,7 +64,7 @@ export function FaqSection() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [faqs]);
 
   return (
     <section
@@ -69,12 +75,12 @@ export function FaqSection() {
     >
       <div className="rj-faq__headline-wrap">
         <h2 ref={headlineRef} className="rj-faq__headline rj-awards-title">
-          FAQ
+          {headline}
         </h2>
       </div>
 
       <Accordion type="single" collapsible className="rj-faq__list">
-        {HOME_FAQS.map((item, index) => (
+        {faqs.map((item, index) => (
           <AccordionItem
             key={item.question}
             value={`item-${index}`}

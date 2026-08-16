@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { HomeIntro } from "@/components/home/HomeIntro";
-import { LogoStrip } from "@/components/home/LogoStrip";
 import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -135,7 +134,6 @@ function HomePage() {
 
       <main className="rj-page__main">
         <HeroReel />
-        <LogoStrip />
         <HomeIntro />
         <Deferred>
           <GlanceSection />

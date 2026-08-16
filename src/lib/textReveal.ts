@@ -236,6 +236,17 @@ export function createAwardsCharReveal(
     wordsClass: WORD_CLASS,
     charsClass: CHAR_CLASS,
   });
+
+  // SplitText often stamps text-align:start / shrink widths — force true center.
+  split.lines.forEach((line) => {
+    const el = line as HTMLElement;
+    el.style.setProperty("text-align", "center", "important");
+    el.style.setProperty("display", "block", "important");
+    el.style.setProperty("width", "100%", "important");
+    el.style.removeProperty("max-width");
+    el.style.removeProperty("margin-left");
+    el.style.removeProperty("margin-right");
+  });
   let restored = false;
 
   const restore = () => {

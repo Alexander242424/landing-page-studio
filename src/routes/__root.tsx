@@ -15,24 +15,130 @@ import { SmoothScrollProvider } from "@/components/scroll/SmoothScrollProvider";
 import { AnalyticsBeacon } from "@/components/analytics/AnalyticsBeacon";
 import { SITE, absoluteUrl, defaultMeta } from "@/lib/site";
 
-function NotFoundComponent() {
+function Arr404() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="font-sans text-7xl font-light text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-normal text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center bg-foreground px-4 py-2 text-sm font-normal text-background transition-opacity hover:opacity-90"
+    <svg
+      className="rj-arrow__svg"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M4.5 3.25h8.25V11.5M12.25 3.75 3.25 12.75"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ArrowCta({
+  href,
+  to,
+  children,
+}: {
+  href?: string;
+  to?: string;
+  children: ReactNode;
+}) {
+  const inner = (
+    <>
+      <span className="rj-arrow__icon rj-arrow__icon--b" aria-hidden="true">
+        <Arr404 />
+      </span>
+      <span className="rj-arrow__content">{children}</span>
+      <span className="rj-arrow__icon rj-arrow__icon--a" aria-hidden="true">
+        <Arr404 />
+      </span>
+    </>
+  );
+  if (to) {
+    return (
+      <Link to={to as "/"} className="rj-arrow">
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <a href={href} className="rj-arrow">
+      {inner}
+    </a>
+  );
+}
+
+function NotFoundComponent() {
+  useEffect(() => {
+    document.title = `Not found — ${SITE.name}`;
+  }, []);
+
+  return (
+    <div
+      className="theme-light flex min-h-screen flex-col"
+      style={{ background: "var(--rj-paper, #fff)" }}
+    >
+      <meta name="robots" content="noindex,nofollow" />
+
+      {/* Minimal wordmark nav */}
+      <header
+        className="flex h-14 shrink-0 items-center px-6 lg:px-12"
+        style={{ borderBottom: "1px solid var(--rj-rule, rgba(0,0,0,.07))" }}
+      >
+        <Link
+          to="/"
+          aria-label="UXLAB — back to home"
+          className="text-sm tracking-tight transition-opacity hover:opacity-60"
+          style={{
+            fontFamily: "var(--rj-font-sans, 'Suisse Intl', sans-serif)",
+            color: "var(--rj-ink)",
+          }}
+        >
+          UXLAB
+        </Link>
+      </header>
+
+      {/* Main content */}
+      <main className="flex flex-1 flex-col justify-center px-6 pb-28 lg:px-12">
+        <div className="w-full max-w-3xl">
+          <p
+            className="mb-5 text-[10px] font-medium uppercase tracking-[0.22em]"
+            style={{ color: "var(--rj-ink-faint, rgba(0,0,0,.3))" }}
           >
-            Go home
-          </Link>
+            Error 404
+          </p>
+
+          <h1
+            className="leading-none tracking-tight"
+            style={{
+              fontFamily: "var(--rj-font-display, 'Suisse Intl', sans-serif)",
+              fontWeight: 300,
+              fontSize: "clamp(3.5rem, 11vw, 8rem)",
+              color: "var(--rj-ink)",
+            }}
+          >
+            Wrong
+            <br />
+            turn.
+          </h1>
+
+          <p
+            className="mt-6 max-w-xs text-sm leading-relaxed"
+            style={{ color: "var(--rj-ink-mid, rgba(0,0,0,.5))" }}
+          >
+            This page doesn't exist or has been moved. Head back to find what
+            you were looking for.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center gap-8">
+            <ArrowCta to="/">Back home</ArrowCta>
+            <ArrowCta to="/resources">Browse resources</ArrowCta>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
@@ -114,6 +220,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         type: "text/plain",
         href: absoluteUrl("/llms-full.txt"),
       },
+      {
+        rel: "preload",
+        href: "/fonts/aeonik-pro/AeonikPro-Regular.otf",
+        as: "font",
+        type: "font/otf",
+        crossOrigin: "anonymous",
+      },
+      { rel: "preconnect", href: "https://app.cal.com" },
       { rel: "dns-prefetch", href: "https://app.cal.com" },
     ],
   }),

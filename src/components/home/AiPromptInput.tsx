@@ -556,10 +556,47 @@ export function AiPromptInput() {
     if (showing) {
       root.classList.add("is-shown");
 
-      // Measure full dock width from CSS, then start 30% narrower.
+      // Measure dock from tip-chip row natural width (bar must match pills).
       gsap.set(root, { width: "", autoAlpha: 0 });
-      const fullWidth = root.getBoundingClientRect().width;
+      if (tips) {
+        // Expand tip row for measure without flashing (opacity 0).
+        gsap.set(tips, { autoAlpha: 0, gridTemplateRows: "1fr" });
+      }
+      gsap.set(chips, { autoAlpha: 0 });
+
+      const tipRow = tips?.querySelector<HTMLElement>(".rj-ask__row");
+      // Temporarily uncap so scrollWidth reflects all chips + gaps.
+      const prevRootWidth = root.style.width;
+      const prevDockVar = root.style.getPropertyValue("--rj-ask-dock-width");
+      root.style.width = "max-content";
+      root.style.maxWidth = "none";
+      root.style.setProperty("--rj-ask-dock-width", "max-content");
+      if (tipRow) {
+        tipRow.style.width = "max-content";
+        tipRow.style.maxWidth = "none";
+      }
+      const chipsNatural =
+        tipRow?.scrollWidth ??
+        tips?.scrollWidth ??
+        chips.reduce((sum, el) => sum + el.offsetWidth, 0) +
+          Math.max(0, chips.length - 1) * 8;
+      if (tipRow) {
+        tipRow.style.width = "";
+        tipRow.style.maxWidth = "";
+      }
+      root.style.width = prevRootWidth;
+      root.style.maxWidth = "";
+      if (prevDockVar) {
+        root.style.setProperty("--rj-ask-dock-width", prevDockVar);
+      } else {
+        root.style.removeProperty("--rj-ask-dock-width");
+      }
+
+      const gutter = window.matchMedia("(max-width: 767px)").matches ? 20 : 32;
+      const maxAllowed = Math.max(280, window.innerWidth - gutter);
+      const fullWidth = Math.min(Math.max(chipsNatural, 280), maxAllowed);
       const startWidth = Math.max(fullWidth * 0.7, Math.min(280, fullWidth));
+      root.style.setProperty("--rj-ask-dock-width", `${Math.round(fullWidth)}px`);
 
       if (reduced) {
         gsap.set(root, { autoAlpha: 1, width: fullWidth, clearProps: "transform" });
@@ -608,7 +645,7 @@ export function AiPromptInput() {
         },
         0,
       );
-      // 2) Stretch dock to full width
+      // 2) Stretch dock to tip-chip width
       tl.to(
         root,
         {

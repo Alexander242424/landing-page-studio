@@ -1,10 +1,12 @@
 import { useEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { LogoStrip } from "@/components/home/LogoStrip";
 import { LazyVideo } from "@/components/media/LazyVideo";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import { openContactChat } from "@/lib/askChat";
+import type { ServiceHeroContent } from "@/lib/servicePages";
 import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -13,6 +15,18 @@ const HERO_VIDEO = "/video/hero.mp4";
 const HERO_POSTER = "/video/hero-poster.jpg";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
+
+const DEFAULT_HERO: ServiceHeroContent = {
+  ariaLabel: "We turn your product experience into revenue.",
+  lines: ["We turn your product", "experience into revenue."],
+  descriptionLines: [
+    "Growth partner for AI startups and product teams to boost conversions,",
+    "retention, user experience, funnels, and AI transformation.",
+  ],
+  primaryCta: { label: "Let's talk", href: "#contact" },
+  secondaryCta: { label: "See results", href: "#glance" },
+  logosStat: "Trusted by 200+ YCombinator\n& Speedrun founders",
+};
 
 /**
  * Rejouice-matched hero + showreel:
@@ -26,7 +40,8 @@ const DESKTOP_MQ = "(min-width: 1024px)";
  *
  * Load sequence (with playHomeEntrance): header → video → title → description
  */
-export function HeroReel() {
+export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
+  const hero = content ?? DEFAULT_HERO;
   const { lenis } = useSmoothScroll();
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -34,6 +49,7 @@ export function HeroReel() {
   const copyRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const logosRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const videoWrapRef = useRef<HTMLDivElement>(null);
@@ -52,9 +68,9 @@ export function HeroReel() {
     }
   };
 
-  const onProcessClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  const onResultsClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    scrollToHref("#process");
+    scrollToHref(hero.secondaryCta.href);
   };
 
   const onTalkClick = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -68,13 +84,14 @@ export function HeroReel() {
     const copy = copyRef.current;
     const description = descriptionRef.current;
     const actions = actionsRef.current;
+    const logos = logosRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
     const frame = frameRef.current;
     if (!hero || !logo || !copy || !reel || !videoWrap || !frame) return;
 
-    // Title + description/CTAs share one scroll-linked y (move as one unit).
+    // Title + description/CTAs + logos share one scroll-linked y (move as one unit).
     const copyUnit = copy;
 
     const cleanups: Array<() => void> = [];
@@ -112,6 +129,17 @@ export function HeroReel() {
         });
       }
 
+      if (logos) {
+        gsap.set(logos, { autoAlpha: 0, y: 14 });
+        gsap.to(logos, {
+          autoAlpha: 1,
+          y: 0,
+          delay: 2.55,
+          duration: 1,
+          ease: "expo.out",
+        });
+      }
+
       if (icon) {
         gsap.set(icon, { autoAlpha: 0, y: -14 });
         gsap.to(icon, {
@@ -129,25 +157,46 @@ export function HeroReel() {
           yoyo: true,
           repeat: -1,
         });
+
+        // Fixed to viewport bottom — hide once the hero band leaves the screen.
+        ScrollTrigger.create({
+          trigger: hero,
+          start: "bottom bottom",
+          end: "bottom top",
+          onEnter: () => gsap.to(icon, { autoAlpha: 0, duration: 0.25, overwrite: "auto" }),
+          onLeaveBack: () => gsap.to(icon, { autoAlpha: 1, duration: 0.25, overwrite: "auto" }),
+        });
       }
 
       const mm = gsap.matchMedia();
 
       // Mobile: no copy/video parallax — video must not scrub up over the hero text.
       mm.add(MOBILE_MQ, () => {
-        gsap.set(frame, { clipPath: "inset(0% round 0rem)" });
+        gsap.set(frame, {
+          clearProps: "--rj-reel-clip,--rj-reel-radius",
+          clipPath: "inset(0% round 0rem)",
+        });
         gsap.set(copyUnit, { clearProps: "transform" });
         gsap.set(videoWrap, { clearProps: "transform" });
 
         return () => {
-          gsap.set([copyUnit, videoWrap, frame], {
-            clearProps: "transform,clipPath",
+          gsap.set([copyUnit, videoWrap], {
+            clearProps: "transform",
+          });
+          gsap.set(frame, {
+            clearProps: "transform,clipPath,--rj-reel-clip,--rj-reel-radius",
           });
         };
       });
 
       // Desktop: keep full Rejouice scrub budget.
       mm.add(DESKTOP_MQ, () => {
+        // CSS vars scrub reliably in reverse (string clip-path + round often sticks).
+        gsap.set(frame, {
+          "--rj-reel-clip": "21.5%",
+          "--rj-reel-radius": "2.4rem",
+        });
+
         gsap
           .timeline({
             scrollTrigger: {
@@ -175,12 +224,22 @@ export function HeroReel() {
               scrub: true,
               start: "top bottom",
               end: "top top",
+              invalidateOnRefresh: true,
             },
           })
           .fromTo(
             frame,
-            { clipPath: "inset(21.5% round 2.4rem)" },
-            { clipPath: "inset(0% round 0rem)", ease: "none", duration: 1 },
+            {
+              "--rj-reel-clip": "21.5%",
+              "--rj-reel-radius": "2.4rem",
+            },
+            {
+              "--rj-reel-clip": "0%",
+              "--rj-reel-radius": "0rem",
+              ease: "none",
+              duration: 1,
+              immediateRender: false,
+            },
           );
 
         gsap
@@ -190,6 +249,7 @@ export function HeroReel() {
               scrub: true,
               start: "top bottom",
               end: "bottom top",
+              invalidateOnRefresh: true,
             },
           })
           .fromTo(
@@ -197,6 +257,12 @@ export function HeroReel() {
             { yPercent: -50 },
             { yPercent: 50, ease: "none", duration: 1 },
           );
+
+        return () => {
+          gsap.set(frame, {
+            clearProps: "--rj-reel-clip,--rj-reel-radius,clipPath",
+          });
+        };
       });
 
       cleanups.push(() => mm.revert());
@@ -214,50 +280,103 @@ export function HeroReel() {
     };
   }, []);
 
+  // Keep logo bar width locked to the reel's *initial* visible frame (inset clip),
+  // not 57% of the padded hero — that was leaving side gaps vs the video.
+  useEffect(() => {
+    const root = rootRef.current;
+    const frame = frameRef.current;
+    if (!root || !frame) return;
+
+    const syncLogosWidth = () => {
+      if (!window.matchMedia(DESKTOP_MQ).matches) {
+        root.style.removeProperty("--rj-reel-logos-width");
+        return;
+      }
+
+      const insetRaw = getComputedStyle(root)
+        .getPropertyValue("--rj-reel-start-inset")
+        .trim();
+      const insetPct = Number.parseFloat(insetRaw) || 21.5;
+      // getBoundingClientRect ignores clip-path — full reel width, then apply start inset.
+      const frameW = frame.getBoundingClientRect().width;
+      const visibleW = frameW * (1 - (2 * insetPct) / 100);
+      root.style.setProperty("--rj-reel-logos-width", `${Math.round(visibleW * 100) / 100}px`);
+    };
+
+    syncLogosWidth();
+    const ro = new ResizeObserver(syncLogosWidth);
+    ro.observe(frame);
+    window.addEventListener("resize", syncLogosWidth);
+    const mq = window.matchMedia(DESKTOP_MQ);
+    mq.addEventListener("change", syncLogosWidth);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", syncLogosWidth);
+      mq.removeEventListener("change", syncLogosWidth);
+      root.style.removeProperty("--rj-reel-logos-width");
+    };
+  }, []);
+
   return (
     <section ref={rootRef} className="rj-hero-reel" id="hero" aria-label="Hero">
       <div ref={heroRef} className="rj-hero">
-        <div ref={copyRef} className="rj-hero__copy">
-          <h1
-            ref={logoRef}
-            className="rj-hero__logo rj-hero__headline rj-awards-title"
-            aria-label="We turn your product experience into revenue."
-          >
-            <span className="rj-hero__line">We turn your product</span>
-            <span className="rj-hero__line">experience into revenue.</span>
-          </h1>
-          <div className="rj-hero__taglines">
-            <p
-              ref={descriptionRef}
-              className="rj-hero__tagline rj-hero__description rj-text-reveal"
+        <div ref={copyRef} className="rj-hero__motion">
+          <div className="rj-hero__copy">
+            <h1
+              ref={logoRef}
+              className="rj-hero__logo rj-hero__headline rj-awards-title"
+              aria-label={hero.ariaLabel}
             >
-              UXLab drives growth of your product through UX, AI
-              transformation, conversions,
-              <br className="rj-hero__description-break" />
-              activations and retention that compound.
-            </p>
-            <div
-              ref={actionsRef}
-              className="rj-hero__actions"
-              aria-label="Hero actions"
-            >
-              <ArrowLink
-                href="#contact"
-                className="rj-link-active rj-hero__cta rj-hero__cta--talk"
-                onClick={onTalkClick}
+              <span className="rj-hero__line">{hero.lines[0]}</span>
+              <span className="rj-hero__line">{hero.lines[1]}</span>
+            </h1>
+            <div className="rj-hero__taglines">
+              <p
+                ref={descriptionRef}
+                className="rj-hero__tagline rj-hero__description rj-text-reveal"
               >
-                Let&apos;s talk
-              </ArrowLink>
-              <ArrowLink
-                href="#process"
-                className="rj-link-active rj-hero__cta rj-hero__cta--process"
-                onClick={onProcessClick}
+                <span className="rj-hero__line">{hero.descriptionLines[0]}</span>
+                <span className="rj-hero__line">{hero.descriptionLines[1]}</span>
+              </p>
+              <div
+                ref={actionsRef}
+                className="rj-hero__actions"
+                aria-label="Hero actions"
               >
-                Our process
-              </ArrowLink>
+                <ArrowLink
+                  href={hero.primaryCta.href}
+                  className="rj-link-active rj-hero__cta rj-hero__cta--talk"
+                  onClick={onTalkClick}
+                >
+                  {hero.primaryCta.label}
+                </ArrowLink>
+                <ArrowLink
+                  href={hero.secondaryCta.href}
+                  className="rj-link-active rj-hero__cta rj-hero__cta--process"
+                  onClick={onResultsClick}
+                >
+                  {hero.secondaryCta.label}
+                </ArrowLink>
+              </div>
+            </div>
+          </div>
+
+          <div ref={logosRef} className="rj-hero__logos">
+            <div className="rj-hero__logos-bar">
+              <p className="rj-hero__logos-stat">
+                {hero.logosStat.split("\n").map((line, index, arr) => (
+                  <span key={line}>
+                    {line}
+                    {index < arr.length - 1 ? <br /> : null}
+                  </span>
+                ))}
+              </p>
+              <LogoStrip variant="hero" />
             </div>
           </div>
         </div>
+
         <div className="rj-hero__controls">
           <div ref={iconRef} className="rj-hero__icon-wrap" aria-hidden="true">
             <svg
@@ -302,7 +421,6 @@ export function HeroReel() {
             />
           </div>
         </div>
-        <h2 className="rj-reel__label rj-link-active">Showreel</h2>
         <p className="rj-reel__mobile-label">
           <svg
             xmlns="http://www.w3.org/2000/svg"

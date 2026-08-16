@@ -14,6 +14,15 @@ const SLOT_COUNT = 8;
 /** Match styles.css mobile band — marquee below this, even row at/above. */
 const MARQUEE_MQ = "(max-width: 767px)";
 
+/** Hero row: fewer marks as the viewport shrinks (stat + logos share one bar). */
+function heroVisibleCount(width: number): number {
+  if (width < 820) return 2;
+  if (width < 960) return 3;
+  if (width < 1100) return 4;
+  if (width < 1240) return 5;
+  return 5;
+}
+
 /** Crossfade duration (seconds). */
 const FADE_DURATION = 0.55;
 /** Pause between slot swaps (seconds), plus random jitter. */
@@ -197,12 +206,15 @@ function LogoMarqueeItem({
 }
 
 /**
- * Rejouice-style client logo strip: fixed slots on a light band,
- * logos crossfade from a larger pool (staggered, one at a time).
+ * Client logo strip: fixed slots with staggered crossfade from a larger pool.
  * Double-buffered so a slot is never blank during swap.
  * On narrow viewports: infinite right→left marquee instead of the even row.
+ *
+ * Variants:
+ * - `band` — standalone light section (legacy / reusable)
+ * - `hero` — AngelList-style bar in the dark hero (desktop: random slot crossfade)
  */
-export function LogoStrip() {
+export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
   const rootRef = useRef<HTMLElement>(null);
   const slotRefs = useRef<Array<HTMLLIElement | null>>([]);
   const layerRefs = useRef<
@@ -214,22 +226,33 @@ export function LogoStrip() {
 
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isMarquee, setIsMarquee] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(SLOT_COUNT);
+  const visibleCountRef = useRef(SLOT_COUNT);
   const enteredRef = useRef(false);
+  const isHero = variant === "hero";
 
   useEffect(() => {
     const motionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const marqueeMq = window.matchMedia(MARQUEE_MQ);
     const syncMotion = () => setReducedMotion(motionMq.matches);
     const syncMarquee = () => setIsMarquee(marqueeMq.matches);
+    const syncVisible = () => {
+      const next = isHero ? heroVisibleCount(window.innerWidth) : SLOT_COUNT;
+      visibleCountRef.current = next;
+      setVisibleCount(next);
+    };
     syncMotion();
     syncMarquee();
+    syncVisible();
     motionMq.addEventListener("change", syncMotion);
     marqueeMq.addEventListener("change", syncMarquee);
+    window.addEventListener("resize", syncVisible);
     return () => {
       motionMq.removeEventListener("change", syncMotion);
       marqueeMq.removeEventListener("change", syncMarquee);
+      window.removeEventListener("resize", syncVisible);
     };
-  }, []);
+  }, [isHero]);
 
   // Preload the full pool only once the strip is near the viewport.
   useEffect(() => {
@@ -265,7 +288,21 @@ export function LogoStrip() {
   }, []);
 
   // Entrance: stagger fade/slide up — opacity + transform only (never autoAlpha).
+  // Hero: bar fades in with CTAs; slots start visible so the swap loop can run.
   useEffect(() => {
+    if (isHero) {
+      enteredRef.current = true;
+      const items = slotRefs.current.filter(Boolean) as HTMLLIElement[];
+      if (items.length) {
+        gsap.set(items, {
+          opacity: 1,
+          visibility: "visible",
+          clearProps: "transform",
+        });
+      }
+      return;
+    }
+
     if (isMarquee) {
       enteredRef.current = true;
       return;
@@ -323,10 +360,11 @@ export function LogoStrip() {
       // After revert, items must stay visible (swap loop may already be running).
       forceItemsVisible();
     };
-  }, [reducedMotion, isMarquee]);
+  }, [reducedMotion, isMarquee, isHero, visibleCount]);
 
-  // Crossfade swap loop — desktop only, after entrance (or immediately if reduced motion).
+  // Crossfade swap loop — random slot replaces its mark (band + desktop hero).
   useEffect(() => {
+    // Mobile hero uses marquee; skip swap there.
     if (isMarquee || CLIENT_LOGOS.length <= 1) return;
 
     let cancelled = false;
@@ -337,7 +375,8 @@ export function LogoStrip() {
     let swapping = false;
 
     const assertAllSlotsVisible = () => {
-      slotsRef.current.forEach((slot, i) => {
+      const count = visibleCountRef.current;
+      slotsRef.current.slice(0, count).forEach((slot, i) => {
         const item = slotRefs.current[i];
         if (
           item &&
@@ -387,11 +426,20 @@ export function LogoStrip() {
       swapping = true;
 
       const currentSlots = slotsRef.current;
-      let slotIndex = Math.floor(Math.random() * currentSlots.length);
-      if (currentSlots.length > 1) {
+      const activeCount = Math.min(
+        visibleCountRef.current,
+        currentSlots.length,
+      );
+      if (activeCount < 1) {
+        swapping = false;
+        schedule();
+        return;
+      }
+      let slotIndex = Math.floor(Math.random() * activeCount);
+      if (activeCount > 1) {
         let guard = 0;
         while (slotIndex === lastSlot && guard < 6) {
-          slotIndex = Math.floor(Math.random() * currentSlots.length);
+          slotIndex = Math.floor(Math.random() * activeCount);
           guard += 1;
         }
       }
@@ -408,7 +456,7 @@ export function LogoStrip() {
       // Guarantee the current mark stays fully visible before any buffer work.
       forceSlotVisible(layers, slot.active);
 
-      const visible = currentSlots.map((s) => s.logo);
+      const visible = currentSlots.slice(0, activeCount).map((s) => s.logo);
       const preferred = pickNext(visible, slotIndex, CLIENT_LOGOS);
       const nextLogo = await preloadWithFallback(
         preferred,
@@ -562,7 +610,7 @@ export function LogoStrip() {
         });
       }
     };
-  }, [reducedMotion, isMarquee]);
+  }, [reducedMotion, isMarquee, isHero]);
 
   // After React commits which layer is active, clear GSAP leftovers on the
   // in-flow mark so a parent re-render can never leave both layers hidden.
@@ -577,7 +625,9 @@ export function LogoStrip() {
   return (
     <section
       ref={rootRef}
-      className="rj-logo-strip"
+      className={
+        isHero ? "rj-logo-strip rj-logo-strip--hero" : "rj-logo-strip"
+      }
       aria-label="Clients and partners"
     >
       {/* Mobile marquee — visibility via CSS (max-width: 767px); both trees avoid hydration flash */}
@@ -615,7 +665,7 @@ export function LogoStrip() {
         className="rj-logo-strip__row"
         aria-hidden={isMarquee ? true : undefined}
       >
-        {slots.map((slot, index) => {
+        {slots.slice(0, visibleCount).map((slot, index) => {
           const logoA = slot.active === "a" ? slot.logo : slot.bufferLogo;
           const logoB = slot.active === "b" ? slot.logo : slot.bufferLogo;
           const aActive = slot.active === "a";

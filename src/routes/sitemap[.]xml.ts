@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { ARTICLES, articlePath } from "@/lib/articles";
 import { WORK_PATH, casePath, getListedCases } from "@/lib/cases";
+import { getAllServicePages } from "@/lib/servicePages";
 import { SITE } from "@/lib/site";
 
 interface SitemapEntry {
@@ -45,6 +46,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             changefreq: "weekly",
             priority: "0.9",
           },
+          ...getAllServicePages().map((page) => ({
+            path: page.path,
+            lastmod: latestArticleMod,
+            changefreq: "monthly" as const,
+            priority: "0.85",
+          })),
           ...ARTICLES.map((article) => ({
             path: articlePath(article.slug),
             lastmod: article.dateModified,

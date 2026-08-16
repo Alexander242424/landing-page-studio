@@ -6,10 +6,41 @@ import { createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+export type HomeIntroContent = {
+  id?: string;
+  ariaLabel?: string;
+  taglineBefore: string;
+  taglineLinkLabel: string;
+  taglineLinkHref: string;
+  taglineAfter?: string;
+  title: string;
+  paragraphs: string[];
+};
+
+const DEFAULT_INTRO: HomeIntroContent = {
+  id: "about",
+  ariaLabel: "Introduction",
+  taglineBefore:
+    "We help teams drive growth through product performance, UX, conversion, activations, and LTV lifts that compound. Explore",
+  taglineLinkLabel: "our services",
+  taglineLinkHref: "#solutions",
+  taglineAfter: ".",
+  title: "Results speak for themselves.",
+  paragraphs: [
+    "Since 2013, we have been recognized globally for helping founders build market-defining brands.",
+    "We partner with five clients a year to give each one the focus and care they deserve.",
+  ],
+};
+
 /**
  * Rejouice post-reel intro: word-reveal tagline + key-value row with split reveal.
  */
-export function HomeIntro() {
+export function HomeIntro({
+  content,
+}: {
+  content?: HomeIntroContent;
+} = {}) {
+  const intro = content ?? DEFAULT_INTRO;
   const { lenis } = useSmoothScroll();
   const rootRef = useRef<HTMLElement>(null);
   const taglineRef = useRef<HTMLParagraphElement>(null);
@@ -29,9 +60,11 @@ export function HomeIntro() {
     }
   };
 
-  const onServicesClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  const onLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    const href = intro.taglineLinkHref;
+    if (!href.startsWith("#")) return;
     event.preventDefault();
-    scrollToHref("#solutions");
+    scrollToHref(href);
   };
 
   useEffect(() => {
@@ -82,24 +115,23 @@ export function HomeIntro() {
     <section
       ref={rootRef}
       className="rj-intro"
-      id="about"
-      aria-label="Introduction"
+      id={intro.id ?? "about"}
+      aria-label={intro.ariaLabel ?? "Introduction"}
     >
       <div className="rj-intro__tagline">
         <div className="rj-intro__tagline-inner">
           <div className="rj-intro__space" aria-hidden="true" />
           <div className="rj-intro__content">
             <p ref={taglineRef}>
-              We help teams drive growth through product performance, UX,
-              conversion, activations, and LTV lifts that compound. Explore{" "}
+              {intro.taglineBefore}{" "}
               <a
-                href="#solutions"
+                href={intro.taglineLinkHref}
                 className="rj-link-active-full"
-                onClick={onServicesClick}
+                onClick={onLinkClick}
               >
-                our services
+                {intro.taglineLinkLabel}
               </a>
-              .
+              {intro.taglineAfter ?? ""}
             </p>
           </div>
         </div>
@@ -111,21 +143,18 @@ export function HomeIntro() {
             <div ref={splitRef} className="rj-split" />
             <div className="rj-intro__title">
               <h2 ref={titleRef} className="rj-text-reveal">
-                Your growth starts here.
+                {intro.title}
               </h2>
             </div>
             <div className="rj-intro__body">
               <div className="rj-intro__body-inner">
                 <div ref={bodyTextRef} className="rj-text-reveal">
-                  <p>
-                    Since 2013, we have been recognized globally for helping
-                    founders build market-defining brands.
-                  </p>
-                  <p>
-                    <br />
-                    We partner with five clients a year to give each one the
-                    focus and care they deserve.
-                  </p>
+                  {intro.paragraphs.map((paragraph, index) => (
+                    <p key={paragraph}>
+                      {index > 0 ? <br /> : null}
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>
