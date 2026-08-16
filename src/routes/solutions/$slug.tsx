@@ -6,6 +6,7 @@ import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { playHomeEntrance } from "@/lib/homeEntrance";
+import { usePageReveal } from "@/lib/pageReveal";
 import {
   getServicePage,
   type ServicePageContent,
@@ -149,12 +150,14 @@ function buildJsonLd(page: ServicePageContent) {
 function ServiceLandingPage() {
   const { page } = Route.useLoaderData();
   const rootRef = useRef<HTMLDivElement>(null);
+  const { isRevealed } = usePageReveal();
 
   useLayoutEffect(() => {
+    if (!isRevealed) return;
     const root = rootRef.current;
     if (!root) return;
     return playHomeEntrance(root);
-  }, [page.slug]);
+  }, [isRevealed, page.slug]);
 
   const jsonLd = buildJsonLd(page);
 

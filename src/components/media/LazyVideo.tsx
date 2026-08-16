@@ -19,6 +19,8 @@ type LazyVideoProps = Omit<
   autoPlayWhenVisible?: boolean;
   /** preload once attached — default metadata. */
   preload?: "none" | "metadata" | "auto";
+  /** Attach src immediately (hero during preloader) instead of waiting for IO. */
+  eager?: boolean;
 };
 
 /**
@@ -34,6 +36,7 @@ export const LazyVideo = forwardRef<HTMLVideoElement, LazyVideoProps>(
       rootMargin = "400px 0px",
       autoPlayWhenVisible = true,
       preload = "metadata",
+      eager = false,
       muted = true,
       playsInline = true,
       loop,
@@ -42,7 +45,8 @@ export const LazyVideo = forwardRef<HTMLVideoElement, LazyVideoProps>(
     forwardedRef,
   ) {
     const localRef = useRef<HTMLVideoElement | null>(null);
-    const near = useNearViewport(localRef, { rootMargin });
+    const nearObserved = useNearViewport(localRef, { rootMargin });
+    const near = eager || nearObserved;
 
     const setRefs = (node: HTMLVideoElement | null) => {
       localRef.current = node;

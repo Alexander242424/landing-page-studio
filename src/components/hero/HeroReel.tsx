@@ -8,6 +8,7 @@ import { ArrowLink } from "@/components/ui/ArrowLink";
 import { openContactChat } from "@/lib/askChat";
 import type { ServiceHeroContent } from "@/lib/servicePages";
 import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
+import { usePageReveal } from "@/lib/pageReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -41,6 +42,7 @@ const DEFAULT_HERO: ServiceHeroContent = {
 export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const hero = content ?? DEFAULT_HERO;
   const { lenis } = useSmoothScroll();
+  const { isRevealed, shouldPlay } = usePageReveal();
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
@@ -87,6 +89,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
     const frame = frameRef.current;
+    if (!isRevealed) return;
     if (!hero || !logo || !copy || !reel || !videoWrap || !frame) return;
 
     // Title + description/CTAs + logos share one scroll-linked y (move as one unit).
@@ -276,7 +279,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [isRevealed]);
 
   // Keep logo bar width locked to the reel's *initial* visible frame (inset clip),
   // not 57% of the padded hero — that was leaving side gaps vs the video.
@@ -411,7 +414,8 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
               muted
               loop
               playsInline
-              preload="metadata"
+              preload={shouldPlay ? "auto" : "metadata"}
+              eager={shouldPlay}
               autoPlayWhenVisible
               // Warm shortly before the showreel enters view — not on first paint.
               rootMargin="240px 0px"

@@ -40,6 +40,7 @@ import {
   type ChatActionId,
 } from "@/lib/chatActions";
 import { UXLAB_SYSTEM_PROMPT } from "@/lib/uxlabKnowledge";
+import { ChatMarkdown } from "@/lib/chatMarkdown";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -426,6 +427,8 @@ export function AiPromptInput() {
   const [open, setOpen] = useState(false);
   /** Past ~mid showreel — toggles dock visibility. */
   const [pastDockGate, setPastDockGate] = useState(false);
+  /** First-section (hero copy) is in view — hide tip chips, keep the input. */
+  const [inFirstSection, setInFirstSection] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
@@ -534,7 +537,41 @@ export function AiPromptInput() {
     };
   }, []);
 
+  // Tip chips collapse while the hero copy band is on screen; input stays.
+  useEffect(() => {
+    let cancelled = false;
+    let raf = 0;
+    let trigger: ScrollTrigger | null = null;
+
+    const attach = () => {
+      if (cancelled) return;
+      const hero = document.querySelector<HTMLElement>(".rj-hero");
+      if (!hero) {
+        raf = requestAnimationFrame(attach);
+        return;
+      }
+
+      trigger = ScrollTrigger.create({
+        trigger: hero,
+        start: "top top",
+        end: "bottom top",
+        onToggle: (self) => setInFirstSection(self.isActive),
+        onRefresh: (self) => setInFirstSection(self.isActive),
+      });
+      setInFirstSection(trigger.isActive);
+    };
+
+    attach();
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      trigger?.kill();
+    };
+  }, []);
+
   const dockShown = pastDockGate || open;
+  const tipsCollapsed = inFirstSection && !open;
 
   // Entrance: narrow bar rises (opacity + scale) → stretch to full → chips stagger in.
   useEffect(() => {
@@ -1443,6 +1480,7 @@ export function AiPromptInput() {
           intent: resolveGeneralActionIntent(displayText),
           messageCount: userMessageCount,
           userText: displayText,
+          replyText: fullText,
           recentlyShown: actionsShownRef.current,
           commercialStarted: commercialStartedRef.current,
         });
@@ -1571,7 +1609,7 @@ export function AiPromptInput() {
   return (
     <div
       ref={rootRef}
-      className={`rj-ask${open ? " is-open" : ""}${dockShown ? " is-shown" : ""}`}
+      className={`rj-ask${open ? " is-open" : ""}${dockShown ? " is-shown" : ""}${tipsCollapsed ? " is-tips-collapsed" : ""}`}
       role="complementary"
       aria-label="Ask UXLAB"
       aria-hidden={dockShown ? undefined : true}
@@ -1580,7 +1618,7 @@ export function AiPromptInput() {
       <div
         ref={tipsRef}
         className="rj-ask__tips"
-        aria-hidden={open}
+        aria-hidden={open || tipsCollapsed}
         data-lenis-prevent
       >
         <div className="rj-ask__row" data-lenis-prevent>
@@ -1592,7 +1630,7 @@ export function AiPromptInput() {
               }}
               type="button"
               className="rj-ask__chip"
-              tabIndex={open ? -1 : 0}
+              tabIndex={open || tipsCollapsed ? -1 : 0}
               onClick={() => onTip(tip)}
             >
               {tip}
@@ -1642,9 +1680,13 @@ export function AiPromptInput() {
                 className={`rj-ask__msg rj-ask__msg--${msg.role} rj-ask__msg--enter`}
               >
                 <div
-                  className={`rj-ask__bubble${msg.streaming ? " is-streaming" : ""}`}
+                  className={`rj-ask__bubble${msg.streaming ? " is-streaming" : ""}${msg.role === "assistant" ? " rj-ask__bubble--rich" : ""}`}
                 >
-                  {msg.text}
+                  {msg.role === "assistant" ? (
+                    <ChatMarkdown text={msg.text} streaming={msg.streaming} />
+                  ) : (
+                    msg.text
+                  )}
                 </div>
               </div>
             ))}

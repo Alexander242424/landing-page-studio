@@ -7,6 +7,7 @@ import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { playHomeEntrance } from "@/lib/homeEntrance";
+import { usePageReveal } from "@/lib/pageReveal";
 import { defaultLinks, defaultMeta, homeJsonLd, SITE } from "@/lib/site";
 
 /** Below-fold sections — split so GSAP/media work is not on the critical path. */
@@ -76,12 +77,14 @@ function HomePage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const hash = useRouterState({ select: (s) => s.location.hash });
   const { lenis } = useSmoothScroll();
+  const { isRevealed } = usePageReveal();
 
   useLayoutEffect(() => {
+    if (!isRevealed) return;
     const root = rootRef.current;
     if (!root) return;
     return playHomeEntrance(root);
-  }, []);
+  }, [isRevealed]);
 
   // Hash links from article breadcrumbs / site header (e.g. #resources)
   // — section may be lazy, so retry until it mounts.

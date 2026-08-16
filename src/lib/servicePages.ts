@@ -89,7 +89,7 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
     ariaLabel: "Turn the same traffic into compounding revenue.",
     lines: ["Turn the same traffic", "into compounding revenue."],
     description:
-      "Your product leaks. We find where, fix it, and install a system that keeps compounding after we leave.",
+      "We find where conversion drops — signup, activation, paywall, retention — ship the metric lifts that pay, and leave a system that keeps compounding after we leave.",
     ...SHARED_CTAS,
   },
   valueProp: {

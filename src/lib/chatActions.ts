@@ -21,6 +21,8 @@ export type ResolveChatActionsInput = {
   /** Count of user messages in the thread (including the latest). */
   messageCount: number;
   userText?: string;
+  /** Latest assistant reply — long structured answers get pills. */
+  replyText?: string;
   /** True if a CTA strip was already shown in this general thread. */
   recentlyShown?: boolean;
   /** True if Cal / lead / CRO capture already started or completed. */
@@ -62,6 +64,18 @@ export function isBroadQuery(text: string) {
   );
 }
 
+/** A long / structured assistant reply should offer next-step pills. */
+export function isSubstantialReply(text: string) {
+  const t = text.trim();
+  if (!t) return false;
+  if (t.length >= 260) return true;
+  const lines = t.split(/\n+/).filter((line) => line.trim().length > 0);
+  if (lines.length >= 4 && t.length >= 160) return true;
+  const headings = t.match(/\*\*[^*]+\*\*/g)?.length ?? 0;
+  if (headings >= 2 && t.length >= 140) return true;
+  return false;
+}
+
 /** Conversion interest that didn’t already enter the CRO audit router. */
 export function isSoftCroInterest(text: string) {
   const t = text.trim().toLowerCase();
@@ -79,6 +93,7 @@ export function resolveChatActions({
   intent,
   messageCount,
   userText = "",
+  replyText = "",
   recentlyShown = false,
   commercialStarted = false,
 }: ResolveChatActionsInput): ChatAction[] {
@@ -98,8 +113,10 @@ export function resolveChatActions({
     return [];
   }
 
-  // Avoid re-showing the same strip on every subsequent reply.
-  if (recentlyShown) return [];
+  const longReply = isSubstantialReply(replyText);
+
+  // Short follow-ups stay quiet after the first strip; long answers get pills again.
+  if (recentlyShown && !longReply) return [];
 
   if (intent === "cro") {
     return [BOOK, CRO_START];
@@ -109,12 +126,12 @@ export function resolveChatActions({
     return [BOOK, PROJECT];
   }
 
-  if (intent === "broad" || isBroadQuery(userText)) {
+  if (longReply || intent === "broad" || isBroadQuery(userText)) {
     return [BOOK, PROJECT];
   }
 
-  // ~4–5 exchanges ≈ 4+ user turns in a general thread.
-  if (intent === "general" && messageCount >= 4) {
+  // ~3 exchanges in a general thread.
+  if (intent === "general" && messageCount >= 3) {
     return [BOOK, PROJECT];
   }
 

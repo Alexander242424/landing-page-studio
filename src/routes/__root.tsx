@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SmoothScrollProvider } from "@/components/scroll/SmoothScrollProvider";
+import { PageRevealProvider } from "@/lib/pageReveal";
+import { Preloader } from "@/components/preloader/Preloader";
 import { AnalyticsBeacon } from "@/components/analytics/AnalyticsBeacon";
 import { SITE, absoluteUrl, defaultMeta } from "@/lib/site";
 
@@ -257,8 +259,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <SmoothScrollProvider>
-        <AnalyticsBeacon />
-        <Outlet />
+        <PageRevealProvider>
+          <Preloader />
+          <AnalyticsBeacon />
+          <Outlet />
+        </PageRevealProvider>
       </SmoothScrollProvider>
     </QueryClientProvider>
   );
