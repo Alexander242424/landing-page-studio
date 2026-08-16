@@ -7,7 +7,7 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 gsap.registerPlugin(ScrollTrigger);
 
 const WORDS = ["Growth", "product", "performance", "agency"] as const;
-const MIN_VISIBLE_MS = 1400;
+const MIN_VISIBLE_MS = 1800;
 const MAX_WAIT_MS = 4500;
 const MEDIA_GIVE_UP_MS = 3800;
 const NO_HERO_MS = 360;
@@ -86,18 +86,14 @@ export function Preloader() {
   const rootRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const lenisRef = useRef(lenis);
+  const exitStartedRef = useRef(false);
+  const playExitRef = useRef<() => void>(() => undefined);
   const [mounted, setMounted] = useState(shouldPlay && !isRevealed);
-  const revealedRef = useRef(isRevealed);
 
-  revealedRef.current = isRevealed;
   lenisRef.current = lenis;
 
   useLayoutEffect(() => {
-    if (isRevealed && mounted) setMounted(false);
-  }, [isRevealed, mounted]);
-
-  useLayoutEffect(() => {
-    if (!shouldPlay || isRevealed) return;
+    if (!mounted) return;
 
     const root = document.documentElement;
     const previousRestoration = history.scrollRestoration;
@@ -120,15 +116,13 @@ export function Preloader() {
         history.scrollRestoration = previousRestoration;
       }
     };
-  }, [shouldPlay, isRevealed]);
+  }, [mounted]);
 
   useLayoutEffect(() => {
-    if (!shouldPlay || isRevealed) {
-      lenis?.start();
-    } else {
+    if (mounted) {
       lenis?.stop();
     }
-  }, [shouldPlay, isRevealed, lenis]);
+  }, [mounted, lenis]);
 
   useLayoutEffect(() => {
     if (!mounted) return;
@@ -137,8 +131,10 @@ export function Preloader() {
     const title = titleRef.current;
     if (!root || !title) return;
 
+    const words = title.querySelectorAll<HTMLElement>(".rj-preloader__word");
     const reduced = prefersReducedMotion();
     let cancelled = false;
+    let intro: gsap.core.Timeline | null = null;
     let exit: gsap.core.Timeline | null = null;
 
     const finish = () => {
@@ -149,7 +145,6 @@ export function Preloader() {
       scroll?.scrollTo(0, { immediate: true });
       scroll?.start();
       scroll?.resize();
-      reveal();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           window.scrollTo(0, 0);
@@ -160,7 +155,12 @@ export function Preloader() {
     };
 
     const playExit = () => {
-      if (cancelled) return;
+      if (cancelled || exitStartedRef.current) return;
+      exitStartedRef.current = true;
+      // Start hero/header/video under the wipe — not after it.
+      reveal();
+      playExitRef.current = () => undefined;
+
       if (reduced) {
         finish();
         return;
@@ -170,11 +170,12 @@ export function Preloader() {
         onComplete: finish,
       });
       exit.to(
-        title,
+        words,
         {
-          y: () => -window.innerHeight,
-          duration: 0.85,
+          yPercent: -110,
+          duration: 0.72,
           ease: "expo.inOut",
+          stagger: 0.045,
         },
         0,
       );
@@ -182,24 +183,48 @@ export function Preloader() {
         root,
         {
           yPercent: 100,
-          duration: 0.9,
+          duration: 0.95,
           ease: "expo.inOut",
         },
-        0.08,
+        0.1,
       );
     };
 
+    if (!reduced) {
+      gsap.set(words, { yPercent: 110 });
+      intro = gsap.timeline();
+      intro.to(words, {
+        yPercent: 0,
+        duration: 1.2,
+        ease: "expo.out",
+        stagger: 0.1,
+      });
+    }
+
     void waitUntilReady().then(() => {
       if (cancelled) return;
+      if (intro && intro.isActive()) {
+        intro.eventCallback("onComplete", playExit);
+        return;
+      }
       playExit();
     });
 
+    playExitRef.current = playExit;
+
     return () => {
       cancelled = true;
+      playExitRef.current = () => undefined;
+      intro?.kill();
       exit?.kill();
-      gsap.killTweensOf([root, title]);
+      gsap.killTweensOf([root, title, words]);
     };
   }, [mounted, reveal]);
+
+  useLayoutEffect(() => {
+    if (!mounted || !isRevealed) return;
+    playExitRef.current();
+  }, [mounted, isRevealed]);
 
   if (!mounted) return null;
 
@@ -210,16 +235,6 @@ export function Preloader() {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 2000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#ffffff",
-        overflow: "hidden",
-      }}
     >
       <script
         dangerouslySetInnerHTML={{

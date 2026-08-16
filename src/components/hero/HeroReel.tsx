@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoStrip } from "@/components/home/LogoStrip";
@@ -78,7 +78,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
     openContactChat();
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const hero = heroRef.current;
     const logo = logoRef.current;
     const copy = copyRef.current;
@@ -193,10 +193,13 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       // Desktop: keep full Rejouice scrub budget.
       mm.add(DESKTOP_MQ, () => {
         // CSS vars scrub reliably in reverse (string clip-path + round often sticks).
-        gsap.set(frame, {
-          "--rj-reel-clip": "21.5%",
-          "--rj-reel-radius": "2.4rem",
-        });
+        // First-load: leave the entrance tween in charge of the opening clip.
+        if (!shouldPlay) {
+          gsap.set(frame, {
+            "--rj-reel-clip": "21.5%",
+            "--rj-reel-radius": "2.4rem",
+          });
+        }
 
         gsap
           .timeline({
@@ -270,16 +273,19 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
     }, rootRef);
 
     // Avoid ScrollTrigger.refresh on mobile address-bar resize (layout thrash).
+    // First-load: playHomeEntrance / preloader already refresh after the wipe.
     const onOrientation = () => ScrollTrigger.refresh();
     window.addEventListener("orientationchange", onOrientation);
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+    if (!shouldPlay) {
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    }
 
     return () => {
       window.removeEventListener("orientationchange", onOrientation);
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, [isRevealed]);
+  }, [isRevealed, shouldPlay]);
 
   // Keep logo bar width locked to the reel's *initial* visible frame (inset clip),
   // not 57% of the padded hero — that was leaving side gaps vs the video.

@@ -187,9 +187,16 @@ export function createTextReveal(
   }
 
   return () => {
+    const done = timeline.progress() === 1;
     timeline.scrollTrigger?.kill();
     timeline.kill();
+    gsap.set(container, {
+      clearProps: "opacity,visibility,--scale,--transformOrigin",
+    });
     element.innerHTML = originalHTML;
+    if (done) {
+      gsap.set(container, { autoAlpha: 1 });
+    }
   };
 }
 
@@ -249,7 +256,7 @@ export function createAwardsCharReveal(
   });
   let restored = false;
 
-  const restore = () => {
+  const restore = (keepVisible = false) => {
     if (restored) return;
     restored = true;
     try {
@@ -259,16 +266,17 @@ export function createAwardsCharReveal(
     }
     split = null;
     element.innerHTML = originalHTML;
-    // Keep visible: clearing opacity would let .rj-awards-title hide the title again.
     gsap.set(element, {
-      clearProps: "perspective,transform",
-      autoAlpha: 1,
+      clearProps: "perspective,transform,opacity,visibility",
     });
+    if (keepVisible) {
+      gsap.set(element, { autoAlpha: 1 });
+    }
   };
 
   const chars = split.chars;
   if (!chars.length) {
-    restore();
+    restore(false);
     return () => undefined;
   }
 
@@ -298,8 +306,9 @@ export function createAwardsCharReveal(
   timeline.to(chars, { yPercent: 0, stagger: yStagger }, 0);
 
   return () => {
+    const done = timeline.progress() === 1;
     timeline.scrollTrigger?.kill();
     timeline.kill();
-    restore();
+    restore(done);
   };
 }

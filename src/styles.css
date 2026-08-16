@@ -1715,6 +1715,11 @@ ul {
   visibility: hidden;
 }
 
+.rj-page--entered .rj-hero .rj-awards-title {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* SplitText line mask: overflow:hidden + negative letter-spacing clips the
    leading glyphs. Horizontal pad expands the clip box; negative margin keeps layout. */
 .rj-text-reveal__line {
@@ -1864,12 +1869,14 @@ ul {
   }
 
   .rj-hero__logos {
-    margin-top: 48px;
+    margin-top: 0;
   }
 
   .rj-hero__copy {
     gap: calc(1.6rem + 8px);
-    --rj-hero-edge: calc(0.8rem + 16px);
+    /* Match .rj-header__outer height so the gap under the bar equals the gap above logos */
+    --rj-hero-edge: 2.4rem;
+    padding-top: calc(6.7rem + var(--rj-hero-edge));
     padding-bottom: var(--rj-hero-edge);
     /* Side inset lives on .rj-hero — don't double it here */
     padding-inline: 0;
@@ -1883,9 +1890,8 @@ ul {
   .rj-hero__logos-bar {
     flex-direction: column;
     align-items: center;
-    /* Same space above logos (after text) as below */
     gap: 2.4rem;
-    padding: 2.4rem 0;
+    padding: 0 0 2.4rem;
   }
 
   .rj-hero__logos-stat {
@@ -2194,8 +2200,25 @@ ul {
 /* Homepage first-load entrance: hide until GSAP arms / completes */
 .rj-page--enter:not(.rj-page--entered) .rj-header,
 .rj-page--enter:not(.rj-page--entered) .rj-reel,
-.rj-page--enter:not(.rj-page--entered) .rj-hero__tagline {
+.rj-page--enter:not(.rj-page--entered) .rj-hero__tagline,
+.rj-page--enter:not(.rj-page--entered) .rj-hero__actions,
+.rj-page--enter:not(.rj-page--entered) .rj-hero__logos,
+.rj-page--enter:not(.rj-page--entered) .rj-hero__icon-wrap {
   opacity: 0;
+  visibility: hidden;
+}
+
+/* Video starts inset/scaled so the wipe reveals the grow, not a full frame */
+.rj-page--enter:not(.rj-page--entered) .rj-reel__video-frame {
+  transform: scale(1.06);
+  transform-origin: 50% 50%;
+}
+
+@media (min-width: 1024px) {
+  .rj-page--enter:not(.rj-page--entered) .rj-reel__video-frame {
+    --rj-reel-clip: 35.5%;
+    --rj-reel-radius: 3rem;
+  }
 }
 
 /* First-load preloader: lock native + Lenis scroll until the wipe finishes */
@@ -2241,32 +2264,13 @@ html.rj-preloading body {
   display: inline-block;
   overflow: hidden;
   vertical-align: top;
+  padding-bottom: 0.1em;
 }
 
 .rj-preloader__word {
   display: inline-block;
   will-change: transform;
   transform: translateY(110%);
-  animation: rj-preloader-word-in 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.rj-preloader__word-wrap:nth-child(1) .rj-preloader__word {
-  animation-delay: 0.08s;
-}
-.rj-preloader__word-wrap:nth-child(2) .rj-preloader__word {
-  animation-delay: 0.15s;
-}
-.rj-preloader__word-wrap:nth-child(3) .rj-preloader__word {
-  animation-delay: 0.22s;
-}
-.rj-preloader__word-wrap:nth-child(4) .rj-preloader__word {
-  animation-delay: 0.29s;
-}
-
-@keyframes rj-preloader-word-in {
-  to {
-    transform: translateY(0);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2278,15 +2282,22 @@ html.rj-preloading body {
 
   .rj-preloader__word {
     transform: none;
-    animation: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rj-page--enter:not(.rj-page--entered) .rj-header,
   .rj-page--enter:not(.rj-page--entered) .rj-reel,
-  .rj-page--enter:not(.rj-page--entered) .rj-hero__tagline {
+  .rj-page--enter:not(.rj-page--entered) .rj-hero__tagline,
+  .rj-page--enter:not(.rj-page--entered) .rj-hero__actions,
+  .rj-page--enter:not(.rj-page--entered) .rj-hero__logos,
+  .rj-page--enter:not(.rj-page--entered) .rj-hero__icon-wrap {
     opacity: 1;
+    visibility: visible;
+  }
+
+  .rj-page--enter:not(.rj-page--entered) .rj-reel__video-frame {
+    transform: none;
   }
 }
 
@@ -4273,63 +4284,37 @@ body.rj-scroll-dark .rj-page__main {
   background: color-mix(in srgb, var(--rj-white) 10%, transparent);
 }
 
-.rj-ask__bubble--thinking {
+.rj-ask__msg--assistant .rj-ask__bubble.rj-ask__bubble--thinking {
   display: inline-flex;
   align-items: baseline;
   min-height: 18px;
   padding-block: 11px;
   padding-inline: 15px;
+  background: none;
+  border-radius: 0;
 }
 
 .rj-ask__thinking {
-  display: inline-flex;
-  align-items: baseline;
+  display: inline-block;
   font-family: var(--rj-font-sans);
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: -0.01em;
   line-height: 1.4;
-}
-
-.rj-ask__thinking-label {
-  background: linear-gradient(
+  background-image: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--rj-white) 42%, transparent) 0%,
-    color-mix(in srgb, var(--rj-white) 42%, transparent) 35%,
+    var(--rj-ask-fg-muted) 0%,
+    var(--rj-ask-fg-muted) 38%,
     color-mix(in srgb, var(--rj-white) 92%, transparent) 50%,
-    color-mix(in srgb, var(--rj-white) 42%, transparent) 65%,
-    color-mix(in srgb, var(--rj-white) 42%, transparent) 100%
+    var(--rj-ask-fg-muted) 62%,
+    var(--rj-ask-fg-muted) 100%
   );
-  background-size: 200% auto;
+  background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  animation: rj-ask-thinking-shimmer 2s linear infinite;
-}
-
-.rj-ask__thinking-dots {
-  display: inline-flex;
-  margin-left: 1px;
-}
-
-.rj-ask__thinking-dots span {
-  display: inline-block;
-  color: color-mix(in srgb, var(--rj-white) 55%, transparent);
-  -webkit-text-fill-color: color-mix(in srgb, var(--rj-white) 55%, transparent);
-  animation: rj-ask-thinking-dot 1.4s ease-in-out infinite;
-}
-
-.rj-ask__thinking-dots span:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.rj-ask__thinking-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.rj-ask__thinking-dots span:nth-child(3) {
-  animation-delay: 0.4s;
+  animation: rj-ask-thinking-shimmer 1.8s linear infinite;
 }
 
 @keyframes rj-ask-thinking-shimmer {
@@ -4341,20 +4326,14 @@ body.rj-scroll-dark .rj-page__main {
   }
 }
 
-@keyframes rj-ask-thinking-dot {
-  0%,
-  20% {
-    opacity: 0.15;
-    transform: translateY(0);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(-1px);
-  }
-  60%,
-  100% {
-    opacity: 0.15;
-    transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  .rj-ask__thinking {
+    animation: none;
+    background-image: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: var(--rj-ask-fg-muted);
+    color: var(--rj-ask-fg-muted);
   }
 }
 
@@ -4551,6 +4530,59 @@ body.rj-scroll-dark .rj-page__main {
   min-width: 0;
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+.rj-ask__ph {
+  --rj-ask-ph-row: 1.3em;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  font-family: var(--rj-font-sans);
+  font-size: 16px;
+  font-weight: 300;
+  font-style: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+.rj-ask__ph.is-hidden {
+  opacity: 0;
+}
+
+.rj-ask__ph-clip {
+  width: 100%;
+  height: var(--rj-ask-ph-row);
+  overflow: hidden;
+}
+
+.rj-ask__ph-track {
+  width: 100%;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+}
+
+.rj-ask__ph-item {
+  height: var(--rj-ask-ph-row);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rj-ask-fg-muted);
+}
+
+.rj-ask__ph-item.is-active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rj-ask__ph-track,
+  .rj-ask__ph-item {
+    transition: none;
+  }
 }
 
 .rj-ask__input {
@@ -4591,8 +4623,20 @@ body.rj-scroll-dark .rj-page__main {
   .rj-ask {
     --rj-ask-width: calc(100% - 24px);
     --rj-ask-inline: 12px;
-    --rj-ask-chat-h: calc(90dvh - 7.2rem);
+    /* Match .rj-ask__bar min-height on this breakpoint so the 4px gap is real. */
+    --rj-ask-bar-h: 54px;
+    --rj-ask-chat-gap: 4px;
+    /* Grow to the top inset (same as sides + notch), not 90dvh − header. */
+    --rj-ask-chat-h: calc(
+      100dvh - var(--rj-ask-inline) - env(safe-area-inset-top, 0px) - 4px - var(--rj-ask-kb) -
+        env(safe-area-inset-bottom, 0px) - var(--rj-ask-bar-h) - var(--rj-ask-chat-gap)
+    );
     bottom: calc(4px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Header is z-index 999; open chat must cover it. Closed dock stays at 50. */
+  .rj-ask.is-open {
+    z-index: 1000;
   }
 
   .rj-ask__chat {

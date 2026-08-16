@@ -56,9 +56,6 @@ export function playHomeEntrance(root: HTMLElement): () => void {
     }
   }
 
-  const clearables: HTMLElement[] = [header, reel];
-  if (frame) clearables.push(frame);
-
   const tl = gsap.timeline({
     defaults: { ease: "expo.out" },
     onComplete: () => {
@@ -111,11 +108,8 @@ export function playHomeEntrance(root: HTMLElement): () => void {
   }
 
   return () => {
+    // Kill only — do not unlock CSS or clearProps. Remounts (Strict Mode)
+    // must not flash the finished page before the entrance plays again.
     tl.kill();
-    finish();
-    gsap.set(clearables, {
-      clearProps:
-        "opacity,visibility,transform,clipPath,--rj-reel-clip,--rj-reel-radius",
-    });
   };
 }

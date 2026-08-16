@@ -60,10 +60,9 @@ const PLACEHOLDER_PROMPTS = [
   "Share a URL for a quick look",
 ] as const;
 
-const TYPE_MS = 38;
-const DELETE_MS = 22;
-const HOLD_MS = 2200;
-const GAP_MS = 480;
+/** OpenAI-style vertical slide; a bit faster than their 500ms / ~2.5s hold. */
+const PLACEHOLDER_SLIDE_MS = 350;
+const PLACEHOLDER_HOLD_MS = 1800;
 
 type ChatRole = "user" | "assistant";
 
@@ -247,12 +246,7 @@ function ThinkingIndicator() {
       aria-live="polite"
       aria-label="Thinking"
     >
-      <span className="rj-ask__thinking-label">Thinking</span>
-      <span className="rj-ask__thinking-dots" aria-hidden="true">
-        <span>.</span>
-        <span>.</span>
-        <span>.</span>
-      </span>
+      Thinking...
     </div>
   );
 }
@@ -323,63 +317,23 @@ function CroScanCard({ scan }: { scan: ScanCardState }) {
   );
 }
 
-function useTypewriterPlaceholder(paused: boolean) {
-  const [placeholder, setPlaceholder] = useState("");
-  const indexRef = useRef(0);
-  const charRef = useRef(0);
-  const deletingRef = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+function useRotatingPlaceholderIndex(paused: boolean) {
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (paused) {
-      if (timerRef.current) clearTimeout(timerRef.current);
+    if (paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
-    let cancelled = false;
+    const id = window.setInterval(() => {
+      setIndex((current) => (current + 1) % PLACEHOLDER_PROMPTS.length);
+    }, PLACEHOLDER_HOLD_MS);
 
-    const tick = () => {
-      if (cancelled) return;
-
-      const phrase = PLACEHOLDER_PROMPTS[indexRef.current];
-      const deleting = deletingRef.current;
-
-      if (!deleting) {
-        charRef.current = Math.min(charRef.current + 1, phrase.length);
-        setPlaceholder(phrase.slice(0, charRef.current));
-
-        if (charRef.current === phrase.length) {
-          deletingRef.current = true;
-          timerRef.current = setTimeout(tick, HOLD_MS);
-          return;
-        }
-
-        timerRef.current = setTimeout(tick, TYPE_MS);
-        return;
-      }
-
-      charRef.current = Math.max(charRef.current - 1, 0);
-      setPlaceholder(phrase.slice(0, charRef.current));
-
-      if (charRef.current === 0) {
-        deletingRef.current = false;
-        indexRef.current = (indexRef.current + 1) % PLACEHOLDER_PROMPTS.length;
-        timerRef.current = setTimeout(tick, GAP_MS);
-        return;
-      }
-
-      timerRef.current = setTimeout(tick, DELETE_MS);
-    };
-
-    timerRef.current = setTimeout(tick, GAP_MS);
-
-    return () => {
-      cancelled = true;
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    return () => window.clearInterval(id);
   }, [paused]);
 
-  return paused ? "" : placeholder;
+  return index;
 }
 
 /**
@@ -415,6 +369,8 @@ export function AiPromptInput() {
   const scanRafRef = useRef<number | null>(null);
   const dockShownPrevRef = useRef(false);
   const dockTlRef = useRef<gsap.core.Timeline | null>(null);
+  const inFirstSectionRef = useRef(true);
+  const openRef = useRef(false);
   /** CTA strip already shown once in this general thread. */
   const actionsShownRef = useRef(false);
   /** Cal / lead / CRO capture already in play this session. */
@@ -440,6 +396,8 @@ export function AiPromptInput() {
   const [chatActions, setChatActions] = useState<ChatAction[]>([]);
   const [showCal, setShowCal] = useState(false);
   const [inputHint, setInputHint] = useState<string | null>(null);
+  inFirstSectionRef.current = inFirstSection;
+  openRef.current = open;
 
   function clearChatActions() {
     setChatActions([]);
@@ -457,7 +415,8 @@ export function AiPromptInput() {
   const scanning = croStep === "scanning";
   const canSend = Boolean(value.trim()) && !pending && !scanning;
   const animationPaused = open || focused || Boolean(value.trim());
-  const rotatingPlaceholder = useTypewriterPlaceholder(animationPaused);
+  const placeholderIndex = useRotatingPlaceholderIndex(animationPaused);
+  const showPlaceholderReel = !animationPaused;
 
   const placeholder = open
     ? croStep
@@ -467,7 +426,7 @@ export function AiPromptInput() {
         : newsletterStep
           ? NEWSLETTER_PLACEHOLDER[newsletterStep]
           : (inputHint ?? "Ask anything…")
-    : rotatingPlaceholder;
+    : "";
 
   function focusAskInput() {
     requestAnimationFrame(() => {
@@ -538,10 +497,14 @@ export function AiPromptInput() {
   }, []);
 
   // Tip chips collapse while the hero copy band is on screen; input stays.
+  // start must be "top bottom" — "top top" goes inactive via onLeaveBack when
+  // the user scrolls back to the hero (hero top == viewport top), which is
+  // exactly when chips should stay hidden over the logos bar.
   useEffect(() => {
     let cancelled = false;
     let raf = 0;
     let trigger: ScrollTrigger | null = null;
+    let sync: (() => void) | null = null;
 
     const attach = () => {
       if (cancelled) return;
@@ -551,14 +514,21 @@ export function AiPromptInput() {
         return;
       }
 
+      sync = () => {
+        if (cancelled) return;
+        const rect = hero.getBoundingClientRect();
+        setInFirstSection(rect.bottom > 0 && rect.top < window.innerHeight);
+      };
+
       trigger = ScrollTrigger.create({
         trigger: hero,
-        start: "top top",
+        start: "top bottom",
         end: "bottom top",
-        onToggle: (self) => setInFirstSection(self.isActive),
-        onRefresh: (self) => setInFirstSection(self.isActive),
+        onToggle: sync,
+        onRefresh: sync,
       });
-      setInFirstSection(trigger.isActive);
+      sync();
+      window.addEventListener("scroll", sync, { passive: true });
     };
 
     attach();
@@ -567,6 +537,7 @@ export function AiPromptInput() {
       cancelled = true;
       cancelAnimationFrame(raf);
       trigger?.kill();
+      if (sync) window.removeEventListener("scroll", sync);
     };
   }, []);
 
@@ -1745,6 +1716,30 @@ export function AiPromptInput() {
           <label className="sr-only" htmlFor={inputId}>
             Ask UXLAB
           </label>
+          <div
+            className={`rj-ask__ph${showPlaceholderReel ? "" : " is-hidden"}`}
+            aria-hidden="true"
+          >
+            <div className="rj-ask__ph-clip">
+              <div
+                className="rj-ask__ph-track"
+                style={{
+                  transform: `translateY(${(-placeholderIndex / PLACEHOLDER_PROMPTS.length) * 100}%)`,
+                  transitionDuration: `${PLACEHOLDER_SLIDE_MS}ms`,
+                }}
+              >
+                {PLACEHOLDER_PROMPTS.map((text, i) => (
+                  <div
+                    key={text}
+                    className={`rj-ask__ph-item${i === placeholderIndex ? " is-active" : ""}`}
+                    style={{ transitionDuration: `${PLACEHOLDER_SLIDE_MS}ms` }}
+                  >
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
           <input
             ref={inputRef}
             id={inputId}
