@@ -601,7 +601,9 @@ ul {
   align-items: center;
   justify-content: space-between;
   overflow: visible;
-  padding-inline: var(--rj-grid-margin);
+  padding-inline: 12px;
+  pointer-events: auto;
+  font-size: 1.4rem;
   font-weight: 400;
   font-style: normal;
   letter-spacing: -0.014rem;
@@ -625,7 +627,7 @@ ul {
   /* Flex box matches icon size so it centers on the wordmark */
   width: 1.8rem;
   height: 1.5424rem;
-  margin: 0 0 0 -0.2rem;
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -4620,8 +4622,13 @@ body.rj-scroll-dark .rj-page__main {
   pointer-events: none;
 }
 
-.rj-process__item:last-child .rj-process__line {
-  display: none;
+.rj-process__line--end {
+  top: auto;
+  bottom: 0;
+}
+
+.rj-process__item:last-child {
+  padding-bottom: 2.4rem;
 }
 
 .rj-process__number {
@@ -4737,6 +4744,15 @@ body.rj-scroll-dark .rj-page__main {
     height: 100%;
     transform: scaleY(0);
     transform-origin: center bottom;
+  }
+
+  .rj-process__line--end,
+  .rj-process__item:last-child .rj-process__line:not(.rj-process__line--end) {
+    display: none;
+  }
+
+  .rj-process__item:last-child {
+    padding-bottom: var(--rj-grid-gutter);
   }
 
   /* Metalab: pin number to top, push title/body toward column bottom */

@@ -237,6 +237,12 @@ export function OurProcessSection({
               onMouseEnter={() => setActive(index)}
             >
               <span className="rj-process__line" aria-hidden="true" />
+              {index === count - 1 ? (
+                <span
+                  className="rj-process__line rj-process__line--end"
+                  aria-hidden="true"
+                />
+              ) : null}
               <span className="rj-process__number">
                 {String(index + 1).padStart(2, "0")}
               </span>
