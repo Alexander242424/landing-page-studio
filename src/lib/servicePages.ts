@@ -5,10 +5,10 @@ import { SOLUTIONS } from "@/lib/solutions";
 export type ServiceHeroContent = {
   /** Accessible full headline */
   ariaLabel: string;
-  /** Visual lines for awards char reveal */
+  /** Visual lines for awards char reveal (desktop); flow as one wrap on mobile */
   lines: [string, string];
-  /** Supporting description lines */
-  descriptionLines: [string, string];
+  /** Supporting description — wraps naturally, not authored as line breaks */
+  description: string;
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
   logosStat: string;
@@ -55,7 +55,7 @@ export type ServicePageContent = {
   faqs: HomeFaq[];
 };
 
-const LOGOS_STAT = "Trusted by 200+ YCombinator\n& Speedrun founders";
+const LOGOS_STAT = "Trusted by 200+ YCombinator \n& Speedrun founders";
 
 const SHARED_CTAS = {
   primaryCta: { label: "Let's talk", href: "#contact" },
@@ -86,12 +86,10 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
   ],
   serviceType: "Product performance / CRO",
   hero: {
-    ariaLabel: "More revenue from the same traffic.",
-    lines: ["More revenue.", "Same traffic."],
-    descriptionLines: [
-      "Your product leaks. We find where, fix it, and install",
-      "a system that keeps compounding after we leave.",
-    ],
+    ariaLabel: "Turn the same traffic into compounding revenue.",
+    lines: ["Turn the same traffic", "into compounding revenue."],
+    description:
+      "Your product leaks. We find where, fix it, and install a system that keeps compounding after we leave.",
     ...SHARED_CTAS,
   },
   valueProp: {
@@ -204,12 +202,10 @@ export const PRODUCT_DESIGN: ServicePageContent = {
   ],
   serviceType: "Product design",
   hero: {
-    ariaLabel: "A product your users understand and come back to.",
-    lines: ["A product they", "understand and return to."],
-    descriptionLines: [
-      "Structure, flows, and UI built for the moments that matter —",
-      "first value, repeat habit, and willingness to pay.",
-    ],
+    ariaLabel: "Design a product they understand and return to.",
+    lines: ["Design a product they", "understand and return to."],
+    description:
+      "Structure, flows, and UI built for the moments that matter — first value, repeat habit, and willingness to pay.",
     ...SHARED_CTAS,
   },
   valueProp: {
@@ -322,12 +318,10 @@ export const WEBSITES: ServicePageContent = {
   ],
   serviceType: "Websites and funnels",
   hero: {
-    ariaLabel: "Visits that become qualified demand.",
-    lines: ["Visits that become", "qualified demand."],
-    descriptionLines: [
-      "Your site should be your best salesperson —",
-      "not a brochure visitors skim and leave.",
-    ],
+    ariaLabel: "Sites that turn visits into qualified demand.",
+    lines: ["Sites that turn visits", "into qualified demand."],
+    description:
+      "Your site should be your best salesperson — not a brochure visitors skim and leave.",
     ...SHARED_CTAS,
   },
   valueProp: {
@@ -440,12 +434,10 @@ export const TESTING: ServicePageContent = {
   ],
   serviceType: "Testing and experimentation",
   hero: {
-    ariaLabel: "Know what works before you build it.",
-    lines: ["Know what works", "before you build it."],
-    descriptionLines: [
-      "User research and experiments that validate your bets —",
-      "so you stop shipping features that don't move metrics.",
-    ],
+    ariaLabel: "Ship what actually moves conversion, not opinions.",
+    lines: ["Ship what actually moves", "conversion, not opinions."],
+    description:
+      "User research and experiments that validate your bets — so you stop shipping features that don't move metrics.",
     ...SHARED_CTAS,
   },
   valueProp: {
@@ -560,12 +552,10 @@ export const AI_ENGINEERING: ServicePageContent = {
   ],
   serviceType: "AI-first product engineering",
   hero: {
-    ariaLabel: "Your backlog moves. Production quality.",
-    lines: ["Your backlog moves.", "Production quality."],
-    descriptionLines: [
-      "AI-native builds turn a scoped brief into a live product in days —",
-      "your roadmap ships faster without the quality trade-off.",
-    ],
+    ariaLabel: "Ship your backlog 3× faster at production quality.",
+    lines: ["Ship your backlog 3× faster", "at production quality."],
+    description:
+      "AI-native builds turn a scoped brief into a live product in days — your roadmap ships faster without the quality trade-off.",
     ...SHARED_CTAS,
   },
   valueProp: {
@@ -678,12 +668,10 @@ export const AI_MVP: ServicePageContent = {
   ],
   serviceType: "AI MVP to product",
   hero: {
-    ariaLabel: "From impressive demo to a product real users trust.",
-    lines: ["Your demo, ready", "for real users."],
-    descriptionLines: [
-      "Vibe-coded MVPs break on real users. We harden the experience",
-      "so they activate, return, and pay — without you in the room.",
-    ],
+    ariaLabel: "Turn a vibe-coded demo into a product people trust.",
+    lines: ["Turn a vibe-coded demo", "into a product people trust."],
+    description:
+      "Vibe-coded MVPs break on real users. We harden the experience so they activate, return, and pay — without you in the room.",
     ...SHARED_CTAS,
   },
   valueProp: {

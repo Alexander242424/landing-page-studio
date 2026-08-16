@@ -85,7 +85,7 @@ function NotFoundComponent() {
 
       {/* Minimal wordmark nav */}
       <header
-        className="flex h-14 shrink-0 items-center px-6 lg:px-12"
+        className="flex h-14 shrink-0 items-center px-[12px] lg:px-12"
         style={{ borderBottom: "1px solid var(--rj-rule, rgba(0,0,0,.07))" }}
       >
         <Link
@@ -102,7 +102,7 @@ function NotFoundComponent() {
       </header>
 
       {/* Main content */}
-      <main className="flex flex-1 flex-col justify-center px-6 pb-28 lg:px-12">
+      <main className="flex flex-1 flex-col justify-center px-[12px] pb-28 lg:px-12">
         <div className="w-full max-w-3xl">
           <p
             className="mb-5 text-[10px] font-medium uppercase tracking-[0.22em]"
@@ -151,7 +151,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-[12px]">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-normal tracking-tight text-foreground">
           This page didn't load

@@ -19,13 +19,11 @@ const DESKTOP_MQ = "(min-width: 1024px)";
 const DEFAULT_HERO: ServiceHeroContent = {
   ariaLabel: "We turn your product experience into revenue.",
   lines: ["We turn your product", "experience into revenue."],
-  descriptionLines: [
-    "Growth partner for AI startups and product teams to boost conversions,",
-    "retention, user experience, funnels, and AI transformation.",
-  ],
+  description:
+    "Growth partner for AI startups and product teams to boost conversions, retention, user experience, funnels, and AI transformation.",
   primaryCta: { label: "Let's talk", href: "#contact" },
   secondaryCta: { label: "See results", href: "#glance" },
-  logosStat: "Trusted by 200+ YCombinator\n& Speedrun founders",
+  logosStat: "Trusted by 200+ YCombinator \n& Speedrun founders",
 };
 
 /**
@@ -328,7 +326,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
               className="rj-hero__logo rj-hero__headline rj-awards-title"
               aria-label={hero.ariaLabel}
             >
-              <span className="rj-hero__line">{hero.lines[0]}</span>
+              <span className="rj-hero__line">{hero.lines[0]}</span>{" "}
               <span className="rj-hero__line">{hero.lines[1]}</span>
             </h1>
             <div className="rj-hero__taglines">
@@ -336,8 +334,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
                 ref={descriptionRef}
                 className="rj-hero__tagline rj-hero__description rj-text-reveal"
               >
-                <span className="rj-hero__line">{hero.descriptionLines[0]}</span>
-                <span className="rj-hero__line">{hero.descriptionLines[1]}</span>
+                {hero.description}
               </p>
               <div
                 ref={actionsRef}

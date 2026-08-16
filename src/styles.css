@@ -123,7 +123,7 @@
   /* Layout / grid */
   --rj-grid-size: 6;
   --rj-grid-gutter: 0.4rem;
-  --rj-grid-margin: 1rem;
+  --rj-grid-margin: 12px;
   --rj-container-max: 192rem;
   --rj-radius-none: 0;
   --rj-radius-sm: 0.2rem;
@@ -601,9 +601,7 @@ ul {
   align-items: center;
   justify-content: space-between;
   overflow: visible;
-  padding-inline: 1rem;
-  pointer-events: auto;
-  font-size: 1.4rem;
+  padding-inline: var(--rj-grid-margin);
   font-weight: 400;
   font-style: normal;
   letter-spacing: -0.014rem;
@@ -1336,7 +1334,7 @@ ul {
   min-height: 0;
   max-height: 100%;
   overflow: auto;
-  padding: 7.2rem 16px 2rem;
+  padding: 7.2rem var(--rj-grid-margin) 2rem;
   border-radius: 1.6rem;
   border: 0;
   background: transparent;
@@ -1376,13 +1374,13 @@ ul {
 .rj-mobile-menu__links {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 1.2rem;
 }
 
 .rj-mobile-menu__link {
   display: block;
   color: var(--rj-white);
-  font-size: clamp(1.8rem, 6vw, 3rem);
+  font-size: clamp(3.6rem, 12vw, 6rem);
   font-weight: 300;
   letter-spacing: -0.03em;
   line-height: 1.15;
@@ -1471,7 +1469,7 @@ ul {
   min-height: calc(80dvh + 40px);
   min-height: calc(80svh + 40px);
   overflow: hidden;
-  padding-inline: 1rem;
+  padding-inline: var(--rj-grid-margin);
   /* Keep logos from sitting flush on the reel */
   padding-bottom: calc(2.4rem - 16px);
   color: var(--rj-white);
@@ -1509,8 +1507,7 @@ ul {
   justify-content: center;
   gap: calc(1.6rem + 8px);
   overflow: hidden;
-  padding-inline: 1rem;
-  /* Equal free space above headline and below CTAs */
+  padding-inline: 0;
   padding-top: calc(var(--rj-header-height) + var(--rj-hero-edge));
   padding-bottom: var(--rj-hero-edge);
   box-sizing: border-box;
@@ -1524,9 +1521,9 @@ ul {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  width: calc(100% + 2rem);
-  margin-inline: -1rem;
-  padding-inline: 1rem;
+  width: calc(100% + 2 * var(--rj-grid-margin));
+  margin-inline: calc(-1 * var(--rj-grid-margin));
+  padding-inline: var(--rj-grid-margin);
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -1591,21 +1588,22 @@ ul {
 
 .rj-hero__headline {
   min-width: 0;
-  /* Mobile: +15% vs prior clamp(36px, 9.2vw, 64px) */
-  font-size: clamp(41px, 10.58vw, 74px);
+  /* Mobile: a bit larger so the flowing title lands on ~3 lines */
+  font-size: clamp(47px, 12.2vw, 82px);
   color: var(--rj-white);
   overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
   max-width: 100%;
   text-align: center;
+  text-wrap: balance;
   /* Optical balance: letter-spacing isn't applied after the last glyph */
   padding-inline-start: 0.05em;
 }
 
-/* Explicit line boxes so SplitText measures the intended breaks */
+/* Desktop: authored 2-line boxes. Mobile: inline so the title wraps as one phrase. */
 .rj-hero__line {
-  display: block;
+  display: inline;
   text-align: center;
 }
 
@@ -1625,6 +1623,12 @@ ul {
   .rj-hero__headline {
     font-size: calc(clamp(4.8rem, 1.2rem + 5vw, 9.6rem) - 18px);
     line-height: 0.84;
+    text-wrap: wrap;
+  }
+
+  .rj-hero__headline .rj-hero__line {
+    display: block;
+    white-space: nowrap;
   }
 
   .rj-challenges__headline,
@@ -1633,15 +1637,10 @@ ul {
   }
 
   .rj-hero__description {
-    max-width: none;
-    width: max-content;
+    max-width: min(52rem, 100%);
+    width: auto;
     font-size: clamp(1.55rem, 1.1rem + 0.45vw, 2rem);
     white-space: normal;
-    text-align: center;
-  }
-
-  .rj-hero__description .rj-hero__line {
-    white-space: nowrap;
     text-align: center;
   }
 }
@@ -1681,7 +1680,7 @@ ul {
 /* Short viewports: keep headline from colliding with header / bottom copy */
 @media (max-height: 720px) {
   .rj-hero__headline {
-    font-size: min(10.58vw, 8.28vh, 64px);
+    font-size: min(12.2vw, 9.2vh, 70px);
   }
 }
 
@@ -1745,13 +1744,16 @@ ul {
 }
 
 .rj-hero__description {
-  max-width: min(100%, 92%);
+  max-width: min(100%, 36rem);
   margin: 0;
   /* px floor — avoids 2.667vw-rem inflation on mid mobile widths */
   font-size: clamp(14px, 3.6vw, 18px);
   font-weight: 300;
   letter-spacing: -0.016rem;
   line-height: 1.3;
+  white-space: normal;
+  text-wrap: pretty;
+  text-align: center;
 }
 
 .rj-hero__actions {
@@ -1838,8 +1840,8 @@ ul {
     gap: calc(1.6rem + 8px);
     --rj-hero-edge: calc(0.8rem + 16px);
     padding-bottom: var(--rj-hero-edge);
-    /* Keep equal side inset — headline centers inside this box */
-    padding-inline: 1rem;
+    /* Side inset lives on .rj-hero — don't double it here */
+    padding-inline: 0;
   }
 
   .rj-hero__headline {
@@ -1849,7 +1851,7 @@ ul {
 
   .rj-hero__logos-bar {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     /* Same space above logos (after text) as below */
     gap: 2.4rem;
     padding: 2.4rem 0;
@@ -1857,12 +1859,14 @@ ul {
 
   .rj-hero__logos-stat {
     max-width: none;
+    width: 100%;
     padding-right: 0;
     margin-right: 0;
     border-right: none;
     font-size: clamp(0.78rem, 3.1vw, 1.05rem);
     white-space: nowrap;
     line-height: 1.2;
+    text-align: center;
   }
 
   .rj-hero__logos-stat br {
@@ -1881,8 +1885,8 @@ ul {
 
 .rj-hero__controls {
   position: fixed;
-  right: 1rem;
-  bottom: 1rem;
+  right: var(--rj-grid-margin);
+  bottom: var(--rj-grid-margin);
   z-index: 40;
   display: none;
   align-items: flex-end;
@@ -1971,7 +1975,7 @@ ul {
   display: none;
   position: absolute;
   bottom: 2rem;
-  left: 1rem;
+  left: var(--rj-grid-margin);
   align-items: center;
   color: var(--rj-white);
   font-size: 1.4rem;
@@ -2051,18 +2055,13 @@ ul {
   }
 
   .rj-hero__description {
-    max-width: none;
-    width: max-content;
+    max-width: min(72rem, 90%);
+    width: auto;
     /* +15% vs prior desktop scale */
     font-size: clamp(2.07rem, 1.27rem + 0.63vw, 2.76rem);
     letter-spacing: -0.024rem;
     line-height: 1.3;
     white-space: normal;
-    text-align: center;
-  }
-
-  .rj-hero__description .rj-hero__line {
-    white-space: nowrap;
     text-align: center;
   }
 
@@ -2673,7 +2672,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-intro__tagline {
   display: flex;
   flex-direction: column;
-  padding: 10rem 1rem 2.9rem;
+  padding: 10rem var(--rj-grid-margin) 2.9rem;
 }
 
 @media (max-width: 767px) {
@@ -2817,7 +2816,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-intro__item {
   --grid-size: 6;
   --grid-gutter: 0.4rem;
-  --grid-margin: 1rem;
+  --grid-margin: var(--rj-grid-margin);
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--grid-size), 1fr);
@@ -2879,7 +2878,7 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-glance__split-wrap {
   position: relative;
-  margin-inline: 1rem;
+  margin-inline: var(--rj-grid-margin);
 }
 
 .rj-glance__header {
@@ -2890,7 +2889,7 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: -0.016rem;
   line-height: 1.75rem;
   min-height: 1.75rem;
-  padding: 1.74rem 1rem 2.6rem;
+  padding: 1.74rem var(--rj-grid-margin) 2.6rem;
 }
 
 .rj-glance__widgets {
@@ -3381,7 +3380,7 @@ body.rj-scroll-dark .rj-page__main {
   background: var(--rj-white);
   color: var(--rj-black);
   font-family: var(--rj-font-sans);
-  padding: 14.8rem 1rem;
+  padding: 14.8rem var(--rj-grid-margin);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4444,8 +4443,8 @@ body.rj-scroll-dark .rj-page__main {
 
 @media (width <= 767px) {
   .rj-ask {
-    --rj-ask-width: calc(100% - 20px);
-    --rj-ask-inline: 10px;
+    --rj-ask-width: calc(100% - 24px);
+    --rj-ask-inline: 12px;
     --rj-ask-chat-h: calc(90dvh - 7.2rem);
     bottom: calc(4px + var(--rj-ask-kb) + env(safe-area-inset-bottom, 0px));
   }
@@ -4782,7 +4781,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-approach__lead {
   display: flex;
   flex-direction: column;
-  padding: 10rem 1rem 5.2rem;
+  padding: 10rem var(--rj-grid-margin) 5.2rem;
 }
 
 .rj-approach__lead-inner {
@@ -4844,7 +4843,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-approach__item {
   --grid-size: 6;
   --grid-gutter: 0.4rem;
-  --grid-margin: 1rem;
+  --grid-margin: var(--rj-grid-margin);
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--grid-size), 1fr);
@@ -4956,7 +4955,7 @@ body.rj-scroll-dark .rj-page__main {
 /* ─── Home video (clip-path scale on scroll) ─── */
 .rj-home-video {
   width: 100%;
-  padding: 0 1rem 4rem;
+  padding: 0 var(--rj-grid-margin) 4rem;
   background: var(--rj-bg);
 }
 
@@ -5011,7 +5010,7 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-footer__rule {
   height: 1px;
-  margin-inline: 1rem;
+  margin-inline: var(--rj-grid-margin);
   background: var(--rj-border);
 }
 
@@ -5045,7 +5044,7 @@ body.rj-scroll-dark .rj-page__main {
   display: grid;
   grid-template-columns: 1fr;
   gap: 3.2rem;
-  margin-inline: 1rem;
+  margin-inline: var(--rj-grid-margin);
   padding-top: 3.2rem;
 }
 
@@ -5296,7 +5295,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-faq {
   background: var(--rj-bg);
   color: var(--rj-fg);
-  padding: 18rem 1rem 18rem;
+  padding: 18rem var(--rj-grid-margin) 18rem;
   font-family: var(--rj-font-sans);
 }
 
@@ -5607,6 +5606,7 @@ body.rj-scroll-dark .rj-page__main {
   width: 100%;
   margin-bottom: 0;
   padding-top: 2.4rem;
+  padding-inline: var(--rj-grid-margin);
   text-align: center;
   pointer-events: none;
   box-sizing: border-box;
