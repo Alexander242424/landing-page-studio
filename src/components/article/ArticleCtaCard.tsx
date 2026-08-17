@@ -6,7 +6,7 @@ import {
   LOGO_STRIP_SEED_IDS,
 } from "@/lib/clientLogos";
 
-const CTA_LOGOS = LOGO_STRIP_SEED_IDS.map(
+const CTA_LOGOS = LOGO_STRIP_SEED_IDS.slice(0, 6).map(
   (id) => CLIENT_LOGOS.find((logo) => logo.id === id) ?? CLIENT_LOGOS[0]!,
 );
 

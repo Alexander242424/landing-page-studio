@@ -6499,9 +6499,23 @@ html[data-rj-route="case"] body {
   max-width: 100%;
   margin-top: 2rem;
   align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   background: var(--rj-white);
   color: var(--rj-black);
-  border-radius: 4px;
+  border-radius: 999px;
+}
+
+/* Incoming hover ↗ sits at the centered label, not the button’s left edge.
+   Zero net flex space so “Let’s talk” + trailing arrow stay the centered group. */
+.rj-article-cta .rj-article-cta__btn .rj-arrow__icon--b {
+  position: relative;
+  top: auto;
+  left: auto;
+  height: auto;
+  margin-inline-end: calc(-1 * (var(--rj-arrow-icon) + var(--rj-arrow-spacing)));
+  transform: translate3d(-125%, 0, 0);
 }
 
 .rj-article-cta__btn:hover {
