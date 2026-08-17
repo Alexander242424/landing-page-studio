@@ -124,15 +124,15 @@ export const CASES: CaseStudy[] = [
     slug: "oura",
     client: "Oura",
     logo: "/logos/oura.svg",
-    title: "Category-defining wearables brand & product experience.",
+    title: "Day-7 retention up by redesigning the first-value moment.",
     hasPage: true,
     hoverImage: "/glance/oura.jpg",
     headline: {
-      line: "Category-defining wearables",
-      emphasis: "brand & product experience.",
+      line: "Day-7 retention up",
+      emphasis: "by redesigning the first-value moment.",
     },
     description:
-      "How UXLAB shaped a wearable brand and product experience around readiness, recovery, and rituals people keep — not dashboards they abandon.",
+      "How UXLAB redesigned Oura's first seven days — mapping onboarding to first value so readiness and recovery clicked in the first week, not the fourth.",
     year: "2024",
     meta: [
       { label: "Client", value: "Oura" },
@@ -327,11 +327,11 @@ export const CASES: CaseStudy[] = [
     client: "Bankroll U",
     logo: "/logos/bankrollu.svg",
     headline: {
-      line: "Sports markets, clear",
-      emphasis: "at the next play.",
+      line: "Bet placed faster",
+      emphasis: "by simplifying sports market UI.",
     },
     description:
-      "How UXLAB clarified sports-market moments so the next play reads instantly — product surfaces that keep conviction high when the clock is moving.",
+      "How UXLAB cleaned Bankroll U's market view so the next play reads instantly — cutting the steps between conviction and action.",
     heroSrc: "/cases/bankrollu/hero.jpg",
     glanceSrc: "/glance/bankrollu.jpg",
     aspectRatio: "992 / 880",
@@ -351,11 +351,11 @@ export const CASES: CaseStudy[] = [
     client: "Grono",
     logo: "/logos/grono.svg",
     headline: {
-      line: "A week of content",
-      emphasis: "from one calm surface.",
+      line: "Weekly content output up",
+      emphasis: "by redesigning the planning surface.",
     },
     description:
-      "How UXLAB turned Grono’s content engine into one calm surface — planning a week of output without the chaos of a crowded dashboard.",
+      "How UXLAB redesigned Grono's core planning surface — turning dashboard sprawl into one calm session that plans a week of content.",
     heroSrc: "/cases/grono/hero.jpg",
     glanceSrc: "/glance/grono.jpg",
     aspectRatio: "992 / 1150",
@@ -375,11 +375,11 @@ export const CASES: CaseStudy[] = [
     client: "Nespresso",
     logo: "/logos/nespresso.svg",
     headline: {
-      line: "Premium coffee commerce",
-      emphasis: "designed for mobile.",
+      line: "Mobile AOV up",
+      emphasis: "by redesigning ritual and checkout flow.",
     },
     description:
-      "How UXLAB shaped premium coffee commerce for mobile — ritual, assortment, and checkout that feel as considered as the cup.",
+      "How UXLAB redesigned Nespresso's mobile commerce to carry premium ritual on a small screen — fixing assortment, membership, and checkout so revenue per session improved.",
     heroSrc: "/cases/nespresso/hero.jpg",
     glanceSrc: "/glance/nespresso.jpg",
     aspectRatio: "992 / 988",
@@ -399,11 +399,11 @@ export const CASES: CaseStudy[] = [
     client: "Foundrae",
     logo: "/logos/foundrae.svg",
     headline: {
-      line: "Jewelry storytelling",
-      emphasis: "that invites the shop.",
+      line: "Purchase intent up",
+      emphasis: "by redesigning narrative-to-cart flow.",
     },
     description:
-      "How UXLAB built jewelry storytelling that invites the shop — narrative surfaces that lead with meaning, then make purchase feel inevitable.",
+      "How UXLAB rebuilt Foundrae's digital experience — leading with story, earning the purchase, and keeping the brand's editorial quality intact through checkout.",
     heroSrc: "/cases/foundrae/hero.jpg",
     glanceSrc: "/glance/foundrae.jpg",
     aspectRatio: "992 / 1150",
@@ -423,11 +423,11 @@ export const CASES: CaseStudy[] = [
     client: "Boostra",
     logo: "/logos/boostra.svg",
     headline: {
-      line: "Conversion analysis",
-      emphasis: "teams can act on.",
+      line: "Faster CRO decisions",
+      emphasis: "by making analysis teams can act on.",
     },
     description:
-      "How UXLAB turned conversion analysis into something teams can act on — clear signal, prioritized friction, and interventions meant to ship.",
+      "How UXLAB turned Boostra's conversion analysis into a short list of moves teams can ship this sprint — clear signal, prioritized friction, no dashboard archaeology.",
     heroSrc: "/cases/boostra/hero.jpg",
     glanceSrc: "/glance/boostra.jpg",
     aspectRatio: "992 / 880",
@@ -447,11 +447,11 @@ export const CASES: CaseStudy[] = [
     client: "Stan",
     logo: "/logos/stan.svg",
     headline: {
-      line: "Creator profiles",
-      emphasis: "built for exclusive access.",
+      line: "More paying fans",
+      emphasis: "by redesigning the exclusive access experience.",
     },
     description:
-      "How UXLAB shaped creator profiles for exclusive access — identity, membership, and gated moments that feel premium without friction.",
+      "How UXLAB redesigned Stan's creator profiles and gate moments — making the offer obvious and the path to join short enough to convert on impulse.",
     heroSrc: "/cases/stan/hero.jpg",
     glanceSrc: "/glance/stan.jpg",
     aspectRatio: "992 / 1150",

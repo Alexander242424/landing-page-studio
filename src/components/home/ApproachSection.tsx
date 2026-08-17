@@ -10,21 +10,22 @@ const ITEMS = [
   {
     title: (
       <>
-        A simple philosophy: <br />
-        quality over quantity.
+        Depth over volume.
+        <br />
+        Small roster, full focus.
       </>
     ),
-    body: "We partner with five clients a year to deliver unmatched focus, and impact. Every detail is carefully crafted, every decision strategic, and every outcome transformative.",
+    body: "We take a small number of clients because shallow engagements don't compound. You get the team's full attention — not account management and handoffs.",
   },
   {
     title: (
       <>
-        Performance & emotion.
+        Beautiful doesn’t
         <br />
-        You need both.
+        convert by itself.
       </>
     ),
-    body: "We craft brands that become category leaders. These brands aren’t built on products alone. Emotional connection and sustainable growth are the two essentials to get there. This is how you drive retention and advocacy.",
+    body: "We connect UX to the metrics that matter. Every design decision is tied to a growth lever — conversion, activation, retention, or LTV — not just a cleaner interface.",
   },
 ] as const;
 
@@ -111,9 +112,8 @@ export function ApproachSection() {
           <div className="rj-approach__lead-space" aria-hidden="true" />
           <div className="rj-approach__lead-content">
             <p ref={leadRef}>
-              Our approach is built for compounding growth—diagnose the real
-              friction, design the highest-leverage fix, validate with signal,
-              and ship what moves revenue. See{" "}
+              We work on the moments where growth stalls — UX, conversion,
+              onboarding, retention — and leave a system that compounds. See{" "}
               <a
                 href="#process"
                 className="rj-link-active-full"

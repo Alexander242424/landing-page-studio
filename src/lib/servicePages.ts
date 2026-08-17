@@ -191,55 +191,68 @@ export const PRODUCT_DESIGN: ServicePageContent = {
   path: pathFor("product-design"),
   title: "Product Design",
   description:
-    "Your product works but people stall — at signup, the core feature, the paywall. UXLAB designs the flows and UI so users reach first value, build habit, and pay — without getting lost.",
+    "Your product has the right idea but users stall — at signup, the core feature, the paywall. UXLAB designs activation flows and UI so users reach first value, build habit, and convert — with CRO instrumentation built in.",
   keywords: [
     "product design",
     "UX design",
-    "product flows",
-    "activation design",
+    "activation flow design",
     "conversion UX",
+    "CRO design",
+    "design system",
     "UXLAB",
   ],
   serviceType: "Product design",
   hero: {
-    ariaLabel: "Design a product they understand and return to.",
-    lines: ["Design a product they", "understand and return to."],
+    ariaLabel: "Design flows and UI that move users to value, not confusion.",
+    lines: ["Design flows and UI that", "move users to value."],
     description:
-      "Structure, flows, and UI built for the moments that matter — first value, repeat habit, and willingness to pay.",
+      "Activation-first product design for funded AI startups and B2B SaaS — from the first onboarding screen to the moment they pay.",
     ...SHARED_CTAS,
   },
   valueProp: {
     id: "value",
     taglineBefore:
-      "Your product works but people stall — at signup, at the core feature, at the paywall. We design flows and UI so users reach",
+      "Your product has the right idea but users stall — at signup, at the core feature, at the paywall. We design the flows and UI that move them to",
     taglineLinkLabel: "first value, habit, and revenue",
     taglineLinkHref: "#outcomes",
-    taglineAfter: " without getting lost.",
-    title: "Design that earns its place in the funnel.",
+    taglineAfter: " — with CRO instrumentation built in from the start.",
+    title: "Activation-first design that earns its place in the funnel.",
     paragraphs: [
-      "Every screen in your product either moves someone forward or loses them. Most teams have screens that do neither — they exist because someone built them, not because they convert. We audit, redesign, and build the flows that matter most.",
-      "You get coherent systems your engineering team can ship and maintain: IA, interaction patterns, and UI components with all the states — empty, loading, error, edge cases — built in from the start.",
+      "Every screen is either moving someone forward or losing them. Most products have screens that do neither — built because someone had a sprint cycle, not because they convert. We audit the friction, redesign the highest-leverage flows, and instrument what we ship.",
+      "You get coherent systems your engineering team can build and maintain: activation flows, interaction patterns, and UI components with every state — empty, loading, error, edge cases — built in from the start, not filed as follow-up tickets.",
     ],
   },
   outcomes: {
     id: "outcomes",
     leadBefore:
-      "What you leave with is a product users navigate without hand-holding — flows clear, UI shippable, patterns your team can extend. See",
+      "What you leave with is a product users navigate to value without hand-holding — activation mapped, UI shippable, and a CRO backlog your team can run. See",
     leadLinkLabel: "our process",
     leadLinkHref: "#process",
     leadAfter: ".",
     items: [
       {
-        title: "Flows where users don't stall.",
-        body: "Mapped journeys from signup to first value to paid habit — with structure that makes the next step obvious even under real-world distraction and edge cases.",
+        title: "Activation flow design.",
+        body: "User journeys from signup to first value to paid habit — structured so the next step is obvious at every moment, even without narration or a sales rep in the room.",
       },
       {
-        title: "UI your engineering team can ship.",
-        body: "Components, states, and interaction patterns ready for production — with accessibility, empty states, and error cases included, not left as follow-up tickets.",
+        title: "UX audit and friction mapping.",
+        body: "A ranked list of the screens and moments costing you activation and retention — evidence-based, so you know what to fix first and why.",
       },
       {
-        title: "A design system that compounds.",
+        title: "Product UI for the moments that matter.",
+        body: "Dashboards, onboarding sequences, and key workflows designed for clarity and confidence — not for a design portfolio.",
+      },
+      {
+        title: "Component and design system foundations.",
         body: "Living patterns so new features inherit what already converts — and your team stops re-debating the same design decisions every sprint.",
+      },
+      {
+        title: "CRO hypothesis backlog.",
+        body: "An instrumentation plan and sequenced test backlog tied to your primary metrics — so design improvements keep compounding after the engagement ends.",
+      },
+      {
+        title: "Dev-ready handoff.",
+        body: "Production-ready specs, every state, every edge case. Not a Figma dump — we pair through ship until the code matches the intent.",
       },
     ],
   },
@@ -247,23 +260,23 @@ export const PRODUCT_DESIGN: ServicePageContent = {
     items: [
       {
         title: "Diagnose",
-        body: "You get a clear picture of where design fails your users: which screens cause drop-off, where IA hides value, and what's costing you activation or retention.",
+        body: "You get a clear read on where design is costing you activation — which screens cause drop-off, where the IA buries value, and what the friction map reveals about your users' real path.",
       },
       {
         title: "Prototype",
-        body: "You see high-fidelity solutions for the highest-leverage screens — built for pressure-testing with real users, not moodboard reviews with stakeholders.",
+        body: "You see high-fidelity solutions for the highest-leverage screens — activation flows, key workflows, and paywall moments — built to pressure-test with real users, not for stakeholder reviews.",
       },
       {
         title: "Validate",
-        body: "You know which designs move task success and time-to-value before heavy build. We cut what decorates without lifting the metric.",
+        body: "You know which designs move task success and time-to-value before build. We cut what decorates without lifting the metric and keep what moves the number.",
       },
       {
         title: "Ship",
-        body: "Your engineering team gets production-ready specs, every state, and a pairing partner — so what ships matches what was designed, down to the edge cases.",
+        body: "Your engineering team gets production-ready specs, every state, and a pairing partner — so what ships matches what was designed, edge cases included.",
       },
       {
         title: "Compound",
-        body: "You get a pattern library that keeps new features consistent with what converts — so design debt doesn't quietly undo the growth you built.",
+        body: "You get a pattern library and CRO backlog that keeps new features consistent with what converts — so design debt doesn't quietly undo the growth you built.",
       },
     ],
   },
@@ -271,10 +284,15 @@ export const PRODUCT_DESIGN: ServicePageContent = {
     {
       question: "My product already looks decent — why do I need this?",
       answer:
-        "Visual polish isn't the problem. The problem is flows that stall at activation, IA that buries the core feature, or UI states that break trust at the wrong moment. We fix what's losing you revenue, not what's aesthetically weak.",
+        "Visual polish is rarely the problem. The problem is flows that stall at activation, IA that buries the core feature, or missing states that break trust at the wrong moment. We fix what's losing you revenue, not what's aesthetically weak.",
     },
     {
-      question: "Will you redesign everything?",
+      question: "What's the difference between product design and CRO?",
+      answer:
+        "With us, not much. Classic product design ignores what moves metrics. Classic CRO ignores how design shapes behavior. We combine both — every flow we design has a hypothesis, an instrumentation plan, and a measurable outcome.",
+    },
+    {
+      question: "Will you redesign everything, or focus on what matters?",
       answer:
         "We start with the highest-leverage screens. A full redesign is only justified when the architecture genuinely blocks growth — most teams need sharp, focused interventions on the 3–5 surfaces that matter most.",
     },
@@ -284,19 +302,9 @@ export const PRODUCT_DESIGN: ServicePageContent = {
         "Production-ready specs, every state, and pairing through ship. Not a Figma dump. We stay in the loop until the code matches the intent — edge cases included.",
     },
     {
-      question: "Can you work within our existing design system?",
-      answer:
-        "Yes. We extend or repair what you have. If your system blocks conversion, we propose targeted upgrades — not a full rewrite by default.",
-    },
-    {
       question: "How do I measure whether the design worked?",
       answer:
         "By the metrics that matter: task success, time-to-value, activation, conversion, retention. Aesthetic preference in a review session is not a success metric.",
-    },
-    {
-      question: "Who gets the most value from this?",
-      answer:
-        "Product-led teams with real users, a shipping culture, and screens that are losing them revenue — SaaS, marketplaces, consumer apps. Not teams looking for a rebrand.",
     },
   ],
 };
@@ -307,55 +315,69 @@ export const WEBSITES: ServicePageContent = {
   path: pathFor("websites"),
   title: "Websites + Funnels",
   description:
-    "You're spending on traffic but your site isn't closing. UXLAB builds the site and funnels that turn visits into qualified demos, trials, and pipeline — not bounce rates.",
+    "You're spending on traffic but the site isn't closing. UXLAB builds conversion-first sites and funnels that turn visits into qualified demos, trials, and pipeline for funded B2B and AI startups.",
   keywords: [
     "website design",
     "landing pages",
-    "funnels",
-    "conversion website",
+    "conversion funnels",
+    "B2B website",
+    "SaaS marketing site",
     "demand generation",
+    "CRO",
     "UXLAB",
   ],
   serviceType: "Websites and funnels",
   hero: {
-    ariaLabel: "Sites that turn visits into qualified demand.",
-    lines: ["Sites that turn visits", "into qualified demand."],
+    ariaLabel: "Sites and funnels that turn visitors into qualified demand.",
+    lines: ["Sites and funnels that turn", "visitors into qualified demand."],
     description:
-      "Your site should be your best salesperson — not a brochure visitors skim and leave.",
+      "A good site makes the next step feel obvious. We build the positioning, structure, and conversion paths that turn visits into pipeline.",
     ...SHARED_CTAS,
   },
   valueProp: {
     id: "value",
     taglineBefore:
-      "You're spending on traffic, but your site isn't closing. Visitors arrive, don't understand the offer, and leave. We build the site and funnels that turn that traffic into",
+      "You're spending on traffic but visitors arrive, can't parse the offer, and leave. We build the site and funnels that turn that traffic into",
     taglineLinkLabel: "qualified demos, trials, and pipeline",
     taglineLinkHref: "#outcomes",
     taglineAfter: " — not bounce rates.",
-    title: "A site that sells while you sleep.",
+    title: "A site that closes while you sleep.",
     paragraphs: [
-      "Most sites fail at the first job: making the value obvious. Visitors arrive knowing nothing; they leave still knowing nothing. We fix that with positioning, structure, and CTAs built around how your buyers actually decide — not what your homepage committee approved.",
-      "You get a conversion-ready site your team can test and iterate: instrumentation wired from day one, modular sections you can swap, and a backlog of hypotheses — not a static build that goes stale in a quarter.",
+      "Most B2B and AI startup sites fail at the first job: making the value obvious to someone who's never heard of you. Visitors arrive curious and leave confused. We fix that with clear positioning, page structure, and CTAs built around how your buyers actually evaluate and decide.",
+      "You get a conversion-ready system your team can test and iterate: analytics wired from day one, modular sections you can swap, and a CRO hypothesis backlog — not a static build that goes stale in a quarter.",
     ],
   },
   outcomes: {
     id: "outcomes",
     leadBefore:
-      "What you leave with is a site system that converts — clear offer, guided path, and pages built to keep improving. See",
+      "What you leave with is a site system that converts — clear offer, guided buyer path, and pages built to keep improving. See",
     leadLinkLabel: "our process",
     leadLinkHref: "#process",
     leadAfter: ".",
     items: [
       {
-        title: "An offer obvious in the first scroll.",
-        body: "Positioning, proof, and hierarchy that make the value clear before a visitor reaches the fold — without burying the CTA under 12 sections of marketing copy.",
+        title: "Offer clarity and positioning.",
+        body: "Your value is obvious in the first scroll — for a buyer who's never heard of you. No jargon, no buried proof, no 12-section homepage that explains everything and closes nothing.",
       },
       {
-        title: "Funnels that qualify before they convert.",
-        body: "Awareness → consideration → action: landing, pricing, product, and capture moments that match how real buyers move — so the leads that arrive actually close.",
+        title: "Conversion-first page structure.",
+        body: "Hero, proof, pricing, and capture moments built around how real buyers move — so the next step always feels obvious, not like effort.",
       },
       {
-        title: "A site built to compound, not to launch.",
-        body: "Instrumentation, modular architecture, and a test backlog so conversion keeps improving after launch — instead of freezing until the next redesign budget.",
+        title: "Product storytelling for complex offers.",
+        body: "Technical and AI products explained without dumbing down — narratives that respect smart buyers and still drive the qualified click.",
+      },
+      {
+        title: "Trust signals and social proof.",
+        body: "Credibility markers placed where doubt lives in the buyer journey — not in a footer no one reads. Logos, case data, and specifics that earn the next step.",
+      },
+      {
+        title: "Funnel and CTA architecture.",
+        body: "Awareness to action: landing pages, nurture, pricing, and capture moments designed for how your buyers actually evaluate — so the leads that arrive actually close.",
+      },
+      {
+        title: "Analytics and CRO hypothesis backlog.",
+        body: "Instrumentation from day one and a sequenced test backlog — so conversion keeps improving after launch instead of freezing until the next redesign budget.",
       },
     ],
   },
@@ -363,15 +385,15 @@ export const WEBSITES: ServicePageContent = {
     items: [
       {
         title: "Diagnose",
-        body: "You get a clear read on why visitors leave: weak offer clarity, confused path, missing proof, or a funnel that doesn't match how your buyers actually decide.",
+        body: "You get a clear read on why visitors leave: weak offer clarity, confused buyer path, missing proof, or a funnel that doesn't match how your buyers actually decide.",
       },
       {
         title: "Prototype",
-        body: "You see page structures and key templates before full build — hero, proof, pricing, capture — designed for qualified conversion, not for design awards.",
+        body: "You see page structures and key templates before full build — hero, proof, pricing, capture — designed for qualified conversion, not for a design award.",
       },
       {
         title: "Validate",
-        body: "Your copy and layout hypotheses get tested with real signal before engineering investment. You know what drives qualified action, not just scrolls.",
+        body: "Your copy and layout hypotheses get tested with real signal before engineering investment. You know what drives qualified action, not just scroll depth.",
       },
       {
         title: "Ship",
@@ -379,7 +401,7 @@ export const WEBSITES: ServicePageContent = {
       },
       {
         title: "Compound",
-        body: "You leave with an experiment roadmap and a modular system so the site keeps improving rather than fossilizing after launch.",
+        body: "You leave with a CRO backlog and a modular system so the site keeps improving rather than fossilizing after launch.",
       },
     ],
   },
@@ -390,29 +412,24 @@ export const WEBSITES: ServicePageContent = {
         "Usually because it looks great for you, not for a buyer who's never heard of you. The offer is unclear, the proof is buried, or the path to conversion isn't obvious. We fix the structure, not just the aesthetics.",
     },
     {
-      question: "Can you work in Webflow, Framer, or our own codebase?",
-      answer:
-        "Yes. We match the stack that fits your team's velocity and ownership. The goal is a site your team can maintain and test — not a locked black box that needs an agency retainer to update.",
-    },
-    {
       question: "What makes this different from a brand agency?",
       answer:
-        "Brand polish without conversion structure is a beautiful brochure. We optimize for qualified demand: clarity of offer, path to action, and measurable outcomes — not award-winning design.",
+        "Brand polish without conversion structure is a beautiful brochure. We optimize for qualified demand: clarity of offer, buyer path, and measurable outcomes — not award-winning design.",
     },
     {
-      question: "Do you run ads to the site?",
+      question: "Can you work in Webflow, Framer, or our own codebase?",
       answer:
-        "We focus on converting the traffic you already have or are buying. We partner with your growth team on landing fit; media buying isn't the core offer.",
+        "Yes. We match the stack that fits your team's velocity and ownership. The goal is a site your team can maintain and test — not a locked build that needs an agency retainer to update.",
     },
     {
       question: "What about SEO?",
       answer:
-        "We build on solid technical foundations and support content structure that helps discovery. The primary job is converting visits — but we don't build sites that work against you in search.",
+        "We build on solid technical foundations and support content structure that helps discovery. The primary job is converting visits — we don't build sites that work against you in search.",
     },
     {
       question: "How will I know the site is working?",
       answer:
-        "By qualified demos, trials, signups, and pipeline — with tracking wired from day one. Vanity metrics like page views without action don't count as success.",
+        "By qualified demos, trials, signups, and pipeline — with tracking wired from day one. Page views without action are not a success metric.",
     },
   ],
 };
@@ -657,55 +674,69 @@ export const AI_MVP: ServicePageContent = {
   path: pathFor("ai-mvp-to-product"),
   title: "AI MVP to Product",
   description:
-    "Your demo impresses in a pitch. Then real users try it and stall. UXLAB closes the gap between demo-ready and product-ready — before you scale acquisition into a leaky funnel.",
+    "Your Lovable, Cursor, or Bolt build impresses in the demo. Real users stall. UXLAB closes the gap between demo-ready and product-ready — UX, UI, edge cases, and activation — before you scale acquisition into a leaky funnel.",
   keywords: [
     "AI MVP",
     "prototype to product",
-    "productization",
-    "vibe coding",
+    "vibe coding cleanup",
+    "Lovable build",
+    "Cursor build",
     "AI startup product",
+    "productization",
     "UXLAB",
   ],
   serviceType: "AI MVP to product",
   hero: {
-    ariaLabel: "Turn a vibe-coded demo into a product people trust.",
-    lines: ["Turn a vibe-coded demo", "into a product people trust."],
+    ariaLabel: "Turn a vibe-coded MVP into a product real users trust.",
+    lines: ["Turn a vibe-coded MVP", "into a product real users trust."],
     description:
-      "Vibe-coded MVPs break on real users. We harden the experience so they activate, return, and pay — without you in the room.",
+      "AI builds fast. Products still need structure, edge cases, and an activation path — or your early adopters churn before you scale.",
     ...SHARED_CTAS,
   },
   valueProp: {
     id: "value",
     taglineBefore:
-      "Your demo impresses in a pitch. Then real users try it — and stall, get confused, or don't come back. We close the gap between demo-ready and",
+      "Your Lovable, Cursor, or Bolt build impressed in the demo. Real users try it — stall, get confused, or don't return. We close the gap between demo-ready and",
     taglineLinkLabel: "product-ready",
     taglineLinkHref: "#outcomes",
     taglineAfter: " — before you scale acquisition into a leaky funnel.",
-    title: "From impressive to trustworthy.",
+    title: "From vibe-coded idea to product-ready build.",
     paragraphs: [
-      "Vibe-coded and AI-scaffolded builds optimize for the demo moment. They look great when you're narrating. Under real use — without you in the room — they break on clarity, edge cases, and retention. That gap is costing you your early adopters.",
-      "You get a path from prototype to a product people can navigate independently: clear IA, reliable flows, UI systems that handle edge cases, and a growth loop that gives users a reason to return.",
+      "AI tools ship fast. They optimize for the happy path — the one you narrate. Real users arrive without context, hit edge cases, stall on unclear IA, and churn before they've seen the core value. That gap between demo and product is where early adoption dies.",
+      "We close it: clear activation flows, coherent UI patterns, error states that maintain trust, and a backend logic review that keeps the product stable under real load.",
     ],
   },
   outcomes: {
     id: "outcomes",
     leadBefore:
-      "What you leave with is a product people navigate, trust, and come back to — not just a demo that wows in a pitch. See",
+      "What you leave with is a product people navigate, trust, and return to — not just a demo that wows in a pitch. See",
     leadLinkLabel: "our process",
     leadLinkHref: "#process",
     leadAfter: ".",
     items: [
       {
-        title: "A product people use without you.",
-        body: "Core jobs-to-be-done mapped into flows users can navigate without narration — so your early adopters succeed on their own and you can start scaling acquisition.",
+        title: "UX gaps found and fixed.",
+        body: "Users stall on your demo flow, not the one you scripted. We map where real users actually get confused and redesign the paths that matter.",
       },
       {
-        title: "A product that doesn't break trust.",
-        body: "Loading, errors, empty states, permissions, and AI edge cases designed so users feel in control even when things don't go perfectly.",
+        title: "Activation path designed.",
+        body: "No happy path without onboarding. We define the first-value moment and build the flow that reliably gets users there — without you in the room.",
       },
       {
-        title: "An activation path and roadmap to revenue.",
-        body: "The first-value moment defined, the return habit designed, and a prioritized backlog toward retention and monetization — so the product grows beyond the MVP.",
+        title: "UI coherence and design system.",
+        body: "Tokens, components, and consistent patterns so the product feels intentional — not stitched together from five different AI sessions.",
+      },
+      {
+        title: "Edge cases and error states.",
+        body: "Empty states, loading, error handling, and permission failures designed so users feel in control even when things don't go perfectly.",
+      },
+      {
+        title: "Backend logic review.",
+        body: "If the AI scaffold has gaps in data handling, state management, or security, we surface them before you scale traffic to a fragile build.",
+      },
+      {
+        title: "Handoff and documentation.",
+        body: "Production-ready specs and clear documentation so your engineering team can maintain, extend, and own the product after the sprint.",
       },
     ],
   },
@@ -713,11 +744,11 @@ export const AI_MVP: ServicePageContent = {
     items: [
       {
         title: "Diagnose",
-        body: "You get an honest read: what's demo magic vs. product debt, where real users stall, and what the minimum trust bar is before you scale acquisition.",
+        body: "You get an honest read: what's demo magic versus product debt, where real users stall, and what the minimum trust bar is before you scale acquisition.",
       },
       {
         title: "Prototype",
-        body: "You see restructured flows and UI that keep the insight of the vibe build — while removing the confusion and dead ends that kill retention.",
+        body: "You see restructured flows and UI that keep what makes the vibe build impressive — while removing the confusion and dead ends that kill retention.",
       },
       {
         title: "Validate",
@@ -725,7 +756,7 @@ export const AI_MVP: ServicePageContent = {
       },
       {
         title: "Ship",
-        body: "Your engineering team gets production-ready specs and a build partner — so the MVP becomes a maintainable product your team can extend without explanations.",
+        body: "Your engineering team gets production-ready specs and a build partner — so the MVP becomes a maintainable product your team can extend without heroic explanations.",
       },
       {
         title: "Compound",
@@ -740,9 +771,9 @@ export const AI_MVP: ServicePageContent = {
         "Demos optimize for the pitch moment. Products optimize for repeated, independent success. Real users don't have you narrating. We close that gap: clarity, trust, edge cases, and activation so users return without you in the room.",
     },
     {
-      question: "Won't this slow us down?",
+      question: "Do you work with Lovable, Cursor, Bolt, and v0 builds?",
       answer:
-        "It protects your acquisition spend. Sending traffic to a product that breaks on real users is what slows you down — churn before retention and angry early adopters who tell others. We get you production-ready fast.",
+        "Yes — this service is built specifically for AI-scaffolded products. We know how these tools generate code and where the gaps appear under real use: missing states, fragile data handling, and UX that only works when someone is guiding the session.",
     },
     {
       question: "Will you rewrite everything?",
@@ -750,19 +781,14 @@ export const AI_MVP: ServicePageContent = {
         "Only what blocks trust or activation. The insight of the vibe build — what makes it impressive — stays. We replace what confuses, crashes, or can't scale.",
     },
     {
-      question: "Can you work with AI-generated code?",
+      question: "Won't this slow us down?",
       answer:
-        "Yes. We partner with your engineering team to productize the UX layer on top of AI scaffolds — focusing on experience quality, trust, and the growth loops that turn curiosity into retention.",
+        "It protects your acquisition spend. Sending traffic to a product that breaks on real users is what slows you down — churn before retention and early adopters who tell others. We get you production-ready fast.",
     },
     {
       question: "What does done look like?",
       answer:
-        "Users complete the core job without hand-holding, return for a second session, and you have a clear roadmap toward the revenue milestones that matter.",
-    },
-    {
-      question: "Who is this for?",
-      answer:
-        "Founders with a promising AI prototype who are about to scale acquisition — and need to be honest about whether the product is actually ready for the users they're paying to acquire.",
+        "Users complete the core job without hand-holding, return for a second session, and you have a clear roadmap toward the retention and revenue milestones that matter.",
     },
   ],
 };

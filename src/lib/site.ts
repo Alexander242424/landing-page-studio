@@ -321,7 +321,7 @@ export function professionalServiceJsonLd() {
             "@type": "Service",
             name: "Product Design",
             description:
-              "End-to-end product design — structure, flows, and UI aimed at activation, conversion, and LTV.",
+              "Activation-first flows and UI for funded AI startups and B2B SaaS — from first onboarding screen to conversion, with a CRO hypothesis backlog and dev-ready handoff.",
             url: `${SITE.origin}/solutions/product-design`,
           },
         },
@@ -331,7 +331,7 @@ export function professionalServiceJsonLd() {
             "@type": "Service",
             name: "Websites + Funnels",
             description:
-              "Marketing and product sites that clarify the offer and turn visits into qualified demand.",
+              "Conversion-first sites and funnels for B2B and AI startups — clear offer, buyer path, and CRO instrumentation that turn visits into qualified demos and pipeline.",
             url: `${SITE.origin}/solutions/websites`,
           },
         },
@@ -361,7 +361,7 @@ export function professionalServiceJsonLd() {
             "@type": "Service",
             name: "AI MVP to Product",
             description:
-              "Turning vibe-coded prototypes and AI-generated builds into products users can trust and use.",
+              "Closing the gap between demo-ready and product-ready — activation flows, UI coherence, edge cases, and backend logic review for Lovable, Cursor, Bolt, and v0 builds.",
             url: `${SITE.origin}/solutions/ai-mvp-to-product`,
           },
         },

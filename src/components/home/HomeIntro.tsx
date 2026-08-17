@@ -21,14 +21,15 @@ const DEFAULT_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Introduction",
   taglineBefore:
-    "We help teams drive growth through product performance, UX, conversion, activations, and LTV lifts that compound. Explore",
+    "We fix the moments that kill revenue — UX, CRO, conversion, activation, retention, and LTV. Explore",
   taglineLinkLabel: "our services",
   taglineLinkHref: "#solutions",
   taglineAfter: ".",
-  title: "Results speak for themselves.",
+  title: "Most products lose users before they pay.",
   paragraphs: [
-    "Since 2013, we have been recognized globally for helping founders build market-defining brands.",
-    "We partner with five clients a year to give each one the focus and care they deserve.",
+    "Users stall. Not because your product is broken — because the first moments don't deliver value fast enough.",
+    "Teams ship features, run ads, and optimize copy. The drop-off stays. The numbers don't move.",
+    "We find the friction that kills revenue and fix it — across UX, conversion, onboarding, and growth loops.",
   ],
 };
 
