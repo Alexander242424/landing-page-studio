@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
@@ -14,22 +14,50 @@ export type HomeIntroContent = {
   taglineLinkHref: string;
   taglineAfter?: string;
   title: string;
-  paragraphs: string[];
+  paragraphs: (string | ReactNode)[];
 };
 
 const DEFAULT_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Introduction",
   taglineBefore:
-    "We fix the moments that kill revenue — UX, CRO, conversion, activation, retention, and LTV. Explore",
+    "We grow products through strategy, UX, and conversion — built to compound. Explore",
   taglineLinkLabel: "our services",
   taglineLinkHref: "#solutions",
   taglineAfter: ".",
-  title: "Most products lose users before they pay.",
+  title: "Your growth starts here.",
   paragraphs: [
-    "Users stall. Not because your product is broken — because the first moments don't deliver value fast enough.",
-    "Teams ship features, run ads, and optimize copy. The drop-off stays. The numbers don't move.",
-    "We find the friction that kills revenue and fix it — across UX, conversion, onboarding, and growth loops.",
+    "Since 2014 we have worked with product teams at every stage — from funded startups finding their activation loop to established brands compounding growth at scale.",
+    <>
+      We also build products of our own.{" "}
+      <a
+        href="https://getboostra.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rj-link-active-full"
+      >
+        Boostra
+      </a>
+      ,{" "}
+      <a
+        href="https://grono.ai"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rj-link-active-full"
+      >
+        Grono
+      </a>
+      , and{" "}
+      <a
+        href="https://tapmy.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rj-link-active-full"
+      >
+        Tapmy
+      </a>{" "}
+      — tools shaped by the same product thinking we bring to every engagement.
+    </>,
   ],
 };
 
@@ -151,7 +179,7 @@ export function HomeIntro({
               <div className="rj-intro__body-inner">
                 <div ref={bodyTextRef} className="rj-text-reveal">
                   {intro.paragraphs.map((paragraph, index) => (
-                    <p key={paragraph}>
+                    <p key={index}>
                       {index > 0 ? <br /> : null}
                       {paragraph}
                     </p>
