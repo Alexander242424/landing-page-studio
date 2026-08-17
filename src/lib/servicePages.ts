@@ -191,7 +191,7 @@ export const PRODUCT_DESIGN: ServicePageContent = {
   path: pathFor("product-design"),
   title: "Product Design",
   description:
-    "Your product has the right idea but users stall — at signup, the core feature, the paywall. UXLAB designs activation flows and UI so users reach first value, build habit, and convert — with CRO instrumentation built in.",
+    "Product design for SaaS, AI, and digital products. We make complex workflows clearer, easier to use, and ready for your team to build.",
   keywords: [
     "product design",
     "UX design",
@@ -203,108 +203,108 @@ export const PRODUCT_DESIGN: ServicePageContent = {
   ],
   serviceType: "Product design",
   hero: {
-    ariaLabel: "Design flows and UI that move users to value, not confusion.",
-    lines: ["Design flows and UI that", "move users to value."],
+    ariaLabel: "Product design for fast-moving product teams.",
+    lines: ["Product design for", "fast-moving product teams."],
     description:
-      "Activation-first product design for funded AI startups and B2B SaaS — from the first onboarding screen to the moment they pay.",
+      "We design product experiences that make complex workflows clear, easy to use, and ready to build.",
     ...SHARED_CTAS,
   },
   valueProp: {
     id: "value",
     taglineBefore:
-      "Your product has the right idea but users stall — at signup, at the core feature, at the paywall. We design the flows and UI that move them to",
-    taglineLinkLabel: "first value, habit, and revenue",
+      "From an early MVP to a live platform, we design the flows, screens, and systems that help users understand",
+    taglineLinkLabel: "what to do next",
     taglineLinkHref: "#outcomes",
-    taglineAfter: " — with CRO instrumentation built in from the start.",
-    title: "Activation-first design that earns its place in the funnel.",
+    taglineAfter: ".",
+    title: "A product system your team can build on.",
     paragraphs: [
-      "Every screen is either moving someone forward or losing them. Most products have screens that do neither — built because someone had a sprint cycle, not because they convert. We audit the friction, redesign the highest-leverage flows, and instrument what we ship.",
-      "You get coherent systems your engineering team can build and maintain: activation flows, interaction patterns, and UI components with every state — empty, loading, error, edge cases — built in from the start, not filed as follow-up tickets.",
+      "We design the journeys, screens, states, and components that make your product feel clear and consistent.",
+      "The work is shaped with your product and engineering teams, so every decision can move from Figma into the real product.",
     ],
   },
   outcomes: {
     id: "outcomes",
     leadBefore:
-      "What you leave with is a product users navigate to value without hand-holding — activation mapped, UI shippable, and a CRO backlog your team can run. See",
+      "Product design can start with one difficult flow or cover the whole product. We focus on what your users and team need now. See",
     leadLinkLabel: "our process",
     leadLinkHref: "#process",
     leadAfter: ".",
     items: [
       {
-        title: "Activation flow design.",
-        body: "User journeys from signup to first value to paid habit — structured so the next step is obvious at every moment, even without narration or a sales rep in the room.",
+        title: "UX audit.",
+        body: "We review the current product, find where people get stuck, and show what should be improved first.",
       },
       {
-        title: "UX audit and friction mapping.",
-        body: "A ranked list of the screens and moments costing you activation and retention — evidence-based, so you know what to fix first and why.",
+        title: "User flows and information architecture.",
+        body: "We map journeys, navigation, decisions, and onboarding so every next step makes sense.",
       },
       {
-        title: "Product UI for the moments that matter.",
-        body: "Dashboards, onboarding sequences, and key workflows designed for clarity and confidence — not for a design portfolio.",
+        title: "Wireframes and UX.",
+        body: "We solve the structure and logic of key screens before moving into the final visual design.",
       },
       {
-        title: "Component and design system foundations.",
-        body: "Living patterns so new features inherit what already converts — and your team stops re-debating the same design decisions every sprint.",
+        title: "Product UI.",
+        body: "We design dashboards, onboarding, forms, tables, mobile screens, and the workflows your users rely on.",
       },
       {
-        title: "CRO hypothesis backlog.",
-        body: "An instrumentation plan and sequenced test backlog tied to your primary metrics — so design improvements keep compounding after the engagement ends.",
+        title: "Design system foundations.",
+        body: "We create reusable components, patterns, and states that keep the product consistent as it grows.",
       },
       {
-        title: "Dev-ready handoff.",
-        body: "Production-ready specs, every state, every edge case. Not a Figma dump — we pair through ship until the code matches the intent.",
+        title: "Developer-ready handoff.",
+        body: "Your team gets organized files, responsive notes, component logic, and support while the product is being built.",
       },
     ],
   },
   process: {
     items: [
       {
-        title: "Diagnose",
-        body: "You get a clear read on where design is costing you activation — which screens cause drop-off, where the IA buries value, and what the friction map reveals about your users' real path.",
+        title: "Product audit",
+        body: "We review the product, users, goals, current flows, feedback, and data to understand what needs to change.",
       },
       {
-        title: "Prototype",
-        body: "You see high-fidelity solutions for the highest-leverage screens — activation flows, key workflows, and paywall moments — built to pressure-test with real users, not for stakeholder reviews.",
+        title: "User flows",
+        body: "We map the main journeys and agree on the structure before designing individual screens.",
       },
       {
-        title: "Validate",
-        body: "You know which designs move task success and time-to-value before build. We cut what decorates without lifting the metric and keep what moves the number.",
+        title: "Wireframes",
+        body: "We work through screen structure, content, states, and edge cases in a simple form that is easy to review.",
       },
       {
-        title: "Ship",
-        body: "Your engineering team gets production-ready specs, every state, and a pairing partner — so what ships matches what was designed, edge cases included.",
+        title: "Product UI",
+        body: "We apply the visual direction and build a clear, reusable interface across the key product flows.",
       },
       {
-        title: "Compound",
-        body: "You get a pattern library and CRO backlog that keeps new features consistent with what converts — so design debt doesn't quietly undo the growth you built.",
+        title: "Handoff and QA",
+        body: "We prepare the files, explain the logic, review implementation, and help your team ship the intended experience.",
       },
     ],
   },
   faqs: [
     {
-      question: "My product already looks decent — why do I need this?",
+      question: "How do you get up to speed with our product?",
       answer:
-        "Visual polish is rarely the problem. The problem is flows that stall at activation, IA that buries the core feature, or missing states that break trust at the wrong moment. We fix what's losing you revenue, not what's aesthetically weak.",
+        "We review the product, user flows, business goals, team feedback, analytics, competitors, and existing research. This gives us enough context to improve the experience without starting from assumptions.",
     },
     {
-      question: "What's the difference between product design and CRO?",
+      question: "Can you work with our product manager and engineers?",
       answer:
-        "With us, not much. Classic product design ignores what moves metrics. Classic CRO ignores how design shapes behavior. We combine both — every flow we design has a hypothesis, an instrumentation plan, and a measurable outcome.",
+        "Yes. We work directly with founders, product managers, engineers, and internal designers. We can join your existing tools and keep feedback and handoff close to the work.",
     },
     {
-      question: "Will you redesign everything, or focus on what matters?",
+      question: "Do you improve the UX or only redesign the screens?",
       answer:
-        "We start with the highest-leverage screens. A full redesign is only justified when the architecture genuinely blocks growth — most teams need sharp, focused interventions on the 3–5 surfaces that matter most.",
+        "Both. Sometimes the interface needs polish. Sometimes the flow, hierarchy, copy, or product logic is the real problem. We solve the experience before decorating it.",
     },
     {
-      question: "How do you hand off to our engineering team?",
+      question: "Can you work with our existing design system?",
       answer:
-        "Production-ready specs, every state, and pairing through ship. Not a Figma dump. We stay in the loop until the code matches the intent — edge cases included.",
+        "Yes. We can use it, clean it up, extend it, or create the missing components and states. We only rebuild what is getting in the team's way.",
     },
     {
-      question: "How do I measure whether the design worked?",
+      question: "Can you help after the designs are handed off?",
       answer:
-        "By the metrics that matter: task success, time-to-value, activation, conversion, retention. Aesthetic preference in a review session is not a success metric.",
+        "Yes. We answer developer questions, review implementation, resolve edge cases, and help keep the shipped product close to the approved design.",
     },
   ],
 };

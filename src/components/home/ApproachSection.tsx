@@ -15,17 +15,17 @@ const ITEMS = [
         Small roster, full focus.
       </>
     ),
-    body: "We take a small number of clients because shallow engagements don't compound. You get the team's full attention — not account management and handoffs.",
+    body: "We take a small number of clients so the same people stay on the work. You get the team, not an account manager and a handoff.",
   },
   {
     title: (
       <>
-        Beautiful doesn’t
+        Pretty is not
         <br />
-        convert by itself.
+        the job.
       </>
     ),
-    body: "We connect UX to the metrics that matter. Every design decision is tied to a growth lever — conversion, activation, retention, or LTV — not just a cleaner interface.",
+    body: "A cleaner screen that nobody finishes is still a miss. We judge the work by whether people get through, come back, and pay.",
   },
 ] as const;
 
@@ -112,14 +112,14 @@ export function ApproachSection() {
           <div className="rj-approach__lead-space" aria-hidden="true" />
           <div className="rj-approach__lead-content">
             <p ref={leadRef}>
-              We work on the moments where growth stalls — UX, conversion,
-              onboarding, retention — and leave a system that compounds. See{" "}
+              We do not hand over a deck and leave. We work inside the product
+              with your team, from the first look to the live change.{" "}
               <a
                 href="#process"
                 className="rj-link-active-full"
                 onClick={onProcessClick}
               >
-                our process
+                See our process
               </a>
               .
             </p>

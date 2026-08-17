@@ -321,7 +321,7 @@ export function professionalServiceJsonLd() {
             "@type": "Service",
             name: "Product Design",
             description:
-              "Activation-first flows and UI for funded AI startups and B2B SaaS — from first onboarding screen to conversion, with a CRO hypothesis backlog and dev-ready handoff.",
+              "Product design for SaaS, AI, and digital products, covering UX audits, user flows, product UI, design systems, and developer-ready handoff.",
             url: `${SITE.origin}/solutions/product-design`,
           },
         },

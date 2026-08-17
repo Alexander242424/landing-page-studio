@@ -8,24 +8,24 @@ gsap.registerPlugin(ScrollTrigger);
 
 const DEFAULT_ITEMS = [
   {
-    title: "Diagnose",
-    body: "Behavior data, session review, and competitive context surface the highest-friction moments. We prioritize what moves conversion, retention, or monetization first.",
+    title: "Look",
+    body: "We watch how people use the product and find where they drop off. Then we pick the one or two moments that matter most.",
   },
   {
-    title: "Prototype",
-    body: "We design focused interventions—flows, paywalls, and system patterns—built to be tested, not presented as theater.",
+    title: "Design",
+    body: "We sketch the smallest change that could fix that moment. A new flow, screen, or step, ready to try, not a big presentation.",
   },
   {
-    title: "Validate",
-    body: "Hypotheses get pressure-tested with experiments and qualitative signal. We keep what compounds and cut what doesn’t.",
+    title: "Test",
+    body: "We try it with real users. If it works, we keep it. If it doesn’t, we drop it and try the next idea.",
   },
   {
     title: "Ship",
-    body: "We partner with your team like co-founders in the work: tight loops, clear ownership, and production-ready craft without agency overhead.",
+    body: "We put the change live with your team. Clear owners, short loops, no leftover deck that never gets built.",
   },
   {
-    title: "Compound",
-    body: "Wins become a system—patterns, principles, and a backlog that keeps growth compounding after the engagement ends.",
+    title: "Grow",
+    body: "What works becomes the new default. The next round starts from a better product, so results keep adding up.",
   },
 ] as const;
 

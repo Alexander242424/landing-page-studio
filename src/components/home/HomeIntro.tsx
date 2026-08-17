@@ -21,13 +21,13 @@ const DEFAULT_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Introduction",
   taglineBefore:
-    "We grow products through strategy, UX, and conversion — built to compound. Explore",
-  taglineLinkLabel: "our services",
+    "A senior product studio for teams that need a partner in the work, not another agency deck.",
+  taglineLinkLabel: "Explore our solutions",
   taglineLinkHref: "#solutions",
   taglineAfter: ".",
   title: "Your growth starts here.",
   paragraphs: [
-    "Since 2014 we have worked with product teams at every stage — from funded startups finding their activation loop to established brands compounding growth at scale.",
+    "Since 2014 we have worked with product teams at every stage, from early funded startups to brands already in market.",
     <>
       We also build products of our own.{" "}
       <a
@@ -55,8 +55,8 @@ const DEFAULT_INTRO: HomeIntroContent = {
         className="rj-link-active-full"
       >
         Tapmy
-      </a>{" "}
-      — tools shaped by the same product thinking we bring to every engagement.
+      </a>
+      , tools shaped by the same product thinking we bring to every engagement.
     </>,
   ],
 };

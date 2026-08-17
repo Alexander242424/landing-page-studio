@@ -1093,8 +1093,8 @@ ul {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 18rem;
-  aspect-ratio: 4 / 3;
+  min-height: 22.5rem;
+  aspect-ratio: 16 / 15;
   overflow: hidden;
   border-radius: 4px;
   background: var(--rj-black);
@@ -2936,7 +2936,7 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-intro__content a {
-  display: inline;
+  display: inline-block;
   overflow: hidden;
   position: relative;
   text-decoration: none;
@@ -2945,7 +2945,26 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-intro__content a::before,
 .rj-intro__content a::after {
-  content: none;
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.08em;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transition: 0.6s var(--rj-ease-link-full);
+}
+
+.rj-intro__content a::before {
+  transform: scaleX(var(--scale));
+  transform-origin: var(--transformOrigin);
+  transition-delay: 0.15s;
+  will-change: transform;
+}
+
+.rj-intro__content a::after {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
 }
 
 @media (min-width: 768px) {
@@ -3023,6 +3042,12 @@ body.rj-scroll-dark .rj-page__main {
   align-items: flex-start;
   row-gap: 2rem;
   max-width: 36rem;
+}
+
+.rj-intro__body a::before,
+.rj-intro__body a::after {
+  height: 1px;
+  bottom: 0.06em;
 }
 
 @media (min-width: 1024px) {
@@ -5780,7 +5805,7 @@ body.rj-scroll-dark .rj-page__main {
   display: grid;
   grid-template-columns: 1fr;
   align-items: stretch;
-  gap: 3.2rem 2rem;
+  gap: 1.2rem;
   perspective: 800px;
 }
 
@@ -5901,7 +5926,7 @@ body.rj-scroll-dark .rj-page__main {
 
   .rj-blog__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2.4rem;
+    gap: 1.2rem;
   }
 
   .rj-blog__title {
