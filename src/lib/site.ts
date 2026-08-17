@@ -107,7 +107,14 @@ export function defaultMeta(options: DefaultMetaOptions = {}): SiteMetaTag[] {
     { name: "author", content: SITE.author },
     { name: "keywords", content: keywords },
     { name: "robots", content: robots },
+    { name: "googlebot", content: robots },
+    { name: "bingbot", content: robots },
     { name: "theme-color", content: SITE.themeColor },
+    { name: "geo.region", content: SITE.location.countryCode },
+    { name: "geo.placename", content: SITE.location.city },
+    { name: "language", content: SITE.language },
+    { name: "rating", content: "general" },
+    { name: "format-detection", content: "telephone=no" },
     { property: "og:type", content: type },
     { property: "og:site_name", content: SITE.name },
     { property: "og:locale", content: SITE.locale },
@@ -164,7 +171,26 @@ export function defaultLinks(path = "/"): SiteMetaLink[] {
       type: "text/plain",
       href: absoluteUrl("/llms-full.txt"),
     },
+    {
+      rel: "alternate",
+      type: "application/rss+xml",
+      href: absoluteUrl("/feed.xml"),
+    },
+    { rel: "author", href: absoluteUrl("/humans.txt") },
+    { rel: "describedby", href: absoluteUrl("/llms.txt") },
   ];
+}
+
+export function personJsonLd() {
+  return {
+    "@type": "Person",
+    "@id": `${SITE.origin}/#founder`,
+    name: SITE.author,
+    jobTitle: "Founder",
+    email: SITE.email,
+    url: SITE.origin,
+    worksFor: { "@id": `${SITE.origin}/#organization` },
+  };
 }
 
 export function organizationJsonLd() {
@@ -176,6 +202,9 @@ export function organizationJsonLd() {
     url: SITE.origin,
     email: SITE.email,
     description: SITE.description,
+    founder: { "@id": `${SITE.origin}/#founder` },
+    brand: { "@type": "Brand", name: SITE.name },
+    slogan: SITE.tagline,
     logo: {
       "@type": "ImageObject",
       "@id": `${SITE.origin}/#logo`,
@@ -227,9 +256,32 @@ export function webSiteJsonLd() {
     "@id": `${SITE.origin}/#website`,
     url: SITE.origin,
     name: SITE.name,
+    alternateName: ["UX LAB", "UXLAB Digital"],
     description: SITE.description,
     inLanguage: SITE.language,
     publisher: { "@id": `${SITE.origin}/#organization` },
+    about: { "@id": `${SITE.origin}/#professional-service` },
+  };
+}
+
+export function homeWebPageJsonLd() {
+  return {
+    "@type": "WebPage",
+    "@id": `${SITE.origin}/#webpage`,
+    url: SITE.origin,
+    name: SITE.title,
+    description: SITE.description,
+    inLanguage: SITE.language,
+    isPartOf: { "@id": `${SITE.origin}/#website` },
+    about: { "@id": `${SITE.origin}/#professional-service` },
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      url: absoluteUrl(SITE.ogImage),
+    },
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: [".rj-intro__title", ".rj-hero__headline", ".rj-faq"],
+    },
   };
 }
 
@@ -341,8 +393,10 @@ export function homeJsonLd() {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      personJsonLd(),
       organizationJsonLd(),
       webSiteJsonLd(),
+      homeWebPageJsonLd(),
       professionalServiceJsonLd(),
       faqPageJsonLd(),
     ],

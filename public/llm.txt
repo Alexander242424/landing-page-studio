@@ -1,0 +1,8 @@
+# Alias for crawlers that look for /llm.txt instead of /llms.txt
+# Canonical: https://uxlab.digital/llms.txt
+
+See: https://uxlab.digital/llms.txt
+Full: https://uxlab.digital/llms-full.txt
+Policy: https://uxlab.digital/ai.txt
+Sitemap: https://uxlab.digital/sitemap.xml
+RSS: https://uxlab.digital/feed.xml

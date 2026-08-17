@@ -1,0 +1,14 @@
+/* TEAM */
+Founder: Alex Tyshchenko
+Contact: alex@uxlab.digital
+From: Warsaw, Poland
+Site: https://uxlab.digital
+
+/* SITE */
+Standards: HTML5, Schema.org, Open Graph
+Components: TanStack Start, React
+Language: English
+Doctype: HTML5
+LLM index: https://uxlab.digital/llms.txt
+Sitemap: https://uxlab.digital/sitemap.xml
+RSS: https://uxlab.digital/feed.xml

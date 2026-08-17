@@ -2,13 +2,19 @@ import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { WorkListItem } from "@/components/work/WorkListItem";
-import { getListedCases } from "@/lib/cases";
+import { useWorkCatalog, workCatalogItems } from "@/hooks/useWorkCatalog";
+import type { WorkCatalogItem } from "@/lib/workCatalog";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function WorkList() {
+type WorkListProps = {
+  items?: WorkCatalogItem[];
+};
+
+export function WorkList({ items }: WorkListProps) {
   const rootRef = useRef<HTMLElement>(null);
-  const cases = getListedCases();
+  const catalog = useWorkCatalog();
+  const cases = items ?? workCatalogItems(catalog.data);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -43,7 +49,7 @@ export function WorkList() {
     requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => ctx.revert();
-  }, []);
+  }, [cases]);
 
   return (
     <section
@@ -52,8 +58,8 @@ export function WorkList() {
       aria-label="Case studies"
     >
       <ul className="rj-work__rows">
-        {cases.map((caseStudy) => (
-          <WorkListItem key={caseStudy.slug} caseStudy={caseStudy} />
+        {cases.map((item) => (
+          <WorkListItem key={item.slug} item={item} />
         ))}
       </ul>
     </section>

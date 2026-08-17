@@ -2,6 +2,10 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BlogGrid } from "@/components/blog/BlogGrid";
+import {
+  articleCatalogItems,
+  useArticleCatalog,
+} from "@/hooks/useArticleCatalog";
 import { ARTICLES, type Article } from "@/lib/articles";
 import { createTextReveal } from "@/lib/textReveal";
 import { cn } from "@/lib/utils";
@@ -20,10 +24,14 @@ type BlogSectionProps = {
  * Latest articles — light band after FAQ.
  */
 export function BlogSection({
-  articles = ARTICLES,
+  articles,
   skipAnimation = false,
   spaciousTop = false,
 }: BlogSectionProps = {}) {
+  const catalog = useArticleCatalog();
+  const fromCatalog = articleCatalogItems(catalog.data);
+  const resolvedArticles =
+    articles ?? (fromCatalog.length ? fromCatalog : ARTICLES);
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const gridRef = useRef<HTMLUListElement>(null);
@@ -87,7 +95,7 @@ export function BlogSection({
           Latest articles
         </h2>
 
-        <BlogGrid ref={gridRef} articles={articles} />
+        <BlogGrid ref={gridRef} articles={resolvedArticles} />
       </div>
     </section>
   );

@@ -1,0 +1,5 @@
+Contact: mailto:alex@uxlab.digital
+Preferred-Languages: en
+Canonical: https://uxlab.digital
+Policy: https://uxlab.digital/ai.txt
+Expires: 2027-08-17T00:00:00.000Z

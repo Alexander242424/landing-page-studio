@@ -381,20 +381,30 @@ export function buildCaseJsonLd(caseStudy: CaseStudy, canonicalUrl: string) {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "CreativeWork",
+        "@type": ["CreativeWork", "Article"],
         "@id": `${canonicalUrl}#case`,
         name: `${caseStudy.client} case study`,
         headline,
         description: caseStudy.description,
-        image: [imageUrl],
+        inLanguage: SITE.language,
+        isAccessibleForFree: true,
+        image: {
+          "@type": "ImageObject",
+          url: imageUrl,
+        },
         datePublished: caseStudy.datePublished,
         dateModified: caseStudy.dateModified,
         creator: {
           "@type": "Organization",
+          "@id": `${SITE.origin}/#organization`,
           name: SITE.name,
           url: SITE.origin,
         },
-        about: caseStudy.client,
+        publisher: { "@id": `${SITE.origin}/#organization` },
+        about: {
+          "@type": "Organization",
+          name: caseStudy.client,
+        },
         keywords: caseStudy.keywords.join(", "),
         mainEntityOfPage: {
           "@type": "WebPage",

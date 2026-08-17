@@ -2,12 +2,15 @@ import {
   FormEvent,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
 } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Logo } from "@/components/brand/Logo";
+import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import {
   OPEN_LEAD_CHAT_EVENT,
   OPEN_NEWSLETTER_CHAT_EVENT,
@@ -41,11 +44,41 @@ import {
 } from "@/lib/chatActions";
 import { UXLAB_SYSTEM_PROMPT } from "@/lib/uxlabKnowledge";
 import { ChatMarkdown } from "@/lib/chatMarkdown";
+import {
+  articlePath,
+  articleSummarizePrompt,
+  getArticle,
+  resolveCanonicalArticleSlug,
+  type Article,
+} from "@/lib/articles";
+import {
+  articleCatalogItems,
+  useArticleCatalog,
+} from "@/hooks/useArticleCatalog";
+import { absoluteUrl } from "@/lib/site";
 
 gsap.registerPlugin(ScrollTrigger);
 
 /** Show dock around the middle of the showreel (#home-reel). */
 const DOCK_REEL_PROGRESS = 0.45;
+
+/** Home + solution heroes keep the mid-showreel gate. Other pages show the dock immediately. */
+function isReelGatedAskPath(pathname: string) {
+  return pathname === "/" || pathname.startsWith("/solutions/");
+}
+
+function articleFromAskPath(
+  pathname: string,
+  catalogArticles: Article[] = [],
+): Article | undefined {
+  const match = pathname.match(/^\/resources\/([^/]+)\/?$/);
+  const slug = match?.[1];
+  if (!slug) return undefined;
+  const fromCatalog = catalogArticles.find((item) => item.slug === slug);
+  if (fromCatalog) return fromCatalog;
+  const canonical = resolveCanonicalArticleSlug(slug);
+  return canonical ? getArticle(canonical) : undefined;
+}
 
 const TIPS = [
   "Book a call",
@@ -53,6 +86,16 @@ const TIPS = [
   "Ballpark on pricing",
   "CRO Audit",
 ] as const;
+
+const ARTICLE_TIPS = [
+  "Summarize article",
+  "Let's talk",
+  "Pick a service",
+  "CRO Audit",
+] as const;
+
+const ARTICLE_SUMMARIZE_TIP = "Summarize article";
+const PICK_SERVICE_PROMPT = "Help me pick a service";
 
 const PLACEHOLDER_PROMPTS = [
   "Ask about UXLAB…",
@@ -345,6 +388,18 @@ function useRotatingPlaceholderIndex(paused: boolean) {
  * Call / “Book a call” opens an inline Cal.com calendar in the chat.
  */
 export function AiPromptInput() {
+  const { lenis } = useSmoothScroll();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const articleCatalog = useArticleCatalog();
+  const reelGated = isReelGatedAskPath(pathname);
+  const article = useMemo(
+    () => articleFromAskPath(pathname, articleCatalogItems(articleCatalog.data)),
+    [pathname, articleCatalog.data],
+  );
+  const tips = useMemo(
+    () => (article ? [...ARTICLE_TIPS] : [...TIPS]),
+    [article],
+  );
   const inputId = useId();
   const calContainerId = `my-cal-inline-30min-${useId().replace(/:/g, "")}`;
   const rootRef = useRef<HTMLDivElement>(null);
@@ -369,7 +424,7 @@ export function AiPromptInput() {
   const scanRafRef = useRef<number | null>(null);
   const dockShownPrevRef = useRef(false);
   const dockTlRef = useRef<gsap.core.Timeline | null>(null);
-  const inFirstSectionRef = useRef(true);
+  const inFirstSectionRef = useRef(reelGated);
   const openRef = useRef(false);
   /** CTA strip already shown once in this general thread. */
   const actionsShownRef = useRef(false);
@@ -381,10 +436,10 @@ export function AiPromptInput() {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [open, setOpen] = useState(false);
-  /** Past ~mid showreel — toggles dock visibility. */
-  const [pastDockGate, setPastDockGate] = useState(false);
+  /** Past ~mid showreel — toggles dock visibility. Inner pages start shown. */
+  const [pastDockGate, setPastDockGate] = useState(!reelGated);
   /** First-section (hero copy) is in view — hide tip chips, keep the input. */
-  const [inFirstSection, setInFirstSection] = useState(true);
+  const [inFirstSection, setInFirstSection] = useState(reelGated);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
@@ -454,7 +509,13 @@ export function AiPromptInput() {
 
   // Dock: appear once around mid-showreel, then stay (no hide on scroll back).
   // Also visible while chat is open (e.g. Let's talk from the hero).
+  // Article / work / resources have no #home-reel — show immediately (do not rAF-wait).
   useEffect(() => {
+    if (!reelGated) {
+      setPastDockGate(true);
+      return;
+    }
+
     let cancelled = false;
     let raf = 0;
     let trigger: ScrollTrigger | null = null;
@@ -494,16 +555,22 @@ export function AiPromptInput() {
       cancelAnimationFrame(raf);
       trigger?.kill();
     };
-  }, []);
+  }, [reelGated]);
 
   // Tip chips collapse while the hero copy band is on screen; input stays.
   // start must be "top bottom" — "top top" goes inactive via onLeaveBack when
   // the user scrolls back to the hero (hero top == viewport top), which is
   // exactly when chips should stay hidden over the logos bar.
   useEffect(() => {
+    if (!reelGated) {
+      setInFirstSection(false);
+      return;
+    }
+
     let cancelled = false;
     let raf = 0;
     let trigger: ScrollTrigger | null = null;
+    let io: IntersectionObserver | null = null;
     let sync: (() => void) | null = null;
 
     const attach = () => {
@@ -517,8 +584,19 @@ export function AiPromptInput() {
       sync = () => {
         if (cancelled) return;
         const rect = hero.getBoundingClientRect();
-        setInFirstSection(rect.bottom > 0 && rect.top < window.innerHeight);
+        const inView = rect.bottom > 0 && rect.top < window.innerHeight;
+        setInFirstSection((prev) => (prev === inView ? prev : inView));
       };
+
+      io = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry || cancelled) return;
+          setInFirstSection(entry.isIntersecting);
+        },
+        { threshold: 0 },
+      );
+      io.observe(hero);
 
       trigger = ScrollTrigger.create({
         trigger: hero,
@@ -529,6 +607,7 @@ export function AiPromptInput() {
       });
       sync();
       window.addEventListener("scroll", sync, { passive: true });
+      lenis?.on("scroll", sync);
     };
 
     attach();
@@ -537,14 +616,79 @@ export function AiPromptInput() {
       cancelled = true;
       cancelAnimationFrame(raf);
       trigger?.kill();
-      if (sync) window.removeEventListener("scroll", sync);
+      io?.disconnect();
+      if (sync) {
+        window.removeEventListener("scroll", sync);
+        lenis?.off("scroll", sync);
+      }
     };
-  }, []);
+  }, [lenis, reelGated]);
 
   const dockShown = pastDockGate || open;
   const tipsCollapsed = inFirstSection && !open;
 
+  function hideTipsNow() {
+    return inFirstSectionRef.current || openRef.current;
+  }
+
+  function applyTipsHidden(hidden: boolean, animate: boolean) {
+    const tips = tipsRef.current;
+    const chips = chipRefs.current.filter(Boolean) as HTMLButtonElement[];
+    if (!tips) return;
+
+    const reduced =
+      !animate ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = reduced ? 0 : 0.32;
+
+    gsap.killTweensOf([tips, ...chips]);
+    if (hidden) {
+      gsap.to(tips, {
+        autoAlpha: 0,
+        gridTemplateRows: "0fr",
+        duration,
+        ease: "expo.out",
+        overwrite: true,
+      });
+      gsap.to(chips, {
+        autoAlpha: 0,
+        duration: reduced ? 0 : 0.2,
+        overwrite: true,
+      });
+      return;
+    }
+
+    gsap.to(tips, {
+      autoAlpha: 1,
+      gridTemplateRows: "1fr",
+      duration,
+      ease: "expo.out",
+      overwrite: true,
+    });
+    gsap.to(chips, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      duration,
+      stagger: reduced ? 0 : 0.06,
+      overwrite: true,
+    });
+  }
+
+  function snapDockToFinalSize() {
+    const root = rootRef.current;
+    const bar = barRef.current;
+    if (!root || !bar) return;
+    dockTlRef.current?.kill();
+    dockTlRef.current = null;
+    gsap.killTweensOf([root, bar]);
+    gsap.set(root, { autoAlpha: 1, clearProps: "width,transform" });
+    gsap.set(bar, { autoAlpha: 1, y: 0, scale: 1, clearProps: "transform" });
+  }
+
   // Entrance: narrow bar rises (opacity + scale) → stretch to full → chips stagger in.
+  // When the hero is on screen, skip the chip stagger — input only.
+  // Let's talk / open chat must NOT play this morph — jump to final dock + panel size.
   useEffect(() => {
     const root = rootRef.current;
     const bar = barRef.current;
@@ -557,6 +701,9 @@ export function AiPromptInput() {
     const tips = tipsRef.current;
     const chips = chipRefs.current.filter(Boolean) as HTMLButtonElement[];
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const skipChips = hideTipsNow();
+    // Chat opening (Let's talk, etc.) while the dock was hidden — no width/scale morph.
+    const skipEntranceMorph = openRef.current;
 
     dockTlRef.current?.kill();
     dockTlRef.current = null;
@@ -606,11 +753,29 @@ export function AiPromptInput() {
       const startWidth = Math.max(fullWidth * 0.7, Math.min(280, fullWidth));
       root.style.setProperty("--rj-ask-dock-width", `${Math.round(fullWidth)}px`);
 
-      if (reduced) {
-        gsap.set(root, { autoAlpha: 1, width: fullWidth, clearProps: "transform" });
-        gsap.set(bar, { autoAlpha: 1, clearProps: "transform" });
-        if (tips) gsap.set(tips, { autoAlpha: 1, clearProps: "transform" });
-        gsap.set(chips, { autoAlpha: 1, clearProps: "transform" });
+      if (reduced || skipEntranceMorph) {
+        gsap.set(root, { width: fullWidth, clearProps: "transform" });
+        gsap.set(bar, { autoAlpha: 1, y: 0, scale: 1, clearProps: "transform" });
+        applyTipsHidden(skipChips, false);
+
+        if (skipEntranceMorph && !reduced) {
+          gsap.fromTo(
+            root,
+            { autoAlpha: 0 },
+            {
+              autoAlpha: 1,
+              duration: 0.2,
+              ease: "power2.out",
+              overwrite: true,
+              onComplete: () => {
+                gsap.set(root, { clearProps: "width" });
+              },
+            },
+          );
+        } else {
+          gsap.set(root, { autoAlpha: 1, clearProps: "width" });
+        }
+
         return () => {
           dockShownPrevRef.current = false;
         };
@@ -637,7 +802,7 @@ export function AiPromptInput() {
         onComplete: () => {
           gsap.set(root, { clearProps: "width" });
           gsap.set(bar, { clearProps: "transform" });
-          if (tips) gsap.set(tips, { clearProps: "gridTemplateRows" });
+          applyTipsHidden(hideTipsNow(), false);
         },
       });
       dockTlRef.current = tl;
@@ -662,25 +827,25 @@ export function AiPromptInput() {
         },
         0.32,
       );
-      // 3) Tip buttons one-by-one
-      if (tips) {
+      // 3) Tip buttons one-by-one — never while the hero band is on screen
+      if (tips && !skipChips) {
         tl.to(
           tips,
           { autoAlpha: 1, gridTemplateRows: "1fr", duration: 0.28 },
           0.68,
         );
+        tl.to(
+          chips,
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.38,
+            stagger: 0.09,
+          },
+          0.72,
+        );
       }
-      tl.to(
-        chips,
-        {
-          autoAlpha: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.38,
-          stagger: 0.09,
-        },
-        0.72,
-      );
 
       return () => {
         tl.kill();
@@ -735,6 +900,19 @@ export function AiPromptInput() {
       dockShownPrevRef.current = true;
     };
   }, [dockShown]);
+
+  // GSAP inline autoAlpha on tips/chips beats CSS — drive collapse here so it wins.
+  // Opening chat while the dock entrance is stretching: kill the morph, snap to size.
+  useEffect(() => {
+    if (!dockShown) return;
+    if (open && dockTlRef.current?.isActive()) {
+      snapDockToFinalSize();
+    }
+    if (dockTlRef.current?.isActive()) return;
+    applyTipsHidden(tipsCollapsed || open, true);
+    // applyTipsHidden / snapDockToFinalSize read latest refs; do not re-run on identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tipsCollapsed, open, dockShown]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -1332,14 +1510,19 @@ export function AiPromptInput() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stable listener; flows close over latest refs
   }, []);
 
-  async function pushExchange(prompt: string) {
+  async function pushExchange(
+    prompt: string,
+    options?: { modelPrompt?: string },
+  ) {
     // Bare domains (grono.ai) count as URLs — show what the user typed,
     // but send a normalized https URL to the model.
-    const asUrl = normalizeAuditUrl(prompt);
+    const asUrl = options?.modelPrompt ? null : normalizeAuditUrl(prompt);
     const displayText = prompt;
-    const modelPrompt = asUrl
-      ? `The user shared this website URL for a quick look: ${asUrl.href}`
-      : prompt;
+    const modelPrompt =
+      options?.modelPrompt ??
+      (asUrl
+        ? `The user shared this website URL for a quick look: ${asUrl.href}`
+        : prompt);
 
     const userMsg: ChatMessage = {
       id: uid(),
@@ -1381,7 +1564,7 @@ export function AiPromptInput() {
       .map((m) => ({
         role: m.role,
         content:
-          m.id === userMsg.id && asUrl
+          m.id === userMsg.id && modelPrompt !== displayText
             ? modelPrompt
             : m.text,
       }));
@@ -1514,6 +1697,20 @@ export function AiPromptInput() {
       return;
     }
 
+    if (
+      article &&
+      /^(summarize( (this )?article)?)$/i.test(prompt)
+    ) {
+      setShowCal(false);
+      void pushExchange(ARTICLE_SUMMARIZE_TIP, {
+        modelPrompt: articleSummarizePrompt(
+          article,
+          absoluteUrl(articlePath(article.slug)),
+        ),
+      });
+      return;
+    }
+
     if (isPricingIntent(prompt)) {
       void runPricingFlow(prompt);
       return;
@@ -1528,7 +1725,7 @@ export function AiPromptInput() {
     void pushExchange(prompt);
   }
 
-  function onTip(tip: (typeof TIPS)[number]) {
+  function onTip(tip: string) {
     setValue("");
     clearChatActions();
     setInputHint(null);
@@ -1537,6 +1734,27 @@ export function AiPromptInput() {
       intent: "chip",
       metadata: { tip },
     });
+    if (tip === ARTICLE_SUMMARIZE_TIP && article) {
+      setShowCal(false);
+      setOpen(true);
+      void pushExchange(ARTICLE_SUMMARIZE_TIP, {
+        modelPrompt: articleSummarizePrompt(
+          article,
+          absoluteUrl(articlePath(article.slug)),
+        ),
+      });
+      return;
+    }
+    if (tip === "Let's talk") {
+      void startLeadFlow();
+      return;
+    }
+    if (tip === "Pick a service") {
+      setShowCal(false);
+      setOpen(true);
+      void pushExchange(PICK_SERVICE_PROMPT);
+      return;
+    }
     if (tip === "Book a call") {
       void startCalBookingFlow(tip);
       return;
@@ -1593,7 +1811,7 @@ export function AiPromptInput() {
         data-lenis-prevent
       >
         <div className="rj-ask__row" data-lenis-prevent>
-          {TIPS.map((tip, index) => (
+          {tips.map((tip, index) => (
             <button
               key={tip}
               ref={(el) => {

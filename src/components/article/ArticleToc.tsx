@@ -40,35 +40,43 @@ export function ArticleToc({ article, variant, className }: ArticleTocProps) {
   useEffect(() => {
     if (items.length === 0) return;
 
-    const elements = items
-      .map((item) => document.getElementById(item.id))
-      .filter((el): el is HTMLElement => Boolean(el));
+    const headingOffset = () => {
+      const rootStyles = getComputedStyle(document.documentElement);
+      const headerRem = Number.parseFloat(
+        rootStyles.getPropertyValue("--rj-header-height"),
+      );
+      const rootPx = Number.parseFloat(rootStyles.fontSize) || 10;
+      const headerPx = (Number.isFinite(headerRem) ? headerRem : 6.2) * rootPx;
+      return headerPx + 24;
+    };
 
-    if (elements.length === 0) return;
+    const syncActive = () => {
+      const marker = headingOffset();
+      let next = items[0]?.id ?? "";
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) =>
-              a.boundingClientRect.top - b.boundingClientRect.top,
-          );
-
-        if (visible[0]?.target.id) {
-          setActiveId(visible[0].target.id);
+      for (const item of items) {
+        const el = document.getElementById(item.id);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= marker) {
+          next = item.id;
         }
-      },
-      {
-        root: null,
-        rootMargin: "-20% 0px -60% 0px",
-        threshold: [0, 0.25, 1],
-      },
-    );
+      }
 
-    for (const el of elements) observer.observe(el);
-    return () => observer.disconnect();
-  }, [items]);
+      setActiveId((prev) => (prev === next ? prev : next));
+    };
+
+    syncActive();
+
+    if (lenis) {
+      lenis.on("scroll", syncActive);
+      return () => {
+        lenis.off("scroll", syncActive);
+      };
+    }
+
+    window.addEventListener("scroll", syncActive, { passive: true });
+    return () => window.removeEventListener("scroll", syncActive);
+  }, [items, lenis]);
 
   const scrollToId = (id: string) => {
     const target = document.getElementById(id);

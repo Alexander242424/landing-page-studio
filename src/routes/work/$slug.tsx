@@ -4,6 +4,11 @@ import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { CaseView, buildCaseJsonLd } from "@/components/case/CaseView";
 import { casePath, getCase } from "@/lib/cases";
+import {
+  WORK_CATALOG_QUERY_KEY,
+  applyWorkCatalogOverlay,
+} from "@/lib/workCatalog";
+import { listWorkCatalog } from "@/lib/workCatalog.functions";
 import { SITE, absoluteUrl, pageTitle } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
@@ -13,10 +18,23 @@ const SiteFooter = lazy(() =>
 );
 
 export const Route = createFileRoute("/work/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params, context }) => {
     const caseStudy = getCase(params.slug);
     if (!caseStudy) throw notFound();
-    return { caseStudy };
+
+    let catalog;
+    try {
+      catalog = await listWorkCatalog();
+      context.queryClient.setQueryData(WORK_CATALOG_QUERY_KEY, catalog);
+    } catch {
+      return { caseStudy };
+    }
+
+    const row = catalog.items.find((item) => item.slug === params.slug);
+    if (row && !row.hasPage) throw notFound();
+    return {
+      caseStudy: row ? applyWorkCatalogOverlay(caseStudy, row) : caseStudy,
+    };
   },
   head: ({ loaderData }) => {
     const caseStudy = loaderData?.caseStudy;

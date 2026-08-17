@@ -22,6 +22,8 @@ Location: Warsaw, Poland
 Sitemap: https://uxlab.digital/sitemap.xml
 Llms-Txt: https://uxlab.digital/llms.txt
 Llms-Full-Txt: https://uxlab.digital/llms-full.txt
+Rss: https://uxlab.digital/feed.xml
+Humans: https://uxlab.digital/humans.txt
 
 # Citation
 Citation-Format: UXLAB (https://uxlab.digital) — growth product performance agency

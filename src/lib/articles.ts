@@ -36,11 +36,13 @@ export type Article = {
   faq: ArticleFaq[];
 };
 
-const AUTHOR = {
+export const DEFAULT_ARTICLE_AUTHOR = {
   name: "Alex Tyshchenko",
   jobTitle: "Founder, UXLAB",
   url: "https://uxlab.digital",
 } as const;
+
+const AUTHOR = DEFAULT_ARTICLE_AUTHOR;
 
 /** Previous short slugs → current title-derived slugs (for redirects). */
 export const LEGACY_ARTICLE_SLUGS: Record<string, string> = {
@@ -382,4 +384,43 @@ export function getRelatedArticles(slug: string, limit = 3): Article[] {
 
 export function articlePath(slug: string): string {
   return `/resources/${slug}`;
+}
+
+/** Model prompt for the article-page ask-bar “Summarize” chip. */
+export function articleSummarizePrompt(article: Article, url: string): string {
+  const body = article.sections
+    .map((section) => {
+      const paragraphs = section.paragraphs.join("\n\n");
+      const bullets = section.bullets?.length
+        ? section.bullets.map((item) => `- ${item}`).join("\n")
+        : "";
+      return `## ${section.heading}\n\n${paragraphs}${
+        bullets ? `\n\n${bullets}` : ""
+      }`;
+    })
+    .join("\n\n");
+
+  const takeaways = article.takeaways.map((item) => `- ${item}`).join("\n");
+  const faq = article.faq
+    .map((item) => `Q: ${item.question}\nA: ${item.answer}`)
+    .join("\n\n");
+
+  return [
+    "Summarize this UXLAB article for a reader who has not opened it yet.",
+    "Cover the core argument, key takeaways, and who it helps. Be concise and specific. Do not invent details that are not in the article.",
+    "",
+    `Title: ${article.title}`,
+    `URL: ${url}`,
+    `Category: ${article.category}`,
+    "",
+    "Direct answer:",
+    article.answerCapsule,
+    "",
+    "Key takeaways:",
+    takeaways,
+    "",
+    "Article:",
+    body,
+    faq ? `\nFAQ:\n${faq}` : "",
+  ].join("\n");
 }

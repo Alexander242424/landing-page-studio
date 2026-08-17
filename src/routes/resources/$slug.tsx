@@ -7,10 +7,13 @@ import {
   buildArticleJsonLd,
 } from "@/components/article/ArticleView";
 import {
-  articlePath,
-  getArticle,
-  resolveCanonicalArticleSlug,
-} from "@/lib/articles";
+  ARTICLE_CATALOG_QUERY_KEY,
+  getArticleCatalogSeed,
+  resolveCanonicalSlugFrom,
+  toPublicArticle,
+} from "@/lib/articleCatalog";
+import { listPublishedArticles } from "@/lib/articleCatalog.functions";
+import { articlePath } from "@/lib/articles";
 import { SITE, absoluteUrl, pageTitle } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
@@ -20,8 +23,19 @@ const SiteFooter = lazy(() =>
 );
 
 export const Route = createFileRoute("/resources/$slug")({
-  loader: ({ params }) => {
-    const canonicalSlug = resolveCanonicalArticleSlug(params.slug);
+  loader: async ({ params, context }) => {
+    let catalog;
+    try {
+      catalog = await listPublishedArticles();
+      context.queryClient.setQueryData(ARTICLE_CATALOG_QUERY_KEY, catalog);
+    } catch {
+      catalog = {
+        items: getArticleCatalogSeed(),
+        source: "seed" as const,
+      };
+    }
+
+    const canonicalSlug = resolveCanonicalSlugFrom(catalog.items, params.slug);
     if (!canonicalSlug) throw notFound();
     if (canonicalSlug !== params.slug) {
       throw redirect({
@@ -29,9 +43,14 @@ export const Route = createFileRoute("/resources/$slug")({
         params: { slug: canonicalSlug },
       });
     }
-    const article = getArticle(canonicalSlug);
-    if (!article) throw notFound();
-    return { article };
+    const row = catalog.items.find((item) => item.slug === canonicalSlug);
+    if (!row || row.status !== "published") throw notFound();
+    const article = toPublicArticle(row);
+    const related = catalog.items
+      .filter((item) => item.slug !== article.slug)
+      .slice(0, 3)
+      .map(toPublicArticle);
+    return { article, related };
   },
   head: ({ loaderData }) => {
     const article = loaderData?.article;
@@ -97,7 +116,7 @@ export const Route = createFileRoute("/resources/$slug")({
 });
 
 function ArticlePage() {
-  const { article } = Route.useLoaderData();
+  const { article, related } = Route.useLoaderData();
   const canonical = absoluteUrl(articlePath(article.slug));
   const jsonLd = buildArticleJsonLd(article, canonical);
 
@@ -124,7 +143,7 @@ function ArticlePage() {
       <AiPromptInput />
 
       <main className="rj-page__main rj-article-page">
-        <ArticleView article={article} />
+        <ArticleView article={article} related={related} />
       </main>
 
       <Suspense fallback={null}>

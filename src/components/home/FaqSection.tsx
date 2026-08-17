@@ -13,6 +13,57 @@ import { createAwardsCharReveal } from "@/lib/textReveal";
 gsap.registerPlugin(ScrollTrigger);
 
 /**
+ * Shared FAQ rows — same markup and `.rj-faq__*` styles on home and articles.
+ */
+export function FaqAccordion({ faqs }: { faqs: ReadonlyArray<HomeFaq> }) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = listRef.current;
+    if (!root) return;
+
+    const ctx = gsap.context(() => {
+      const items = root.querySelectorAll(".rj-faq__item");
+      items.forEach((item, index) => {
+        gsap.fromTo(
+          item,
+          { autoAlpha: 0, y: 24 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.85,
+            delay: Math.min(index * 0.06, 0.3),
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 92%",
+              once: true,
+            },
+          },
+        );
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, [faqs]);
+
+  return (
+    <Accordion ref={listRef} type="single" collapsible className="rj-faq__list">
+      {faqs.map((item, index) => (
+        <AccordionItem key={item.question} value={`item-${index}`} className="rj-faq__item">
+          <AccordionTrigger className="rj-faq__trigger">
+            <span className="rj-faq__question">{item.question}</span>
+          </AccordionTrigger>
+          <AccordionContent className="rj-faq__answer">
+            <p>{item.answer}</p>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  );
+}
+
+/**
  * FAQ accordion — large awards-style headline + Rejouice-token list.
  */
 export function FaqSection({
@@ -38,26 +89,6 @@ export function FaqSection({
           start: "top 85%",
         }),
       );
-
-      const items = root.querySelectorAll(".rj-faq__item");
-      items.forEach((item, index) => {
-        gsap.fromTo(
-          item,
-          { autoAlpha: 0, y: 24 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.85,
-            delay: Math.min(index * 0.06, 0.3),
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 92%",
-              once: true,
-            },
-          },
-        );
-      });
     }, root);
 
     return () => {
@@ -79,22 +110,7 @@ export function FaqSection({
         </h2>
       </div>
 
-      <Accordion type="single" collapsible className="rj-faq__list">
-        {faqs.map((item, index) => (
-          <AccordionItem
-            key={item.question}
-            value={`item-${index}`}
-            className="rj-faq__item"
-          >
-            <AccordionTrigger className="rj-faq__trigger">
-              <span className="rj-faq__question">{item.question}</span>
-            </AccordionTrigger>
-            <AccordionContent className="rj-faq__answer">
-              <p>{item.answer}</p>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+      <FaqAccordion faqs={faqs} />
     </section>
   );
 }

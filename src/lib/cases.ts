@@ -76,7 +76,8 @@ export type CaseHeadline = {
 };
 
 /**
- * In-repo cases database (like articles.ts — not a CMS).
+ * Full case-study bodies (detail pages). Listing/mega fields are seeded into
+ * Supabase `case_studies` (see workCatalog.ts) and fall back to this module.
  *
  * `hasPage`:
  * - `true`  → detail route at /work/$slug, sitemap entry, list hover + “View case”
@@ -87,9 +88,9 @@ export type CaseStudy = {
   client: string;
   /** Client wordmark for the case hero (black ink on white). */
   logo: string;
-  /** Plain client/name fallback for meta & schema. */
+  /** Short mega/list title — same as formatCaseHeadline(headline). */
   title: string;
-  /** Shared with homepage glance cards. */
+  /** Two-line mega / glance / list title (line + emphasis). */
   headline: CaseHeadline;
   description: string;
   year: string;
@@ -123,7 +124,7 @@ export const CASES: CaseStudy[] = [
     slug: "oura",
     client: "Oura",
     logo: "/logos/oura.svg",
-    title: "Oura",
+    title: "Category-defining wearables brand & product experience.",
     hasPage: true,
     hoverImage: "/glance/oura.jpg",
     headline: {
@@ -506,7 +507,7 @@ function publishedStub({
     slug,
     client,
     logo,
-    title: client,
+    title: formatCaseHeadline(headline),
     hasPage: true,
     hoverImage: glanceSrc,
     headline,

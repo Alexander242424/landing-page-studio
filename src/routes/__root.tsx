@@ -223,6 +223,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: absoluteUrl("/llms-full.txt"),
       },
       {
+        rel: "alternate",
+        type: "application/rss+xml",
+        href: absoluteUrl("/feed.xml"),
+      },
+      {
         rel: "preload",
         href: "/fonts/aeonik-pro/AeonikPro-Regular.otf",
         as: "font",

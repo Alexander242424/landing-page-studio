@@ -14,10 +14,12 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { ARTICLES } from "@/lib/articles";
 import { openLeadChat } from "@/lib/askChat";
 import {
-  caseHoverImage,
-  getListedCases,
-  type CaseStudy,
-} from "@/lib/cases";
+  articleCatalogItems,
+  useArticleCatalog,
+} from "@/hooks/useArticleCatalog";
+import { megaArticles } from "@/lib/articleCatalog";
+import { useWorkCatalog, workCatalogItems } from "@/hooks/useWorkCatalog";
+import { megaWorkItems } from "@/lib/workCatalog";
 import { SOLUTIONS } from "@/lib/solutions";
 import {
   solutionHasLanding,
@@ -27,9 +29,11 @@ import { cn } from "@/lib/utils";
 
 type MegaKind = "work" | "solutions" | "resources";
 
+/** Keep panel mounted through CSS close (opacity + slight y). */
+const MEGA_EXIT_MS = 320;
+
 const NAV_ITEMS = [
   { label: "Work", href: "/work", mega: "work" as const },
-  { label: "About", href: "#about" },
   { label: "Solutions", href: "#solutions", mega: "solutions" as const },
   { label: "Resources", href: "/resources", mega: "resources" as const },
 ] as const;
@@ -45,12 +49,7 @@ function navMega(item: NavItem): MegaKind | null {
   return "mega" in item ? item.mega : null;
 }
 
-/** Featured cases for desktop Work mega — equal tiles, 3×2. */
-const MEGA_WORK_CASES: CaseStudy[] = getListedCases()
-  .filter((item) => item.hasPage)
-  .slice(0, 6);
-
-const MEGA_ARTICLES = ARTICLES.slice(0, 4);
+const MEGA_ARTICLES_FALLBACK = ARTICLES.slice(0, 4);
 
 function glanceLogoSrc(slug: string) {
   return `/glance/${slug}.svg`;
@@ -65,8 +64,15 @@ type SiteHeaderProps = {
  * Fixed mix-blend header: scroll-spy nav, desktop megas (Work / Solutions / Resources), mobile burger.
  */
 export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
+  const workCatalog = useWorkCatalog();
+  const megaWorkCases = megaWorkItems(workCatalogItems(workCatalog.data));
+  const articleCatalog = useArticleCatalog();
+  const fromCatalog = megaArticles(articleCatalogItems(articleCatalog.data), 4);
+  const megaResourceArticles =
+    fromCatalog.length > 0 ? fromCatalog : MEGA_ARTICLES_FALLBACK;
   const [activeHref, setActiveHref] = useState<NavHref | null>(null);
   const [megaKind, setMegaKind] = useState<MegaKind | null>(null);
+  const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const megaRef = useRef<HTMLDivElement>(null);
@@ -89,17 +95,25 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   const openMega = (kind: MegaKind) => {
     clearMegaClose();
     setMegaKind(kind);
+    setMegaOpen(true);
   };
 
   const closeMega = () => {
     clearMegaClose();
-    setMegaKind(null);
+    setMegaOpen(false);
   };
 
   const scheduleMegaClose = () => {
     clearMegaClose();
-    megaCloseTimer.current = setTimeout(() => setMegaKind(null), 160);
+    megaCloseTimer.current = setTimeout(() => setMegaOpen(false), 160);
   };
+
+  // Unmount panel content after the close transition so it can ease out.
+  useEffect(() => {
+    if (megaOpen || !megaKind) return;
+    const id = window.setTimeout(() => setMegaKind(null), MEGA_EXIT_MS);
+    return () => window.clearTimeout(id);
+  }, [megaOpen, megaKind]);
 
   useEffect(() => {
     return () => {
@@ -368,13 +382,13 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   }, [mobileOpen]);
 
   useEffect(() => {
-    if (!megaKind) return;
+    if (!megaOpen) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeMega();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [megaKind]);
+  }, [megaOpen]);
 
   useEffect(() => {
     if (!isHome) {
@@ -556,7 +570,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                         ? item.href
                         : `/${item.href}`;
                     const kind = navMega(item);
-                    const megaActive = kind !== null && megaKind === kind;
+                    const megaActive = kind !== null && megaOpen && megaKind === kind;
 
                     return (
                       <li
@@ -626,10 +640,12 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
         ref={megaRef}
         className={cn(
           "rj-mega",
-          megaKind && "is-open",
+          megaOpen && "is-open",
           megaKind && `rj-mega--${megaKind}`,
         )}
         role="region"
+        aria-hidden={!megaOpen}
+        inert={!megaOpen}
         aria-label={
           megaKind === "work"
             ? "Work"
@@ -638,7 +654,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
               : "Solutions"
         }
         onMouseEnter={
-          megaKind ? () => openMega(megaKind) : undefined
+          megaOpen && megaKind ? () => openMega(megaKind) : undefined
         }
         onMouseLeave={scheduleMegaClose}
       >
@@ -646,7 +662,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
           {megaKind === "work" ? (
             <>
               <ul className="rj-mega-work">
-                {MEGA_WORK_CASES.map((item) => (
+                {megaWorkCases.map((item) => (
                   <li key={item.slug} className="rj-mega-work__item rj-mega__enter">
                     <Link
                       to="/work/$slug"
@@ -657,7 +673,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                     >
                       <div className="rj-mega-work__bg">
                         <img
-                          src={caseHoverImage(item)}
+                          src={item.image}
                           alt=""
                           width={640}
                           height={480}
@@ -670,7 +686,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                           <p>
                             {item.headline.line}
                             <br />
-                            <em>{item.headline.emphasis}</em>
+                            {item.headline.emphasis}
                           </p>
                         </div>
                         <div className="rj-mega-work__bottom">
@@ -683,8 +699,8 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                             className="rj-mega-work__logo"
                             src={glanceLogoSrc(item.slug)}
                             alt=""
-                            width={96}
-                            height={28}
+                            width={118}
+                            height={34}
                             decoding="async"
                             draggable={false}
                             onError={(event) => {
@@ -713,7 +729,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
           {megaKind === "resources" ? (
             <>
               <ul className="rj-mega-resources">
-                {MEGA_ARTICLES.map((article) => (
+                {megaResourceArticles.map((article) => (
                   <li
                     key={article.slug}
                     className="rj-mega-resources__item rj-mega__enter"
@@ -739,7 +755,9 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                         {article.category}
                       </span>
                       <h3 className="rj-mega-resources__title">
-                        {article.title}
+                        <span className="rj-mega-resources__title-text">
+                          {article.title}
+                        </span>
                       </h3>
                       <p className="rj-mega-resources__meta">
                         {article.date} — {article.readTime}

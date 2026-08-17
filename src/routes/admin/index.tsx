@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AdminArticlesPanel } from "@/components/admin/AdminArticlesPanel";
 import { AdminOverviewChart } from "@/components/admin/AdminOverviewChart";
+import { AdminReadAnalytics } from "@/components/admin/AdminReadAnalytics";
 import { Text } from "@/components/typography/Text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { listAdminArticles } from "@/lib/admin/articleAdmin.functions";
 import { adminLogout } from "@/lib/admin/auth.functions";
 import {
   getAdminConversation,
@@ -15,8 +18,19 @@ import {
   getAdminOverview,
   type AdminOverview,
 } from "@/lib/admin/overview.functions";
+import { listWorkCatalog } from "@/lib/workCatalog.functions";
+import type { WorkCatalogResult } from "@/lib/workCatalog";
+import type { ArticleCatalogResult } from "@/lib/articleCatalog";
+import {
+  getArticleAnalyticsDashboard,
+  getArticleViewCounts,
+  type ArticleAnalyticsDashboard,
+  type ArticleAnalyticsRange,
+} from "@/lib/analytics/articleAnalytics.functions";
 import { getAnalyticsDashboard } from "@/lib/analytics/analytics.functions";
 import { cn } from "@/lib/utils";
+
+type AdminSection = "inbox" | "work" | "articles" | "analytics";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -49,32 +63,54 @@ function formatWhen(iso: string) {
 function AdminDashboard() {
   const navigate = useNavigate();
 
+  const [section, setSection] = useState<AdminSection>("inbox");
   const [rangeDays, setRangeDays] = useState<7 | 30>(30);
+  const [articleRange, setArticleRange] = useState<ArticleAnalyticsRange>(30);
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsDash | null>(null);
+  const [articleAnalytics, setArticleAnalytics] =
+    useState<ArticleAnalyticsDashboard | null>(null);
   const [orders, setOrders] = useState<OrderLead[]>([]);
   const [conversations, setConversations] = useState<ConversationSummary[]>(
     [],
   );
+  const [work, setWork] = useState<WorkCatalogResult | null>(null);
+  const [articles, setArticles] = useState<ArticleCatalogResult | null>(null);
+  const [viewsBySlug, setViewsBySlug] = useState<Record<string, number>>({});
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [thread, setThread] = useState<ConversationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadAll(days: 7 | 30, soft = false) {
+  async function loadArticles() {
+    try {
+      const [catalog, views] = await Promise.all([
+        listAdminArticles(),
+        getArticleViewCounts(),
+      ]);
+      setArticles(catalog);
+      setViewsBySlug(views.viewsBySlug);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load articles");
+    }
+  }
+
+  async function loadInbox(days: 7 | 30, soft = false) {
     if (!soft) setLoading(true);
     setError(null);
     try {
-      const [ov, a, o, conv] = await Promise.all([
+      const [ov, a, o, conv, catalog] = await Promise.all([
         getAdminOverview({ data: { days } }),
         getAnalyticsDashboard(),
         listAdminOrders(),
         listAdminConversations(),
+        listWorkCatalog(),
       ]);
       setOverview(ov);
       setAnalytics(a);
       setOrders(o.orders);
       setConversations(conv.conversations);
+      setWork(catalog);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load admin data");
     } finally {
@@ -83,16 +119,16 @@ function AdminDashboard() {
   }
 
   useEffect(() => {
-    void loadAll(rangeDays);
+    void loadInbox(rangeDays);
 
     const POLL_MS = 6_000;
     const intervalId = window.setInterval(() => {
-      void loadAll(rangeDays, true);
+      void loadInbox(rangeDays, true);
     }, POLL_MS);
 
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
-        void loadAll(rangeDays, true);
+        void loadInbox(rangeDays, true);
       }
     };
     document.addEventListener("visibilitychange", onVisibility);
@@ -102,6 +138,29 @@ function AdminDashboard() {
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [rangeDays]);
+
+  useEffect(() => {
+    if (section !== "articles" && section !== "analytics") return;
+    void loadArticles();
+  }, [section]);
+
+  useEffect(() => {
+    if (section !== "analytics") return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const dash = await getArticleAnalyticsDashboard({
+          data: { days: articleRange },
+        });
+        if (!cancelled) setArticleAnalytics(dash);
+      } catch {
+        if (!cancelled) setArticleAnalytics(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [section, articleRange]);
 
   useEffect(() => {
     if (!selectedSession) {
@@ -152,6 +211,29 @@ function AdminDashboard() {
         </p>
       ) : null}
 
+      <nav className="rj-admin__nav" aria-label="Admin sections">
+        {(
+          [
+            ["inbox", "Inbox"],
+            ["work", "Work"],
+            ["articles", "Articles"],
+            ["analytics", "Analytics"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={cn(
+              "rj-admin__nav-btn",
+              section === id && "is-active",
+            )}
+            onClick={() => setSection(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
       {loading ? (
         <div className="rj-admin__stack">
           <div className="rj-admin__skeleton" />
@@ -159,6 +241,8 @@ function AdminDashboard() {
         </div>
       ) : (
         <div className="rj-admin__stack">
+          {section === "inbox" ? (
+            <>
           <section className="rj-admin__panel">
             <div className="rj-admin__panel-head">
               <div className="rj-admin__segment">
@@ -335,7 +419,78 @@ function AdminDashboard() {
               </TabsContent>
             </Tabs>
           </section>
+            </>
+          ) : null}
 
+          {section === "work" ? (
+          <section className="rj-admin__panel">
+            <div className="rj-admin__panel-head">
+              <h2 className="rj-admin__panel-title">Work</h2>
+              <span className="rj-admin__chip">
+                {work?.source === "supabase" ? "Supabase" : "Seed"}
+              </span>
+            </div>
+            <div className="rj-admin__table-wrap" style={{ border: 0 }}>
+              {!work?.items.length ? (
+                <Text muted className="rj-admin__empty">
+                  No case studies in the catalog.
+                </Text>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Client</th>
+                      <th>Title</th>
+                      <th>Services</th>
+                      <th>Page</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {work.items.map((item) => (
+                      <tr key={item.slug}>
+                        <td className="rj-admin__muted">{item.order}</td>
+                        <td>{item.client}</td>
+                        <td>
+                          <span className="rj-admin__truncate">{item.title}</span>
+                        </td>
+                        <td className="rj-admin__muted">
+                          {item.services.slice(0, 3).join(", ")}
+                        </td>
+                        <td>
+                          {item.hasPage ? (
+                            <a href={item.href} className="rj-admin__mono">
+                              {item.href}
+                            </a>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
+          ) : null}
+
+          {section === "articles" ? (
+            <AdminArticlesPanel
+              catalog={articles}
+              viewsBySlug={viewsBySlug}
+              onRefresh={loadArticles}
+            />
+          ) : null}
+
+          {section === "analytics" ? (
+            <>
+              <AdminReadAnalytics
+                dashboard={articleAnalytics}
+                articles={articles?.items ?? []}
+                rangeDays={articleRange}
+                onRange={setArticleRange}
+              />
           <section>
             <Text
               as="h2"
@@ -509,6 +664,8 @@ function AdminDashboard() {
               </div>
             </div>
           </section>
+            </>
+          ) : null}
         </div>
       )}
     </div>

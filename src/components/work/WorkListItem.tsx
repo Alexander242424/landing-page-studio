@@ -1,23 +1,22 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowCue } from "@/components/ui/ArrowLink";
-import { caseHoverImage, type CaseStudy } from "@/lib/cases";
+import type { WorkCatalogItem } from "@/lib/workCatalog";
 import { cn } from "@/lib/utils";
 
 type WorkListItemProps = {
-  caseStudy: CaseStudy;
+  item: WorkCatalogItem;
 };
 
-export function WorkListItem({ caseStudy }: WorkListItemProps) {
-  const hasPage = caseStudy.hasPage;
-  const hoverSrc = caseHoverImage(caseStudy);
+export function WorkListItem({ item }: WorkListItemProps) {
+  const hasPage = item.hasPage;
 
   const body = (
     <div className="rj-work__row-grid">
       <div className="rj-work__brand">
-        {caseStudy.logo ? (
+        {item.logo ? (
           <img
             className="rj-work__logo"
-            src={caseStudy.logo}
+            src={item.logo}
             alt=""
             width={160}
             height={40}
@@ -28,47 +27,46 @@ export function WorkListItem({ caseStudy }: WorkListItemProps) {
         <span
           className={cn(
             "rj-work__client",
-            caseStudy.logo && "rj-work__client--fallback",
+            item.logo && "rj-work__client--fallback",
           )}
         >
-          {caseStudy.client}
+          {item.client}
         </span>
       </div>
 
       <div className="rj-work__copy">
-        <p className="rj-work__description">{caseStudy.description}</p>
-        {hasPage ? (
-          <span className="rj-work__cta">
-            <span className="rj-work__cta-inner">
-              <ArrowCue>View case study</ArrowCue>
-            </span>
-          </span>
-        ) : null}
+        <p className="rj-work__description">{item.title}</p>
       </div>
 
       {hasPage ? (
         <div className="rj-work__preview" aria-hidden="true">
           <div className="rj-work__preview-inner">
-            <div className="rj-work__preview-frame">
-              <img
-                src={hoverSrc}
-                alt=""
-                width={640}
-                height={440}
-                decoding="async"
-                loading="lazy"
-                draggable={false}
-              />
-            </div>
+            <img
+              src={item.image}
+              alt=""
+              width={640}
+              height={400}
+              decoding="async"
+              loading="lazy"
+              draggable={false}
+            />
           </div>
         </div>
       ) : null}
 
       <ul className="rj-work__services" aria-label="Services">
-        {caseStudy.services.map((service) => (
+        {item.services.map((service) => (
           <li key={service}>{service}</li>
         ))}
       </ul>
+
+      {hasPage ? (
+        <span className="rj-work__cta">
+          <span className="rj-work__cta-inner">
+            <ArrowCue>View case study</ArrowCue>
+          </span>
+        </span>
+      ) : null}
     </div>
   );
 
@@ -83,10 +81,10 @@ export function WorkListItem({ caseStudy }: WorkListItemProps) {
       {hasPage ? (
         <Link
           to="/work/$slug"
-          params={{ slug: caseStudy.slug }}
+          params={{ slug: item.slug }}
           viewTransition
           className="rj-work__row-link"
-          aria-label={`View ${caseStudy.client} case study`}
+          aria-label={`View ${item.client} case study`}
         >
           {body}
         </Link>

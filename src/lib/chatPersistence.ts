@@ -78,7 +78,13 @@ export function logChatEvent(input: ChatEventInput): void {
     intent: input.intent ?? null,
     role: input.role ?? null,
     content: input.content ?? null,
-    metadata: input.metadata ?? {},
+    metadata: {
+      ...(input.metadata ?? {}),
+      path:
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : undefined,
+    },
     created_at: new Date().toISOString(),
   };
 

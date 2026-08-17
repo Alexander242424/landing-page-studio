@@ -121,6 +121,59 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
+# Amazon
+User-agent: Amazonbot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# DuckDuckGo / DuckAssist
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Mistral
+User-agent: MistralAI-User
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Hugging Face
+User-agent: HuggingFace-Bot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Brave
+User-agent: Bravebot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Kagi
+User-agent: Kagibot
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Perplexity user-initiated fetch
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Internet Archive
+User-agent: ia_archiver
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
 # Timpi
 User-agent: Timpibot
 Allow: /
@@ -132,5 +185,8 @@ Sitemap: https://uxlab.digital/sitemap.xml
 # LLM / GEO indexes
 # https://uxlab.digital/llms.txt
 # https://uxlab.digital/llms-full.txt
+# https://uxlab.digital/llm.txt
 # https://uxlab.digital/ai.txt
+# https://uxlab.digital/humans.txt
+# https://uxlab.digital/feed.xml
 # https://uxlab.digital/.well-known/llms.txt

@@ -3,12 +3,12 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { WorkList } from "@/components/work/WorkList";
+import { WORK_PATH } from "@/lib/cases";
 import {
-  WORK_PATH,
-  casePath,
-  formatCaseHeadline,
-  getListedCases,
-} from "@/lib/cases";
+  WORK_CATALOG_QUERY_KEY,
+  getWorkCatalogSeed,
+} from "@/lib/workCatalog";
+import { listWorkCatalog } from "@/lib/workCatalog.functions";
 import {
   SITE,
   absoluteUrl,
@@ -26,6 +26,19 @@ const WORK_DESCRIPTION =
   "Selected product and brand work from UXLAB — case studies in activation, CRO, and growth UX.";
 
 export const Route = createFileRoute("/work/")({
+  loader: async ({ context }) => {
+    try {
+      const catalog = await listWorkCatalog();
+      context.queryClient.setQueryData(WORK_CATALOG_QUERY_KEY, catalog);
+      return { catalog };
+    } catch {
+      const catalog = {
+        items: getWorkCatalogSeed(),
+        source: "seed" as const,
+      };
+      return { catalog };
+    }
+  },
   head: () => ({
     meta: defaultMeta({
       title: "Work",
@@ -44,9 +57,9 @@ export const Route = createFileRoute("/work/")({
   component: WorkIndexPage,
 });
 
-function buildWorkJsonLd() {
+function buildWorkJsonLd(items: ReturnType<typeof getWorkCatalogSeed>) {
   const url = absoluteUrl(WORK_PATH);
-  const cases = getListedCases().filter((c) => c.hasPage);
+  const cases = items.filter((item) => item.hasPage);
 
   return {
     "@context": "https://schema.org",
@@ -62,11 +75,11 @@ function buildWorkJsonLd() {
         publisher: { "@id": `${SITE.origin}/#organization` },
         mainEntity: {
           "@type": "ItemList",
-          itemListElement: cases.map((caseStudy, index) => ({
+          itemListElement: cases.map((item, index) => ({
             "@type": "ListItem",
             position: index + 1,
-            url: absoluteUrl(casePath(caseStudy.slug)),
-            name: `${caseStudy.client} — ${formatCaseHeadline(caseStudy.headline)}`,
+            url: absoluteUrl(item.href),
+            name: `${item.client} — ${item.title}`,
           })),
         },
       },
@@ -93,7 +106,11 @@ function buildWorkJsonLd() {
 }
 
 function WorkIndexPage() {
-  const jsonLd = useMemo(() => buildWorkJsonLd(), []);
+  const { catalog } = Route.useLoaderData();
+  const jsonLd = useMemo(
+    () => buildWorkJsonLd(catalog.items),
+    [catalog.items],
+  );
 
   useEffect(() => {
     document.documentElement.dataset.rjRoute = "work";
@@ -132,15 +149,13 @@ function WorkIndexPage() {
             </ol>
           </nav>
 
-          <h1 className="rj-work__title">Work</h1>
-          <p className="rj-work__lede">
-            Selected product and brand engagements — activation, CRO,
-            <br />
-            and growth UX built to ship.
-          </p>
+          <h1 className="rj-work__title">
+            We help teams drive growth through product performance, UX,
+            conversion, activations, and LTV lifts that compound.
+          </h1>
         </header>
 
-        <WorkList />
+        <WorkList items={catalog.items} />
       </main>
 
       <Suspense fallback={null}>

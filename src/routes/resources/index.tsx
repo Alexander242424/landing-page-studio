@@ -4,10 +4,13 @@ import { BlogGrid } from "@/components/blog/BlogGrid";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import {
-  ARTICLES,
-  articlePath,
-  getArticleCategories,
-} from "@/lib/articles";
+  ARTICLE_CATALOG_QUERY_KEY,
+  articleCategoriesFrom,
+  getArticleCatalogSeed,
+  publishedArticles,
+} from "@/lib/articleCatalog";
+import { listPublishedArticles } from "@/lib/articleCatalog.functions";
+import { articlePath } from "@/lib/articles";
 import {
   SITE,
   absoluteUrl,
@@ -52,6 +55,20 @@ export const Route = createFileRoute("/resources/")({
         ? search.category.trim()
         : undefined,
   }),
+  loader: async ({ context }) => {
+    try {
+      const catalog = await listPublishedArticles();
+      context.queryClient.setQueryData(ARTICLE_CATALOG_QUERY_KEY, catalog);
+      return { catalog };
+    } catch {
+      return {
+        catalog: {
+          items: getArticleCatalogSeed(),
+          source: "seed" as const,
+        },
+      };
+    }
+  },
   head: () => ({
     meta: defaultMeta({
       title: "Resources",
@@ -70,7 +87,7 @@ export const Route = createFileRoute("/resources/")({
   component: ResourcesIndexPage,
 });
 
-function buildResourcesJsonLd() {
+function buildResourcesJsonLd(articles: Array<{ slug: string; title: string }>) {
   const url = absoluteUrl(RESOURCES_PATH);
   return {
     "@context": "https://schema.org",
@@ -86,7 +103,7 @@ function buildResourcesJsonLd() {
         publisher: { "@id": `${SITE.origin}/#organization` },
         mainEntity: {
           "@type": "ItemList",
-          itemListElement: ARTICLES.map((article, index) => ({
+          itemListElement: articles.map((article, index) => ({
             "@type": "ListItem",
             position: index + 1,
             url: absoluteUrl(articlePath(article.slug)),
@@ -118,19 +135,27 @@ function buildResourcesJsonLd() {
 
 function ResourcesIndexPage() {
   const navigate = Route.useNavigate();
+  const { catalog } = Route.useLoaderData();
   const { category: categorySlug } = Route.useSearch();
-  const categories = useMemo(() => getArticleCategories(), []);
+  const published = useMemo(
+    () => publishedArticles(catalog.items),
+    [catalog.items],
+  );
+  const categories = useMemo(
+    () => articleCategoriesFrom(published),
+    [published],
+  );
   const activeCategory = useMemo(
     () => categoryFromSlug(categorySlug, categories),
     [categorySlug, categories],
   );
 
   const articles = useMemo(() => {
-    if (activeCategory === "All") return ARTICLES;
-    return ARTICLES.filter((article) => article.category === activeCategory);
-  }, [activeCategory]);
+    if (activeCategory === "All") return published;
+    return published.filter((article) => article.category === activeCategory);
+  }, [activeCategory, published]);
 
-  const jsonLd = useMemo(() => buildResourcesJsonLd(), []);
+  const jsonLd = useMemo(() => buildResourcesJsonLd(published), [published]);
 
   useEffect(() => {
     document.documentElement.dataset.rjRoute = "resources";

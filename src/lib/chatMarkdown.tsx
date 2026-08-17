@@ -24,7 +24,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
     if (match[1] != null) {
       nodes.push(<strong key={key}>{match[1]}</strong>);
     } else if (match[2] != null) {
-      nodes.push(<em key={key}>{match[2]}</em>);
+      nodes.push(match[2]);
     } else if (match[3] != null) {
       nodes.push(<code key={key}>{match[3]}</code>);
     }
@@ -63,7 +63,8 @@ function orderedText(line: string) {
 }
 
 /**
- * Lightweight chat markdown: bold, italic, lists, paragraph breaks.
+ * Lightweight chat markdown: bold, lists, paragraph breaks.
+ * Single-asterisk markers are stripped (copy stays roman).
  * No HTML passthrough — safe for model output.
  */
 export function ChatMarkdown({

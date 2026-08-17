@@ -6,7 +6,7 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const WORDS = ["Growth", "product", "performance", "agency"] as const;
+const WORDS = ["Growth", "product", "performance", "agency."] as const;
 const MIN_VISIBLE_MS = 1800;
 const MAX_WAIT_MS = 4500;
 const MEDIA_GIVE_UP_MS = 3800;
@@ -131,11 +131,13 @@ export function Preloader() {
     const title = titleRef.current;
     if (!root || !title) return;
 
-    const words = title.querySelectorAll<HTMLElement>(".rj-preloader__word");
+    const words = Array.from(
+      title.querySelectorAll<HTMLElement>(".rj-preloader__word"),
+    );
     const reduced = prefersReducedMotion();
     let cancelled = false;
-    let intro: gsap.core.Timeline | null = null;
     let exit: gsap.core.Timeline | null = null;
+    let shownTimer = 0;
 
     const finish = () => {
       if (cancelled) return;
@@ -166,6 +168,18 @@ export function Preloader() {
         return;
       }
 
+      // CSS animation owns intro transforms; disable it before GSAP exit
+      // so fill-mode / translateY(110%) cannot override yPercent.
+      root.classList.add("rj-preloader--exiting");
+      root.classList.remove("rj-preloader--in");
+      gsap.set(words, {
+        overwrite: true,
+        x: 0,
+        xPercent: 0,
+        y: 0,
+        yPercent: 0,
+      });
+
       exit = gsap.timeline({
         onComplete: finish,
       });
@@ -176,6 +190,7 @@ export function Preloader() {
           duration: 0.72,
           ease: "expo.inOut",
           stagger: 0.045,
+          overwrite: true,
         },
         0,
       );
@@ -190,23 +205,21 @@ export function Preloader() {
       );
     };
 
-    if (!reduced) {
-      gsap.set(words, { yPercent: 110 });
-      intro = gsap.timeline();
-      intro.to(words, {
-        yPercent: 0,
-        duration: 1.2,
-        ease: "expo.out",
-        stagger: 0.1,
-      });
+    if (reduced) {
+      root.classList.remove("rj-preloader--in");
+    } else {
+      // Re-arm CSS intro after insert so Safari actually runs keyframes.
+      root.classList.remove("rj-preloader--in");
+      void root.offsetWidth;
+      root.classList.add("rj-preloader--in");
+      shownTimer = window.setTimeout(() => {
+        if (cancelled || exitStartedRef.current) return;
+        root.classList.add("rj-preloader--shown");
+      }, 1400);
     }
 
     void waitUntilReady().then(() => {
       if (cancelled) return;
-      if (intro && intro.isActive()) {
-        intro.eventCallback("onComplete", playExit);
-        return;
-      }
       playExit();
     });
 
@@ -214,10 +227,10 @@ export function Preloader() {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(shownTimer);
       playExitRef.current = () => undefined;
-      intro?.kill();
       exit?.kill();
-      gsap.killTweensOf([root, title, words]);
+      gsap.killTweensOf([root, title, ...words]);
     };
   }, [mounted, reveal]);
 
@@ -231,7 +244,7 @@ export function Preloader() {
   return (
     <div
       ref={rootRef}
-      className="rj-preloader"
+      className="rj-preloader rj-preloader--in"
       role="status"
       aria-live="polite"
       aria-busy="true"
@@ -244,7 +257,7 @@ export function Preloader() {
       <h2
         ref={titleRef}
         className="rj-preloader__title"
-        aria-label="Growth product performance agency"
+        aria-label="Growth product performance agency."
       >
         {WORDS.map((word) => (
           <span key={word} className="rj-preloader__word-wrap" aria-hidden="true">
