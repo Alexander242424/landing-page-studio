@@ -466,6 +466,30 @@ export const CASES: CaseStudy[] = [
       "The result is a surface creators can own — and fans can enter without losing the sense that they were invited.",
     ],
   }),
+  publishedStub({
+    slug: "forbes",
+    client: "Forbes",
+    logo: "/logos/forbes.svg",
+    headline: {
+      line: "+3.1x suite inquiries",
+      emphasis: "by leading with the destination.",
+    },
+    description:
+      "+3.1x suite inquiries after we led Forbes hospitality with destination first — then opened a clear path to book.",
+    heroSrc: "/cases/forbes/hero.jpg",
+    glanceSrc: "/glance/forbes.jpg",
+    aspectRatio: "992 / 988",
+    services: ["Product design", "Brand systems", "Ecommerce"],
+    intro:
+      "Forbes sells the destination as much as the stay. The digital experience had to honor atmosphere first — then open a clear path to inquire without flattening the luxury.",
+    vision:
+      "Let the place invite the booking — then make the next step feel like the natural next page.",
+    narrativeHeading: "Destination that earns the stay.",
+    narrative: [
+      "Hospitality often jumps to room grids. We designed a sequence where atmosphere sets desire, editorial detail confirms craft, and booking stays quiet until the decision is ready.",
+      "Visual language stayed cinematic and spacious — so the brand’s authority survives the scroll into inquiry.",
+    ],
+  }),
 ];
 
 /**

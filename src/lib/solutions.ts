@@ -17,7 +17,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "CRO, activation, retention, and LTV improvements that compound.",
     body: "We find the highest-impact opportunities across the product journey and improve the screens and steps that shape conversion, activation, retention, and revenue.",
     video: "/challenges/c1.mp4",
-    image: "/challenges/product-metrics.png",
+    image: "/challenges/product-metrics.jpg",
   },
   {
     title: "Product Design",
@@ -25,6 +25,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "Clear product experiences, ready to build.",
     body: "We design the flows, screens, states, and systems that make complex products easier to understand, use, and ship.",
     video: "/challenges/c3.mp4",
+    image: "/challenges/product-design.jpg",
   },
   {
     title: "Websites + Funnels",
@@ -32,6 +33,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "Conversion-focused sites and funnels built for qualified demand.",
     body: "We shape the positioning, page structure, product story, and conversion paths that turn visits into qualified demos, trials, and pipeline.",
     video: "/challenges/c4.mp4",
+    image: "/challenges/websites.jpg",
   },
   {
     title: "Testing & Experimentation",
@@ -39,6 +41,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "User research and experiments that validate product decisions.",
     body: "We test ideas with real users and clear metrics before full build, so the team can move forward with evidence instead of assumptions.",
     video: "/challenges/c2.mp4",
+    image: "/challenges/testing-experimentation.jpg",
   },
   {
     title: "AI Engineering",
@@ -46,6 +49,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "AI-native product engineering from brief to production.",
     body: "We use AI-native tools to design, build, and ship reliable product experiences faster, with production quality and maintainable code.",
     video: "/challenges/c5.mp4",
+    image: "/challenges/ai-engineering.jpg",
   },
   {
     title: "AI MVP to Product",
@@ -53,6 +57,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "Vibe-coded MVPs refined into reliable products.",
     body: "We improve the UX, UI, states, structure, and implementation of AI-built MVPs so they are clear, dependable, and ready for real users.",
     video: "/challenges/c1.mp4",
+    image: "/challenges/ai-mvp-to-product.jpg",
   },
 ];
 

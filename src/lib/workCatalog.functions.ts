@@ -113,6 +113,18 @@ function seedResult(): WorkCatalogResult {
   return { items: getWorkCatalogSeed(), source: "seed" };
 }
 
+/** Keep newly added seed cases visible when Supabase has not been updated yet. */
+function mergeSeedGaps(remote: WorkCatalogItem[]): WorkCatalogItem[] {
+  const have = new Set(remote.map((item) => item.slug));
+  const extras = getWorkCatalogSeed().filter((item) => !have.has(item.slug));
+  if (!extras.length) return remote;
+  const maxOrder = remote.reduce((n, item) => Math.max(n, item.order), 0);
+  return [
+    ...remote,
+    ...extras.map((item, i) => ({ ...item, order: maxOrder + 1 + i })),
+  ];
+}
+
 /**
  * Shared catalog for Work list + mega menu.
  * Prefers Supabase `case_studies`; falls back to the in-repo seed so
@@ -125,7 +137,7 @@ export async function resolveWorkCatalog(): Promise<WorkCatalogResult> {
 
   const remote = await fetchSupabaseCatalog();
   const result: WorkCatalogResult = remote
-    ? { items: remote, source: "supabase" }
+    ? { items: mergeSeedGaps(remote), source: "supabase" }
     : seedResult();
 
   catalogCache = { at: Date.now(), result };

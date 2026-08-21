@@ -122,6 +122,16 @@ const CASES: GlanceWidget[] = [
     backgroundImage: "/glance/stan.jpg",
     linkLabel: "Case Study",
   },
+  {
+    id: "forbes",
+    caseSlug: "forbes",
+    size: "full",
+    theme: "dark",
+    title: caseHeadlineTitle("forbes"),
+    logo: "/glance/forbes.svg",
+    backgroundImage: "/glance/forbes.jpg",
+    linkLabel: "Case Study",
+  },
 ];
 
 function LogoMark({ src }: { src: string }) {
