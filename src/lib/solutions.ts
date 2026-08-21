@@ -17,7 +17,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "CRO, activation, retention, and LTV improvements that compound.",
     body: "We find the highest-impact opportunities across the product journey and improve the screens and steps that shape conversion, activation, retention, and revenue.",
     video: "/challenges/c1.mp4",
-    image: "/challenges/product-metrics.jpg",
+    image: "/challenges/product-metrics.png",
   },
   {
     title: "Product Design",
