@@ -5,6 +5,8 @@ export type Solution = {
   blurb: string;
   body: string;
   video: string;
+  /** Optional still used instead of video in the stack card media slot. */
+  image?: string;
 };
 
 /** Canonical Solutions / Challenges We Solve — keep footer & #solutions in sync. */
@@ -15,6 +17,7 @@ export const SOLUTIONS: Solution[] = [
     blurb: "CRO, activation, retention, and LTV improvements that compound.",
     body: "We find the highest-impact opportunities across the product journey and improve the screens and steps that shape conversion, activation, retention, and revenue.",
     video: "/challenges/c1.mp4",
+    image: "/challenges/product-metrics.jpg",
   },
   {
     title: "Product Design",

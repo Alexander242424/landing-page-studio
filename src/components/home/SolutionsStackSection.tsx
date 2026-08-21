@@ -353,15 +353,23 @@ export function SolutionsStackSection({
                         </ArrowLink>
                       </div>
                       <div className="rj-solutions-stack__card-media">
-                        <LazyVideo
-                          src={item.video}
-                          className="rj-solutions-stack__video"
-                          loop
-                          muted
-                          playsInline
-                          rootMargin="600px 0px"
-                          preload="metadata"
-                        />
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt=""
+                            className="rj-solutions-stack__image"
+                          />
+                        ) : (
+                          <LazyVideo
+                            src={item.video}
+                            className="rj-solutions-stack__video"
+                            loop
+                            muted
+                            playsInline
+                            rootMargin="600px 0px"
+                            preload="metadata"
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

@@ -9,18 +9,19 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
-const SLOT_COUNT = 8;
+const SLOT_COUNT = 10;
 
 /** Match styles.css mobile band — marquee below this, even row at/above. */
 const MARQUEE_MQ = "(max-width: 767px)";
 
-/** Hero row: fewer marks as the viewport shrinks (stat + logos share one bar). */
-function heroVisibleCount(width: number): number {
-  if (width < 820) return 2;
-  if (width < 960) return 3;
-  if (width < 1100) return 4;
-  if (width < 1240) return 5;
-  return 5;
+/** ~px reserved for one hero mark (logo + padding). */
+const HERO_SLOT_PX = 118;
+
+/** Hero row: fill the bar as it widens — never leave a 3-logo hole on desktop. */
+function heroVisibleCount(availablePx: number): number {
+  if (availablePx < 280) return 2;
+  if (availablePx < 400) return 3;
+  return Math.max(3, Math.min(SLOT_COUNT, Math.floor(availablePx / HERO_SLOT_PX)));
 }
 
 /** Crossfade duration (seconds). */
@@ -236,8 +237,13 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
     const marqueeMq = window.matchMedia(MARQUEE_MQ);
     const syncMotion = () => setReducedMotion(motionMq.matches);
     const syncMarquee = () => setIsMarquee(marqueeMq.matches);
+    const measureAvailable = () => {
+      const strip = rootRef.current;
+      if (strip && strip.clientWidth > 0) return strip.clientWidth;
+      return Math.round(window.innerWidth * 0.5);
+    };
     const syncVisible = () => {
-      const next = isHero ? heroVisibleCount(window.innerWidth) : SLOT_COUNT;
+      const next = isHero ? heroVisibleCount(measureAvailable()) : SLOT_COUNT;
       visibleCountRef.current = next;
       setVisibleCount(next);
     };
@@ -247,10 +253,17 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
     motionMq.addEventListener("change", syncMotion);
     marqueeMq.addEventListener("change", syncMarquee);
     window.addEventListener("resize", syncVisible);
+    const strip = rootRef.current;
+    const ro =
+      strip && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(syncVisible)
+        : null;
+    if (strip && ro) ro.observe(strip);
     return () => {
       motionMq.removeEventListener("change", syncMotion);
       marqueeMq.removeEventListener("change", syncMarquee);
       window.removeEventListener("resize", syncVisible);
+      ro?.disconnect();
     };
   }, [isHero]);
 
