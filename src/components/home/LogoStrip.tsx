@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -230,6 +230,7 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
   const [visibleCount, setVisibleCount] = useState(SLOT_COUNT);
   const visibleCountRef = useRef(SLOT_COUNT);
   const enteredRef = useRef(false);
+  const heroEntrancePlayedRef = useRef(false);
   const isHero = variant === "hero";
 
   useEffect(() => {
@@ -300,14 +301,28 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
     };
   }, []);
 
-  // Entrance: stagger fade/slide up — opacity + transform only (never autoAlpha).
-  // Hero: bar fades in with CTAs; slots start visible so the swap loop can run.
-  useEffect(() => {
-    if (isHero) {
+  // Hero: each mark flips in on first load, left to right.
+  useLayoutEffect(() => {
+    if (!isHero) return;
+
+    const root = rootRef.current;
+    const rowItems = slotRefs.current.filter(Boolean) as HTMLLIElement[];
+    const trackItems = root
+      ? Array.from(
+          root.querySelectorAll<HTMLLIElement>(
+            ".rj-logo-strip__track > .rj-logo-strip__item",
+          ),
+        )
+      : [];
+    const half = Math.floor(trackItems.length / 2);
+    const items = isMarquee ? trackItems.slice(0, half) : rowItems;
+    const copies = isMarquee ? trackItems.slice(half) : [];
+
+    if (reducedMotion || heroEntrancePlayedRef.current) {
       enteredRef.current = true;
-      const items = slotRefs.current.filter(Boolean) as HTMLLIElement[];
-      if (items.length) {
-        gsap.set(items, {
+      const all = [...items, ...copies];
+      if (all.length) {
+        gsap.set(all, {
           opacity: 1,
           visibility: "visible",
           clearProps: "transform",
@@ -315,6 +330,64 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
       }
       return;
     }
+
+    if (!items.length) return;
+
+    const ctx = gsap.context(() => {
+      const parent = items[0]?.parentElement;
+      if (parent) gsap.set(parent, { perspective: 800 });
+      gsap.set([...items, ...copies], {
+        opacity: 0,
+        visibility: "visible",
+        rotateX: 90,
+        rotateY: -5,
+        yPercent: 70,
+        transformOrigin: "50% 80%",
+      });
+      const finish = () => {
+        heroEntrancePlayedRef.current = true;
+        enteredRef.current = true;
+      };
+      gsap.to(items, {
+        opacity: 1,
+        rotateX: 0,
+        rotateY: 0,
+        yPercent: 0,
+        stagger: 0.1,
+        delay: 2.5,
+        duration: 1.15,
+        ease: "expo.out",
+        onComplete: finish,
+      });
+      if (copies.length) {
+        gsap.to(copies, {
+          opacity: 1,
+          rotateX: 0,
+          rotateY: 0,
+          yPercent: 0,
+          stagger: 0.1,
+          delay: 2.5,
+          duration: 1.15,
+          ease: "expo.out",
+        });
+      }
+    }, root ?? undefined);
+
+    return () => {
+      ctx.revert();
+      if (heroEntrancePlayedRef.current) {
+        gsap.set([...items, ...copies], {
+          opacity: 1,
+          visibility: "visible",
+          clearProps: "transform",
+        });
+      }
+    };
+  }, [isHero, isMarquee, reducedMotion, visibleCount]);
+
+  // Entrance: stagger fade/slide up — opacity + transform only (never autoAlpha).
+  useEffect(() => {
+    if (isHero) return;
 
     if (isMarquee) {
       enteredRef.current = true;
