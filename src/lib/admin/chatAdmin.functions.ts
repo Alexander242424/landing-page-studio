@@ -25,13 +25,23 @@ async function readChatEvents(limit = 8000): Promise<ChatEventRow[]> {
   }
 }
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export type JsonRecord = Record<string, JsonValue>;
+
 export type OrderLead = {
   id: string;
   sessionId: string;
   type: "contact" | "cro_audit" | "newsletter" | "booking" | "other";
   email: string | null;
   summary: string;
-  metadata: Record<string, unknown>;
+  metadata: JsonRecord;
   createdAt: string;
 };
 
