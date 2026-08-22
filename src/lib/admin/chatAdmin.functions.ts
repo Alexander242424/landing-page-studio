@@ -120,7 +120,7 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
         type: "booking",
         email: null,
         summary: "Cal booking opened",
-        metadata: row.metadata ?? {},
+        metadata: (row.metadata ?? {}) as JsonRecord,
         createdAt: row.created_at,
       });
     }
