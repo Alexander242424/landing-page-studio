@@ -19,8 +19,10 @@ import { cn } from "@/lib/utils";
 gsap.registerPlugin(ScrollTrigger);
 
 const DRAG_CLICK_THRESHOLD = 8;
-/** px before locking to horizontal drag vs vertical page scroll */
-const AXIS_LOCK_PX = 6;
+/** Mouse: small lock so desktop drag stays snappy. */
+const AXIS_LOCK_MOUSE_PX = 6;
+/** Touch: wait for a clear axis so a thumb flick isn't stolen from page scroll. */
+const AXIS_LOCK_TOUCH_PX = 10;
 const VELOCITY_WINDOW_MS = 90;
 const MAX_RELEASE_PX_PER_SEC = 3200;
 /** 1/e toward auto-speed in ~360ms; a flick coasts ~1s then becomes the marquee */
@@ -268,6 +270,8 @@ export function GlanceSection() {
       pointerId: -1,
       tracking: false,
       dragging: false,
+      /** Finger is down: freeze the marquee so the track doesn't slip. */
+      held: false,
       axis: "none" as DragAxis,
       startX: 0,
       startY: 0,
@@ -309,6 +313,8 @@ export function GlanceSection() {
 
     const pushSample = (clientX: number) => {
       const t = performance.now();
+      const last = samples[samples.length - 1];
+      if (last && t - last.t < 10 && Math.abs(last.x - clientX) < 1) return;
       samples.push({ x: clientX, t });
       while (samples.length > 1 && t - samples[0].t > VELOCITY_WINDOW_MS) {
         samples.shift();
@@ -339,7 +345,8 @@ export function GlanceSection() {
       if (!inView) return;
       const dt = Math.min(0.064, Math.max(0, deltaTime) / 1000);
 
-      if (!drag.dragging) {
+      // Hold still while the finger is down so auto-marquee never fights 1:1 drag.
+      if (!drag.held) {
         const target = targetVx();
         const lambda = Math.abs(vx - target) > 120 ? INERTIA_LAMBDA : 6.5;
         vx = damp(vx, target, lambda, dt);
@@ -366,14 +373,29 @@ export function GlanceSection() {
       }
     };
 
+    const abortHold = () => {
+      drag.tracking = false;
+      drag.dragging = false;
+      drag.held = false;
+      drag.axis = "none";
+      drag.pointerId = -1;
+      samples.length = 0;
+      vx = targetVx();
+      widgets.classList.remove("is-dragging");
+    };
+
     const endDrag = (applyInertia: boolean) => {
-      if (!drag.tracking && !drag.dragging) return;
+      if (!drag.tracking && !drag.dragging && !drag.held) return;
       const pointerId = drag.pointerId;
       if (drag.dragging) {
         vx = applyInertia ? sampleVelocity() : targetVx();
+      } else {
+        // Tap or abandoned hold: resume the marquee without a stall.
+        vx = targetVx();
       }
       drag.tracking = false;
       drag.dragging = false;
+      drag.held = false;
       drag.axis = "none";
       drag.pointerId = -1;
       samples.length = 0;
@@ -383,26 +405,45 @@ export function GlanceSection() {
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 && e.pointerType === "mouse") return;
-      if (drag.tracking) return;
+      if (drag.tracking || drag.held) return;
       suppressNavRef.current = false;
       drag.pointerId = e.pointerId;
       drag.tracking = true;
       drag.dragging = false;
+      drag.held = true;
       drag.axis = "none";
       drag.startX = e.clientX;
       drag.startY = e.clientY;
       drag.scrollStart = x;
+      vx = 0;
       samples.length = 0;
       pushSample(e.clientX);
     };
 
-    const followPointer = (e: PointerEvent) => {
-      x = drag.scrollStart + (e.clientX - drag.startX);
-      if (Math.abs(e.clientX - drag.startX) > DRAG_CLICK_THRESHOLD) {
+    const followPointer = (clientX: number) => {
+      x = drag.scrollStart + (clientX - drag.startX);
+      if (Math.abs(clientX - drag.startX) > DRAG_CLICK_THRESHOLD) {
         suppressNavRef.current = true;
       }
-      pushSample(e.clientX);
+      pushSample(clientX);
       render();
+    };
+
+    const lockHorizontal = (clientX: number, pointerType: string, pointerId: number) => {
+      drag.axis = "h";
+      drag.dragging = true;
+      vx = 0;
+      suppressNavRef.current = true;
+      widgets.classList.add("is-dragging");
+      // Capture only for mouse — on touch it can cancel the gesture (iOS).
+      if (pointerType === "mouse") {
+        try {
+          widgets.setPointerCapture(pointerId);
+        } catch {
+          /* capture is best-effort; window listeners still track the gesture */
+        }
+      }
+      followPointer(clientX);
     };
 
     const onPointerMove = (e: PointerEvent) => {
@@ -415,31 +456,24 @@ export function GlanceSection() {
       if (drag.axis === "none") {
         const adx = Math.abs(dx);
         const ady = Math.abs(dy);
-        if (adx < AXIS_LOCK_PX && ady < AXIS_LOCK_PX) return;
+        const lockPx =
+          e.pointerType === "mouse" ? AXIS_LOCK_MOUSE_PX : AXIS_LOCK_TOUCH_PX;
+        if (adx < lockPx && ady < lockPx) return;
 
         const isMouse = e.pointerType === "mouse";
         if (!isMouse && ady > adx) {
           drag.axis = "v";
-          drag.tracking = false;
+          abortHold();
           return;
         }
 
-        drag.axis = "h";
-        drag.dragging = true;
-        vx = 0;
-        widgets.classList.add("is-dragging");
-        try {
-          widgets.setPointerCapture(e.pointerId);
-        } catch {
-          /* capture is best-effort; window listeners still track the gesture */
-        }
         if (e.cancelable) e.preventDefault();
-        followPointer(e);
+        lockHorizontal(e.clientX, e.pointerType, e.pointerId);
         return;
       }
 
       if (e.cancelable) e.preventDefault();
-      followPointer(e);
+      followPointer(e.clientX);
     };
 
     const onPointerUp = (e: PointerEvent) => {
@@ -452,10 +486,51 @@ export function GlanceSection() {
       endDrag(false);
     };
 
+    // Touch path: 1:1 follow + preventDefault. iOS is unreliable with pointermove alone.
+    const onTouchMove = (e: TouchEvent) => {
+      if (!drag.held && !drag.tracking) return;
+      if (drag.axis === "v") return;
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      const dx = touch.clientX - drag.startX;
+      const dy = touch.clientY - drag.startY;
+
+      if (drag.axis === "none") {
+        const adx = Math.abs(dx);
+        const ady = Math.abs(dy);
+        if (adx < AXIS_LOCK_TOUCH_PX && ady < AXIS_LOCK_TOUCH_PX) return;
+        if (ady > adx) {
+          drag.axis = "v";
+          abortHold();
+          return;
+        }
+        if (e.cancelable) e.preventDefault();
+        lockHorizontal(touch.clientX, "touch", drag.pointerId);
+        return;
+      }
+
+      if (e.cancelable) e.preventDefault();
+      followPointer(touch.clientX);
+    };
+
+    const onTouchEnd = () => {
+      if (!drag.held && !drag.tracking && !drag.dragging) return;
+      endDrag(true);
+    };
+
+    const onTouchCancel = () => {
+      if (!drag.held && !drag.tracking && !drag.dragging) return;
+      endDrag(false);
+    };
+
     widgets.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove, { passive: false });
     window.addEventListener("pointerup", onPointerUp);
     window.addEventListener("pointercancel", onPointerCancel);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd);
+    window.addEventListener("touchcancel", onTouchCancel);
     widgets.addEventListener("lostpointercapture", onPointerCancel);
 
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -474,6 +549,9 @@ export function GlanceSection() {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
       window.removeEventListener("pointercancel", onPointerCancel);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchCancel);
       widgets.removeEventListener("lostpointercapture", onPointerCancel);
       mq.removeEventListener("change", syncVel);
       ctx.revert();

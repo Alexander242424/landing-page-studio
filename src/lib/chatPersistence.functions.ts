@@ -82,10 +82,13 @@ async function appendLocalDevFile(row: ChatEventRow): Promise<boolean> {
 export const logChatEvent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ChatEventRow.parse(input))
   .handler(async ({ data }) => {
-    // Telegram alerts run regardless of store success (best-effort).
-    void notifyTelegramForChatEvent(data).catch((error) => {
+    // Await the send — a detached `void` fetch is cancelled on Cloudflare
+    // when this handler returns (especially with no Supabase, store=client_only).
+    try {
+      await notifyTelegramForChatEvent(data);
+    } catch (error) {
       console.error("[chatPersistence] Telegram notify failed", error);
-    });
+    }
 
     try {
       const wroteRemote = await insertSupabase(data);

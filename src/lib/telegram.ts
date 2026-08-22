@@ -139,51 +139,105 @@ export function formatTelegramMessage(row: TelegramChatEvent): string {
   return lines.join("\n");
 }
 
+function readEnv(name: string): string | undefined {
+  // Dynamic key so Vite/Nitro cannot replace this with `undefined` at build time.
+  const value = process.env[name];
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
 function chatIds(): string[] {
-  const multi = process.env["TELEGRAM_CHAT_IDS"]?.trim();
+  const multi = readEnv("TELEGRAM_CHAT_IDS");
   if (multi) {
     return multi
       .split(",")
       .map((id) => id.trim())
       .filter(Boolean);
   }
-  const single = process.env["TELEGRAM_CHAT_ID"]?.trim();
+  const single = readEnv("TELEGRAM_CHAT_ID");
   return single ? [single] : [];
+}
+
+let warnedMissingEnv = false;
+
+function warnMissingEnv() {
+  if (warnedMissingEnv) return;
+  warnedMissingEnv = true;
+  console.warn(
+    "[telegram] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID/TELEGRAM_CHAT_IDS is not set — notifications disabled",
+  );
+}
+
+async function postSendMessage(
+  token: string,
+  chatId: string,
+  text: string,
+  parseMode: "HTML" | undefined,
+  signal: AbortSignal,
+): Promise<Response> {
+  return fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      ...(parseMode ? { parse_mode: parseMode } : {}),
+      disable_web_page_preview: true,
+    }),
+    signal,
+  });
 }
 
 /** Send a Telegram message. No-op if env is missing. */
 export async function sendTelegramMessage(text: string): Promise<boolean> {
-  const token = process.env["TELEGRAM_BOT_TOKEN"]?.trim();
+  const token = readEnv("TELEGRAM_BOT_TOKEN");
   const ids = chatIds();
-  if (!token || ids.length === 0) return false;
+  if (!token || ids.length === 0) {
+    warnMissingEnv();
+    return false;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8_000);
 
   let anyOk = false;
-  for (const chatId of ids) {
-    try {
-      const response = await fetch(
-        `https://api.telegram.org/bot${token}/sendMessage`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text,
-            parse_mode: "HTML",
-            disable_web_page_preview: true,
-          }),
-        },
-      );
-      if (!response.ok) {
-        const body = await response.text().catch(() => "");
-        console.error(
-          `[telegram] sendMessage failed (${response.status}): ${body}`,
+  try {
+    for (const chatId of ids) {
+      try {
+        let response = await postSendMessage(
+          token,
+          chatId,
+          text,
+          "HTML",
+          controller.signal,
         );
-        continue;
+        if (!response.ok && response.status === 400) {
+          // New copy / quotes / entities can trip HTML parse_mode — retry plain.
+          response = await postSendMessage(
+            token,
+            chatId,
+            text,
+            undefined,
+            controller.signal,
+          );
+        }
+        if (!response.ok) {
+          const body = await response.text().catch(() => "");
+          console.error(
+            `[telegram] sendMessage failed (${response.status}): ${body}`,
+          );
+          continue;
+        }
+        anyOk = true;
+      } catch (error) {
+        console.error("[telegram] sendMessage error", error);
       }
-      anyOk = true;
-    } catch (error) {
-      console.error("[telegram] sendMessage error", error);
     }
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (anyOk) {
+    console.info("[telegram] notification sent");
   }
   return anyOk;
 }

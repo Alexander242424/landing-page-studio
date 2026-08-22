@@ -147,6 +147,14 @@
   --rj-ease-soft: cubic-bezier(0.39, 0.575, 0.565, 1);
 }
 
+@media (max-width: 767px) {
+  :root {
+    /* Subhead / intro-tagline type: +8px vs 2.6rem at the 10px rem cap */
+    --rj-text-subhead: 3.4rem;
+    --rj-text-subhead-lh: 3.6rem;
+  }
+}
+
 @media (min-width: 768px) {
   :root {
     font-size: 10px;
@@ -2913,10 +2921,10 @@ body.rj-scroll-dark .rj-page__main {
   --transformOrigin: 0% 50%;
   opacity: 0;
   visibility: hidden;
-  font-size: 2.6rem;
+  font-size: 3.4rem;
   font-weight: 300;
   letter-spacing: -0.039rem;
-  line-height: 2.8rem;
+  line-height: 3.6rem;
 }
 
 .rj-text-reveal {
@@ -3108,6 +3116,7 @@ body.rj-scroll-dark .rj-page__main {
   perspective: 1200px;
   /* Vertical page scroll stays native; horizontal is handled in JS. */
   touch-action: pan-y;
+  overscroll-behavior-x: contain;
 }
 
 .rj-glance__track {
@@ -3168,6 +3177,14 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-glance__widget--full {
   aspect-ratio: 992 / 1150;
+}
+
+@media (max-width: 767px) {
+  .rj-glance__widget {
+    /* +15% vs 31rem tiles; height follows aspect-ratio */
+    width: 35.65rem;
+    flex: 0 0 35.65rem;
+  }
 }
 
 .rj-glance__widget--light,
@@ -5011,6 +5028,12 @@ body.rj-scroll-dark .rj-page__main {
   color: var(--rj-fg);
 }
 
+@media (max-width: 767px) {
+  .rj-process__description-text {
+    font-size: 1.6rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .rj-process__title-row {
     padding-bottom: 14rem;
@@ -5141,10 +5164,10 @@ body.rj-scroll-dark .rj-page__main {
   --transformOrigin: 0% 50%;
   opacity: 0;
   visibility: hidden;
-  font-size: 2.6rem;
+  font-size: 3.4rem;
   font-weight: 300;
   letter-spacing: -0.039rem;
-  line-height: 2.8rem;
+  line-height: 3.6rem;
 }
 
 .rj-approach__lead-content a {
@@ -6523,6 +6546,12 @@ html[data-rj-route="case"] body {
   color: color-mix(in srgb, var(--rj-white) 78%, transparent);
 }
 
+@media (max-width: 767px) {
+  .rj-article-cta__body {
+    font-size: 1.6rem;
+  }
+}
+
 .rj-article-cta .rj-article-cta__btn {
   box-sizing: border-box;
   display: flex;
@@ -7232,10 +7261,10 @@ html[data-rj-route="work"] body {
   margin: 1.6rem 0 0;
   max-width: 100%;
   font-family: var(--rj-font-sans);
-  font-size: 2.6rem;
+  font-size: 3.4rem;
   font-weight: 300;
   letter-spacing: -0.039rem;
-  line-height: 2.8rem;
+  line-height: 3.6rem;
   color: var(--rj-white);
 }
 
@@ -7604,6 +7633,13 @@ html[data-rj-route="work"] body {
   letter-spacing: -0.039rem;
   line-height: 2.8rem;
   color: var(--rj-black);
+}
+
+@media (max-width: 767px) {
+  .rj-case__title {
+    font-size: 3.4rem;
+    line-height: 3.6rem;
+  }
 }
 
 .rj-case__meta {

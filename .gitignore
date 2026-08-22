@@ -23,6 +23,11 @@ data/**
 !data/analytics/
 !data/analytics/.gitkeep
 
+# Local secrets (Telegram, Supabase, …)
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
