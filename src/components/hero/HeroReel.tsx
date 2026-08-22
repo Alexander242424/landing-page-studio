@@ -119,6 +119,19 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       );
     }
 
+    const logosStat = logos?.querySelector<HTMLElement>(".rj-hero__logos-stat");
+    if (logosStat) {
+      cleanups.push(
+        createAwardsCharReveal(logosStat, {
+          playOnLoad: true,
+          delay: 2.35,
+          duration: 1.2,
+          stagger: 0.04,
+          yStagger: 0.012,
+        }),
+      );
+    }
+
     const ctx = gsap.context(() => {
       if (actions) {
         gsap.set(actions, { autoAlpha: 0, y: 14 });
@@ -132,14 +145,65 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       }
 
       if (logos) {
-        gsap.set(logos, { autoAlpha: 0, y: 14 });
-        gsap.to(logos, {
-          autoAlpha: 1,
-          y: 0,
-          delay: 2.55,
-          duration: 1,
-          ease: "expo.out",
-        });
+        gsap.set(logos, { autoAlpha: 1 });
+
+        const desktopRow = window.matchMedia("(min-width: 768px)").matches;
+        const rowItems = Array.from(
+          logos.querySelectorAll<HTMLElement>(
+            ".rj-logo-strip__row > .rj-logo-strip__item",
+          ),
+        );
+        const trackItems = Array.from(
+          logos.querySelectorAll<HTMLElement>(
+            ".rj-logo-strip__track > .rj-logo-strip__item",
+          ),
+        );
+        const half = Math.floor(trackItems.length / 2);
+        const marks = desktopRow ? rowItems : trackItems.slice(0, half);
+        const loopCopies = desktopRow ? [] : trackItems.slice(half);
+
+        if (marks.length) {
+          const parent = marks[0]?.parentElement;
+          if (parent) gsap.set(parent, { perspective: 800 });
+          gsap.set(marks, {
+            autoAlpha: 0,
+            rotateX: 90,
+            rotateY: -5,
+            yPercent: 80,
+            transformOrigin: "50% 80%",
+          });
+          if (loopCopies.length) {
+            gsap.set(loopCopies, {
+              autoAlpha: 0,
+              rotateX: 90,
+              rotateY: -5,
+              yPercent: 80,
+              transformOrigin: "50% 80%",
+            });
+          }
+          gsap.to(marks, {
+            autoAlpha: 1,
+            rotateX: 0,
+            rotateY: 0,
+            yPercent: 0,
+            stagger: 0.07,
+            delay: 2.5,
+            duration: 1.25,
+            ease: "expo.out",
+          });
+          if (loopCopies.length) {
+            gsap.to(loopCopies, {
+              autoAlpha: 1,
+              rotateX: 0,
+              rotateY: 0,
+              yPercent: 0,
+              stagger: 0.07,
+              delay: 2.5,
+              duration: 1.25,
+              ease: "expo.out",
+            });
+          }
+        }
       }
 
       if (icon) {
@@ -214,8 +278,8 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
             copyUnit,
             { y: 0 },
             {
-              // Almost the original hold (0.5), just a touch faster off the top.
-              y: () => hero.offsetHeight * 0.42,
+              // A bit faster off the top than the original 0.5 hold — keep it mild.
+              y: () => hero.offsetHeight * 0.32,
               duration: 1,
               ease: "none",
             },
