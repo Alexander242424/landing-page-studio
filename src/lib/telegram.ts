@@ -155,7 +155,12 @@ function chatIds(): string[] {
 export async function sendTelegramMessage(text: string): Promise<boolean> {
   const token = process.env["TELEGRAM_BOT_TOKEN"]?.trim();
   const ids = chatIds();
-  if (!token || ids.length === 0) return false;
+  if (!token || ids.length === 0) {
+    console.warn(
+      "[telegram] skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID(S) missing in this runtime (republish after changing secrets)",
+    );
+    return false;
+  }
 
   let anyOk = false;
   for (const chatId of ids) {
