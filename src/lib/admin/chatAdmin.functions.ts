@@ -98,7 +98,7 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
       ) {
         continue;
       }
-      const meta = row.metadata ?? {};
+      const meta = (row.metadata ?? {}) as JsonRecord;
       const email =
         typeof meta["email"] === "string" ? (meta["email"] as string) : null;
       leads.push({
