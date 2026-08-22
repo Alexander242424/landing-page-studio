@@ -15,7 +15,7 @@ const SLOT_COUNT = 10;
 const MARQUEE_MQ = "(max-width: 767px)";
 
 /** ~px reserved for one hero mark (logo + padding). */
-const HERO_SLOT_PX = 118;
+const HERO_SLOT_PX = 136;
 
 /** Hero row: fill the bar as it widens — never leave a 3-logo hole on desktop. */
 function heroVisibleCount(availablePx: number): number {

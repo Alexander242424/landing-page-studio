@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
+import { useLayoutEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoStrip } from "@/components/home/LogoStrip";
@@ -31,8 +31,8 @@ const DEFAULT_HERO: ServiceHeroContent = {
  * Rejouice-matched hero + showreel:
  * - Awards char reveal on 2-line static headline
  * - Description via createTextReveal (same masked word reveal as HomeIntro / approach)
- * - Scrubbed title+description parallax (shared y); reel clip-path grow (desktop)
- *   + video parallax
+ * - Scrubbed title+description parallax; showreel stays full-bleed (no clip grow)
+ * - Logo bar sits outside the copy unit so it rides up with the video
  * - Taglines sit in normal hero flow on all breakpoints (no mobile bottom scrub —
  *   that desynced them from the showreel while the video scrolled)
  * - Mobile uses a lighter animation budget to avoid touch scroll jitter
@@ -92,7 +92,8 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
     if (!isRevealed) return;
     if (!hero || !logo || !copy || !reel || !videoWrap || !frame) return;
 
-    // Title + description/CTAs + logos share one scroll-linked y (move as one unit).
+    // Headline + description + CTAs share one scroll-linked y.
+    // Logos sit on the reel and scroll with it (Rejouice: bar + video go up together).
     const copyUnit = copy;
 
     const cleanups: Array<() => void> = [];
@@ -190,16 +191,14 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
         };
       });
 
-      // Desktop: keep full Rejouice scrub budget.
+      // Desktop: copy drifts; logos + full-bleed reel stay glued and scroll away together.
       mm.add(DESKTOP_MQ, () => {
-        // CSS vars scrub reliably in reverse (string clip-path + round often sticks).
-        // First-load: leave the entrance tween in charge of the opening clip.
-        if (!shouldPlay) {
-          gsap.set(frame, {
-            "--rj-reel-clip": "21.5%",
-            "--rj-reel-radius": "2.4rem",
-          });
-        }
+        gsap.set(frame, {
+          "--rj-reel-clip": "0%",
+          "--rj-reel-radius": "0rem",
+          clipPath: "inset(0% round 0rem)",
+        });
+        gsap.set(videoWrap, { clearProps: "transform" });
 
         gsap
           .timeline({
@@ -215,57 +214,18 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
             copyUnit,
             { y: 0 },
             {
-              y: () => hero.offsetHeight * 0.5,
+              // Almost the original hold (0.5), just a touch faster off the top.
+              y: () => hero.offsetHeight * 0.42,
               duration: 1,
               ease: "none",
             },
-          );
-
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: reel,
-              scrub: true,
-              start: "top bottom",
-              end: "top top",
-              invalidateOnRefresh: true,
-            },
-          })
-          .fromTo(
-            frame,
-            {
-              "--rj-reel-clip": "21.5%",
-              "--rj-reel-radius": "2.4rem",
-            },
-            {
-              "--rj-reel-clip": "0%",
-              "--rj-reel-radius": "0rem",
-              ease: "none",
-              duration: 1,
-              immediateRender: false,
-            },
-          );
-
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: reel,
-              scrub: true,
-              start: "top bottom",
-              end: "bottom top",
-              invalidateOnRefresh: true,
-            },
-          })
-          .fromTo(
-            videoWrap,
-            { yPercent: -50 },
-            { yPercent: 50, ease: "none", duration: 1 },
           );
 
         return () => {
           gsap.set(frame, {
             clearProps: "--rj-reel-clip,--rj-reel-radius,clipPath",
           });
+          gsap.set(videoWrap, { clearProps: "transform" });
         };
       });
 
@@ -286,44 +246,6 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       ctx.revert();
     };
   }, [isRevealed, shouldPlay]);
-
-  // Keep logo bar width locked to the reel's *initial* visible frame (inset clip),
-  // not 57% of the padded hero — that was leaving side gaps vs the video.
-  useEffect(() => {
-    const root = rootRef.current;
-    const frame = frameRef.current;
-    if (!root || !frame) return;
-
-    const syncLogosWidth = () => {
-      if (!window.matchMedia(DESKTOP_MQ).matches) {
-        root.style.removeProperty("--rj-reel-logos-width");
-        return;
-      }
-
-      const insetRaw = getComputedStyle(root)
-        .getPropertyValue("--rj-reel-start-inset")
-        .trim();
-      const insetPct = Number.parseFloat(insetRaw) || 21.5;
-      // getBoundingClientRect ignores clip-path — full reel width, then apply start inset.
-      const frameW = frame.getBoundingClientRect().width;
-      const visibleW = frameW * (1 - (2 * insetPct) / 100);
-      root.style.setProperty("--rj-reel-logos-width", `${Math.round(visibleW * 100) / 100}px`);
-    };
-
-    syncLogosWidth();
-    const ro = new ResizeObserver(syncLogosWidth);
-    ro.observe(frame);
-    window.addEventListener("resize", syncLogosWidth);
-    const mq = window.matchMedia(DESKTOP_MQ);
-    mq.addEventListener("change", syncLogosWidth);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", syncLogosWidth);
-      mq.removeEventListener("change", syncLogosWidth);
-      root.style.removeProperty("--rj-reel-logos-width");
-    };
-  }, []);
 
   return (
     <section ref={rootRef} className="rj-hero-reel" id="hero" aria-label="Hero">
@@ -367,19 +289,19 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
               </div>
             </div>
           </div>
+        </div>
 
-          <div ref={logosRef} className="rj-hero__logos">
-            <div className="rj-hero__logos-bar">
-              <p className="rj-hero__logos-stat">
-                {hero.logosStat.split("\n").map((line, index, arr) => (
-                  <span key={line}>
-                    {line}
-                    {index < arr.length - 1 ? <br /> : null}
-                  </span>
-                ))}
-              </p>
-              <LogoStrip variant="hero" />
-            </div>
+        <div ref={logosRef} className="rj-hero__logos">
+          <div className="rj-hero__logos-bar">
+            <p className="rj-hero__logos-stat">
+              {hero.logosStat.split("\n").map((line, index, arr) => (
+                <span key={line}>
+                  {line}
+                  {index < arr.length - 1 ? <br /> : null}
+                </span>
+              ))}
+            </p>
+            <LogoStrip variant="hero" />
           </div>
         </div>
 

@@ -1505,9 +1505,6 @@ ul {
 
 /* ─── Hero + showreel (always dark; page after video is light) ─── */
 .rj-hero-reel {
-  /* Reel frame starts at inset(21.5%) → visible width 57% */
-  --rj-reel-start-inset: 21.5%;
-  --rj-reel-start-width: 57%;
   background: var(--rj-black);
   color: var(--rj-white);
 }
@@ -1525,8 +1522,8 @@ ul {
   min-height: calc(80svh + 40px);
   overflow: hidden;
   padding-inline: var(--rj-grid-margin);
-  /* Keep logos from sitting flush on the reel */
-  padding-bottom: calc(2.4rem - 16px);
+  /* Sit the logo bar on the reel so they scroll away as one unit */
+  padding-bottom: 0;
   color: var(--rj-white);
   font-size: 1.4rem;
   font-weight: 400;
@@ -1570,8 +1567,7 @@ ul {
   min-height: 0;
 }
 
-/* Client marks — bottom of dark hero, above showreel (AngelList bar).
-   Desktop: match starting reel frame width (inset 21.5% → 57% centered). */
+/* Client marks — sit on the showreel so the bar + video rise together. */
 .rj-hero__logos {
   position: relative;
   z-index: 2;
@@ -2011,16 +2007,10 @@ ul {
 }
 
 @media (min-width: 1024px) {
-  .rj-reel__videos {
-    will-change: transform;
-  }
-
   .rj-reel__video-frame {
-    --rj-reel-clip: var(--rj-reel-start-inset);
-    --rj-reel-radius: 2.4rem;
-    will-change: clip-path;
-    /* Start ~25% narrower than prior 12% inset (76% → ~57% width) */
-    clip-path: inset(var(--rj-reel-clip) round var(--rj-reel-radius));
+    --rj-reel-clip: 0%;
+    --rj-reel-radius: 0rem;
+    clip-path: inset(0% round 0rem);
   }
 }
 
@@ -2085,8 +2075,7 @@ ul {
     min-height: calc(79.2svh + 80px);
     min-height: calc(var(--rj-svh, 1svh) * 79.2 + 80px);
     padding-inline: 4rem;
-    /* Gap between logo bar and showreel (−16px closer) */
-    padding-bottom: calc(3.2rem - 16px);
+    padding-bottom: 0;
     font-size: 1.6rem;
     font-weight: 300;
     letter-spacing: -0.016rem;
@@ -2094,23 +2083,21 @@ ul {
   }
 
   .rj-hero__logos {
-    /* Full-bleed to viewport so the bar can match the reel frame pixel-for-pixel */
     width: 100vw;
     max-width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: 0;
     margin-top: 0;
-    padding-inline: 0;
+    padding-inline: 4rem;
     display: flex;
     justify-content: center;
     box-sizing: border-box;
   }
 
   .rj-hero__logos-bar {
-    /* Set in HeroReel from measured reel frame × (1 − 2×start-inset) */
-    width: var(--rj-reel-logos-width, 57vw);
-    max-width: var(--rj-reel-logos-width, 57vw);
-    margin-inline: auto;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
     padding: 0 0 1.8rem;
     box-sizing: border-box;
   }
@@ -2243,17 +2230,10 @@ ul {
   visibility: hidden;
 }
 
-/* Video starts inset/scaled so the wipe reveals the grow, not a full frame */
+/* Video starts slightly scaled; rest state is full-bleed */
 .rj-page--enter:not(.rj-page--entered) .rj-reel__video-frame {
-  transform: scale(1.06);
+  transform: scale(1.04);
   transform-origin: 50% 50%;
-}
-
-@media (min-width: 1024px) {
-  .rj-page--enter:not(.rj-page--entered) .rj-reel__video-frame {
-    --rj-reel-clip: 35.5%;
-    --rj-reel-radius: 3rem;
-  }
 }
 
 /* First-load preloader: lock native + Lenis scroll until the wipe finishes */
@@ -2727,8 +2707,8 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-logo-strip--hero .rj-logo-strip__row > .rj-logo-strip__item {
   position: relative;
-  height: calc(2.3rem * 1.058);
-  padding-inline: clamp(0.8rem, 1.6vw, 1.8rem);
+  height: calc(2.53rem * 1.058);
+  padding-inline: clamp(1.15rem, 2.1vw, 2.5rem);
 }
 
 .rj-logo-strip__slot {
@@ -2761,8 +2741,8 @@ body.rj-scroll-dark .rj-page__main {
 
 /* Monochrome light-gray marks on dark hero (filter only — keep opacity free for crossfade) */
 .rj-logo-strip--hero .rj-logo-strip__logo {
-  max-height: 2.3rem;
-  max-width: min(10.35rem, 13.8vw);
+  max-height: 2.53rem;
+  max-width: min(11.4rem, 15.2vw);
   transform: scale(1);
   filter: brightness(0) invert(0.62);
 }
@@ -2808,8 +2788,8 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-logo-strip--hero .rj-logo-strip__item {
-    height: calc(2.01rem * 1.058);
-    margin-inline-end: 2.8rem;
+    height: calc(2.21rem * 1.058);
+    margin-inline-end: 3.3rem;
     padding-inline: 0;
   }
 
@@ -2819,8 +2799,8 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-logo-strip--hero .rj-logo-strip__logo {
-    max-height: 2.01rem;
-    max-width: 8.3rem;
+    max-height: 2.21rem;
+    max-width: 9.1rem;
   }
 }
 
@@ -2854,8 +2834,8 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-logo-strip--hero .rj-logo-strip__row > .rj-logo-strip__item {
-    height: calc(2.3rem * 1.058);
-    padding-inline: clamp(0.8rem, 1.6vw, 1.8rem);
+    height: calc(2.53rem * 1.058);
+    padding-inline: clamp(1.15rem, 2.1vw, 2.5rem);
   }
 
   .rj-logo-strip__logo {
@@ -2864,8 +2844,8 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-logo-strip--hero .rj-logo-strip__logo {
-    max-height: 2.3rem;
-    max-width: min(10.35rem, 13.8vw);
+    max-height: 2.53rem;
+    max-width: min(11.4rem, 15.2vw);
   }
 }
 
