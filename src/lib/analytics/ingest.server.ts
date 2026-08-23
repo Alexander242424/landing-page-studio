@@ -18,7 +18,7 @@ export const AnalyticsIngestInput = z.object({
 
 export type AnalyticsIngestInput = z.infer<typeof AnalyticsIngestInput>;
 
-function supabaseConfig(): { url: string; key: string } | null {
+export function supabaseConfig(): { url: string; key: string } | null {
   const url = process.env["SUPABASE_URL"]?.replace(/\/$/, "");
   const key =
     process.env["SUPABASE_SERVICE_ROLE_KEY"] ??

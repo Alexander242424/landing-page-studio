@@ -132,6 +132,41 @@ export const trackAnalyticsEvent = createServerFn({ method: "POST" })
       city: geo.city,
     };
     const ok = await appendAnalytics(row);
+
+    const remoteEvent =
+      data.name === "page_view"
+        ? "view"
+        : data.name === "page_heartbeat"
+          ? "heartbeat"
+          : data.name === "page_leave"
+            ? "hide"
+            : null;
+    if (remoteEvent) {
+      try {
+        const { getRequestHeaders } = await import(
+          "@tanstack/react-start/server"
+        );
+        const { ingestAnalyticsEvent } = await import(
+          "@/lib/analytics/ingest.server"
+        );
+        await ingestAnalyticsEvent(
+          {
+            path: data.path,
+            event: remoteEvent,
+            sessionId: data.sessionId,
+            referrer: data.referrer ?? null,
+            durationMs:
+              typeof data.durationSec === "number"
+                ? Math.round(data.durationSec * 1000)
+                : null,
+          },
+          getRequestHeaders(),
+        );
+      } catch (error) {
+        console.warn("[analytics] supabase dual-write failed", error);
+      }
+    }
+
     return { ok };
   });
 

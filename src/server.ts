@@ -69,4 +69,12 @@ export default {
       });
     }
   },
+
+  async scheduled(_event: unknown, env: unknown, ctx: { waitUntil(p: Promise<unknown>): void }) {
+    applyWorkerEnvBindings(env);
+    const { runDailyAnalyticsDigest } = await import(
+      "./lib/analytics/dailyDigest"
+    );
+    ctx.waitUntil(runDailyAnalyticsDigest({ source: "cron" }));
+  },
 };
