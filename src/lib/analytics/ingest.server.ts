@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { resolveRequestGeo } from "@/lib/analytics/geo.server";
+import type { GeoLocation } from "@/lib/analytics/geo.server";
+import {
+  geoFromLocale,
+  geoFromTimeZone,
+  isUnresolvedGeo,
+  resolveRequestGeo,
+} from "@/lib/analytics/geo.server";
 
 export const AnalyticsIngestInput = z.object({
   path: z.string().min(1).max(2048),
@@ -14,6 +20,8 @@ export const AnalyticsIngestInput = z.object({
   viewportW: z.number().int().nonnegative().max(10000).nullable().optional(),
   scrollPct: z.number().int().min(0).max(100).nullable().optional(),
   durationMs: z.number().int().nonnegative().max(86_400_000).nullable().optional(),
+  locale: z.string().max(32).nullable().optional(),
+  timezone: z.string().max(64).nullable().optional(),
 });
 
 export type AnalyticsIngestInput = z.infer<typeof AnalyticsIngestInput>;
@@ -43,25 +51,47 @@ function articleSlugFromPath(path: string, explicit?: string | null): string | n
  * Persist one analytics event. Country is resolved from request headers
  * (never from a client IP field). Returns false if Supabase is unset.
  */
+function persistableGeo(geo: GeoLocation | null): {
+  country: string | null;
+  countryCode: string | null;
+  city: string | null;
+} {
+  if (!geo || isUnresolvedGeo(geo)) {
+    return { country: null, countryCode: null, city: geo?.city ?? null };
+  }
+  return {
+    country: geo.country,
+    countryCode: geo.countryCode,
+    city: geo.city && geo.city !== "Local" ? geo.city : null,
+  };
+}
+
 export async function ingestAnalyticsEvent(
   data: AnalyticsIngestInput,
   headers?: { get(name: string): string | null | undefined },
+  geoHint?: GeoLocation | null,
 ): Promise<{ ok: boolean; store: "supabase" | "none" }> {
   const cfg = supabaseConfig();
   if (!cfg) return { ok: false, store: "none" };
 
-  let country: string | null = null;
-  let countryCode: string | null = null;
-  if (headers) {
+  let geo: GeoLocation | null = geoHint ?? null;
+  if (isUnresolvedGeo(geo) && headers) {
     try {
-      const geo = await resolveRequestGeo(headers);
-      country =
-        geo.country && geo.country !== "Local" ? geo.country : null;
-      countryCode = geo.countryCode;
+      geo = await resolveRequestGeo(headers);
     } catch (error) {
       console.warn("[analytics] geo resolve failed", error);
     }
   }
+  if (isUnresolvedGeo(geo)) {
+    const acceptLang = headers?.get("accept-language")?.split(",")[0]?.trim() ?? null;
+    geo =
+      geoFromTimeZone(data.timezone) ??
+      geoFromLocale(data.locale) ??
+      geoFromLocale(acceptLang) ??
+      geo;
+  }
+
+  const resolved = persistableGeo(geo);
 
   const row = {
     path: data.path,
@@ -76,21 +106,33 @@ export async function ingestAnalyticsEvent(
     viewport_w: data.viewportW ?? null,
     scroll_pct: data.scrollPct ?? null,
     duration_ms: data.durationMs ?? null,
-    country,
-    country_code: countryCode,
+    country: resolved.country,
+    country_code: resolved.countryCode,
+    city: resolved.city,
   };
 
   try {
-    const response = await fetch(`${cfg.url}/rest/v1/analytics_events`, {
+    const headersOut = {
+      apikey: cfg.key,
+      Authorization: `Bearer ${cfg.key}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
+    let response = await fetch(`${cfg.url}/rest/v1/analytics_events`, {
       method: "POST",
-      headers: {
-        apikey: cfg.key,
-        Authorization: `Bearer ${cfg.key}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
+      headers: headersOut,
       body: JSON.stringify(row),
     });
+    // City column is additive — retry without it if the migration is not applied yet.
+    if (!response.ok && row.city) {
+      const { city: _city, ...withoutCity } = row;
+      void _city;
+      response = await fetch(`${cfg.url}/rest/v1/analytics_events`, {
+        method: "POST",
+        headers: headersOut,
+        body: JSON.stringify(withoutCity),
+      });
+    }
     if (!response.ok) {
       const body = await response.text().catch(() => "");
       console.warn(

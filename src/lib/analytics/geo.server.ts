@@ -104,14 +104,18 @@ function header(headers: HeaderMap, name: string): string | null {
 
 function geoFromPlatformHeaders(headers: HeaderMap): GeoLocation | null {
   const countryCode = (
-    header(headers, "x-vercel-ip-country") ??
     header(headers, "cf-ipcountry") ??
-    header(headers, "cloudfront-viewer-country")
+    header(headers, "x-vercel-ip-country") ??
+    header(headers, "cloudfront-viewer-country") ??
+    header(headers, "x-country-code") ??
+    header(headers, "x-nf-country") ??
+    header(headers, "x-appengine-country") ??
+    header(headers, "fastly-client-country-code")
   )?.toUpperCase() ?? null;
 
   const city =
-    header(headers, "x-vercel-ip-city") ??
     header(headers, "cf-ipcity") ??
+    header(headers, "x-vercel-ip-city") ??
     header(headers, "cloudfront-viewer-city");
 
   const decodedCity = city ? decodeURIComponent(city) : null;
@@ -198,7 +202,9 @@ export async function resolveRequestGeo(headers: HeaderMap): Promise<GeoLocation
   const platform = geoFromPlatformHeaders(headers);
   const ip = firstPublicIp([
     header(headers, "cf-connecting-ip"),
+    header(headers, "true-client-ip"),
     header(headers, "x-real-ip"),
+    header(headers, "x-client-ip"),
     header(headers, "x-forwarded-for"),
     header(headers, "x-vercel-forwarded-for"),
   ]);
@@ -236,6 +242,86 @@ export async function resolveRequestGeo(headers: HeaderMap): Promise<GeoLocation
     now,
   );
   return { country: "Local", countryCode: null, city: "Local" };
+}
+
+const TIMEZONE_COUNTRY: Record<string, string> = {
+  "Europe/Warsaw": "PL",
+  "Europe/Kyiv": "UA",
+  "Europe/Kiev": "UA",
+  "Europe/Uzhgorod": "UA",
+  "Europe/Zaporozhye": "UA",
+  "Europe/Berlin": "DE",
+  "Europe/London": "GB",
+  "Europe/Paris": "FR",
+  "Europe/Amsterdam": "NL",
+  "Europe/Prague": "CZ",
+  "Europe/Vienna": "AT",
+  "Europe/Rome": "IT",
+  "Europe/Madrid": "ES",
+  "Europe/Lisbon": "PT",
+  "Europe/Stockholm": "SE",
+  "Europe/Oslo": "NO",
+  "Europe/Copenhagen": "DK",
+  "Europe/Helsinki": "FI",
+  "Europe/Bucharest": "RO",
+  "Europe/Sofia": "BG",
+  "Europe/Athens": "GR",
+  "Europe/Istanbul": "TR",
+  "Europe/Riga": "LV",
+  "Europe/Vilnius": "LT",
+  "Europe/Tallinn": "EE",
+  "Europe/Dublin": "IE",
+  "Europe/Zurich": "CH",
+  "Europe/Brussels": "BE",
+  "America/New_York": "US",
+  "America/Chicago": "US",
+  "America/Denver": "US",
+  "America/Los_Angeles": "US",
+  "America/Toronto": "CA",
+  "America/Vancouver": "CA",
+  "America/Sao_Paulo": "BR",
+  "Asia/Dubai": "AE",
+  "Asia/Singapore": "SG",
+  "Asia/Tokyo": "JP",
+  "Australia/Sydney": "AU",
+};
+
+export function geoFromTimeZone(timezone?: string | null): GeoLocation | null {
+  if (!timezone) return null;
+  const countryCode = TIMEZONE_COUNTRY[timezone.trim()];
+  if (!countryCode) return null;
+  return {
+    country: countryNameFromCode(countryCode),
+    countryCode,
+    city: null,
+  };
+}
+
+/**
+ * Weak country fallback from Accept-Language / navigator.language
+ * (`uk-UA` → Ukraine). Used only when edge geo headers are missing.
+ */
+export function geoFromLocale(locale?: string | null): GeoLocation | null {
+  if (!locale) return null;
+  const parts = locale.trim().replaceAll("_", "-").split("-");
+  const region = parts.find((part, index) => {
+    if (index === 0) return false;
+    return /^[A-Za-z]{2}$/.test(part);
+  });
+  if (!region) return null;
+  const countryCode = region.toUpperCase();
+  if (countryCode === "XX" || countryCode === "T1") return null;
+  return {
+    country: countryNameFromCode(countryCode),
+    countryCode,
+    city: null,
+  };
+}
+
+export function isUnresolvedGeo(geo: GeoLocation | null | undefined): boolean {
+  if (!geo) return true;
+  const country = geo.country?.trim();
+  return !country || country === "Local" || country === "Unknown";
 }
 
 export function formatGeoLabel(geo: {

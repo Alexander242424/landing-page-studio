@@ -1,8 +1,21 @@
 import { trackAnalyticsEvent } from "@/lib/analytics/analytics.functions";
-import type { AnalyticsEventName } from "@/lib/analytics/types";
+import type {
+  AnalyticsDevice,
+  AnalyticsEventName,
+  AnalyticsEventInput,
+} from "@/lib/analytics/types";
 
 const SESSION_COOKIE = "uxlab_aid";
 const SESSION_DAYS = 365;
+const ATTR_COOKIE = "uxlab_src";
+const ATTR_DAYS = 90;
+
+export type FirstTouch = {
+  source: string | null;
+  medium: string | null;
+  campaign: string | null;
+  referrer: string | null;
+};
 
 function createId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -40,6 +53,104 @@ export function getAnalyticsSessionId(): string {
   }
 }
 
+export function detectDevice(): AnalyticsDevice {
+  if (typeof window === "undefined") return "desktop";
+  const width = window.innerWidth;
+  if (width < 768) return "mobile";
+  if (width < 1024) return "tablet";
+  return "desktop";
+}
+
+function utmParam(name: string): string | null {
+  if (typeof window === "undefined") return null;
+  const value = new URLSearchParams(window.location.search).get(name);
+  return value?.trim() || null;
+}
+
+function readFirstTouch(): FirstTouch | null {
+  const raw = readCookie(ATTR_COOKIE);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as FirstTouch;
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      source: parsed.source ?? null,
+      medium: parsed.medium ?? null,
+      campaign: parsed.campaign ?? null,
+      referrer: parsed.referrer ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * First-touch source: landing UTM + referrer, kept for 90 days so later
+ * page views still report where the person originally came from.
+ * A later UTM click overwrites (campaign wins).
+ */
+export function getFirstTouch(): FirstTouch {
+  if (typeof window === "undefined") {
+    return { source: null, medium: null, campaign: null, referrer: null };
+  }
+
+  const incoming: FirstTouch = {
+    source: utmParam("utm_source"),
+    medium: utmParam("utm_medium"),
+    campaign: utmParam("utm_campaign"),
+    referrer: document.referrer || null,
+  };
+  const existing = readFirstTouch();
+
+  if (incoming.source) {
+    writeCookie(ATTR_COOKIE, JSON.stringify(incoming), ATTR_DAYS);
+    return incoming;
+  }
+
+  if (existing && (existing.source || existing.referrer)) {
+    return existing;
+  }
+
+  writeCookie(ATTR_COOKIE, JSON.stringify(incoming), ATTR_DAYS);
+  return incoming;
+}
+
+function clientLocale(): string | null {
+  if (typeof navigator === "undefined") return null;
+  return navigator.language || navigator.languages?.[0] || null;
+}
+
+function clientTimezone(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+}
+
+function buildTrackPayload(
+  name: AnalyticsEventName | string,
+  extras?: { durationSec?: number; meta?: Record<string, unknown> },
+): AnalyticsEventInput {
+  const touch = getFirstTouch();
+  return {
+    name,
+    path: `${window.location.pathname}${window.location.search}`,
+    referrer: touch.referrer || document.referrer || null,
+    sessionId: getAnalyticsSessionId(),
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent || null,
+    durationSec: extras?.durationSec ?? null,
+    utmSource: touch.source,
+    utmMedium: touch.medium,
+    utmCampaign: touch.campaign,
+    locale: clientLocale(),
+    timezone: clientTimezone(),
+    device: detectDevice(),
+    meta: extras?.meta ?? {},
+  };
+}
+
 export function trackEvent(
   name: AnalyticsEventName | string,
   meta?: Record<string, unknown>,
@@ -47,16 +158,10 @@ export function trackEvent(
 ): void {
   if (typeof window === "undefined") return;
 
-  const row = {
-    name,
-    path: `${window.location.pathname}${window.location.search}`,
-    referrer: document.referrer || null,
-    sessionId: getAnalyticsSessionId(),
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent || null,
-    durationSec: extras?.durationSec ?? null,
-    meta: meta ?? {},
-  };
+  const row = buildTrackPayload(name, {
+    durationSec: extras?.durationSec,
+    meta,
+  });
 
   void trackAnalyticsEvent({ data: row }).catch(() => {
     // Fire-and-forget — never break the marketing site.
@@ -67,22 +172,10 @@ export function trackEvent(
 export function trackLeaveBeacon(durationSec: number): void {
   if (typeof window === "undefined") return;
 
-  const payload = {
-    name: "page_leave" as const,
-    path: `${window.location.pathname}${window.location.search}`,
-    referrer: document.referrer || null,
-    sessionId: getAnalyticsSessionId(),
-    timestamp: new Date().toISOString(),
-    userAgent: navigator.userAgent || null,
-    durationSec,
-    meta: {},
-  };
+  const payload = buildTrackPayload("page_leave", { durationSec });
 
   try {
-    const body = JSON.stringify({ data: payload });
-    // Server fn POST URL is opaque; fall back to trackEvent.
     void trackAnalyticsEvent({ data: payload });
-    void body;
   } catch {
     trackEvent("page_leave", {}, { durationSec });
   }

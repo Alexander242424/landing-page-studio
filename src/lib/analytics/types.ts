@@ -7,6 +7,8 @@ export type AnalyticsEventName =
   | "lead_submit"
   | "custom";
 
+export type AnalyticsDevice = "mobile" | "tablet" | "desktop";
+
 export type AnalyticsEventInput = {
   name: AnalyticsEventName | string;
   path: string;
@@ -16,6 +18,12 @@ export type AnalyticsEventInput = {
   userAgent?: string | null;
   /** Seconds spent on page (heartbeat / leave) */
   durationSec?: number | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  locale?: string | null;
+  timezone?: string | null;
+  device?: AnalyticsDevice | null;
   meta?: Record<string, unknown>;
 };
 

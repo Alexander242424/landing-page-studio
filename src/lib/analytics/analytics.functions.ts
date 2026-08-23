@@ -15,6 +15,12 @@ const TrackInput = z.object({
   timestamp: z.string().min(1).max(64),
   userAgent: z.string().max(512).nullable().optional(),
   durationSec: z.number().nonnegative().nullable().optional(),
+  utmSource: z.string().max(120).nullable().optional(),
+  utmMedium: z.string().max(120).nullable().optional(),
+  utmCampaign: z.string().max(120).nullable().optional(),
+  locale: z.string().max(32).nullable().optional(),
+  timezone: z.string().max(64).nullable().optional(),
+  device: z.enum(["mobile", "tablet", "desktop"]).nullable().optional(),
   meta: z.record(z.unknown()).optional(),
 });
 
@@ -108,10 +114,13 @@ export const trackAnalyticsEvent = createServerFn({ method: "POST" })
       const { getRequestHeaders } = await import(
         "@tanstack/react-start/server"
       );
-      const { resolveRequestGeo } = await import(
-        "@/lib/analytics/geo.server"
-      );
+      const { geoFromLocale, geoFromTimeZone, isUnresolvedGeo, resolveRequestGeo } =
+        await import("@/lib/analytics/geo.server");
       geo = await resolveRequestGeo(getRequestHeaders());
+      if (isUnresolvedGeo(geo)) {
+        geo =
+          geoFromTimeZone(data.timezone) ?? geoFromLocale(data.locale) ?? geo;
+      }
     } catch (error) {
       console.warn("[analytics] geo resolve failed", error);
     }
@@ -126,6 +135,12 @@ export const trackAnalyticsEvent = createServerFn({ method: "POST" })
       timestamp: data.timestamp,
       userAgent: data.userAgent ?? null,
       durationSec: data.durationSec ?? null,
+      utmSource: data.utmSource ?? null,
+      utmMedium: data.utmMedium ?? null,
+      utmCampaign: data.utmCampaign ?? null,
+      locale: data.locale ?? null,
+      timezone: data.timezone ?? null,
+      device: data.device ?? null,
       meta: data.meta ?? {},
       country: geo.country,
       countryCode: geo.countryCode,
@@ -155,12 +170,19 @@ export const trackAnalyticsEvent = createServerFn({ method: "POST" })
             event: remoteEvent,
             sessionId: data.sessionId,
             referrer: data.referrer ?? null,
+            utmSource: data.utmSource ?? null,
+            utmMedium: data.utmMedium ?? null,
+            utmCampaign: data.utmCampaign ?? null,
+            device: data.device ?? null,
+            locale: data.locale ?? null,
+            timezone: data.timezone ?? null,
             durationMs:
               typeof data.durationSec === "number"
                 ? Math.round(data.durationSec * 1000)
                 : null,
           },
           getRequestHeaders(),
+          geo,
         );
       } catch (error) {
         console.warn("[analytics] supabase dual-write failed", error);

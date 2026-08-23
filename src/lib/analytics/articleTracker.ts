@@ -1,4 +1,8 @@
-import { getAnalyticsSessionId } from "@/lib/analytics/tracker";
+import {
+  detectDevice,
+  getAnalyticsSessionId,
+  getFirstTouch,
+} from "@/lib/analytics/tracker";
 
 export type ArticleAnalyticsEvent = "view" | "heartbeat" | "scroll" | "hide";
 
@@ -11,25 +15,15 @@ export type ArticleTrackPayload = {
   utmSource: string | null;
   utmMedium: string | null;
   utmCampaign: string | null;
+  locale: string | null;
+  timezone: string | null;
   device: "mobile" | "tablet" | "desktop";
   viewportW: number;
   scrollPct: number;
   durationMs: number | null;
 };
 
-function utmParam(name: string): string | null {
-  if (typeof window === "undefined") return null;
-  const value = new URLSearchParams(window.location.search).get(name);
-  return value?.trim() || null;
-}
-
-export function detectDevice(): "mobile" | "tablet" | "desktop" {
-  if (typeof window === "undefined") return "desktop";
-  const width = window.innerWidth;
-  if (width < 768) return "mobile";
-  if (width < 1024) return "tablet";
-  return "desktop";
-}
+export { detectDevice } from "@/lib/analytics/tracker";
 
 export function measureScrollPct(): number {
   if (typeof window === "undefined" || typeof document === "undefined") {
@@ -47,15 +41,18 @@ export function buildArticleTrackPayload(
   event: ArticleAnalyticsEvent,
   extras: { scrollPct: number; durationMs?: number | null },
 ): ArticleTrackPayload {
+  const touch = getFirstTouch();
   return {
     path: `${window.location.pathname}${window.location.search}`,
     articleSlug: slug,
     event,
     sessionId: getAnalyticsSessionId(),
-    referrer: document.referrer || null,
-    utmSource: utmParam("utm_source"),
-    utmMedium: utmParam("utm_medium"),
-    utmCampaign: utmParam("utm_campaign"),
+    referrer: touch.referrer || document.referrer || null,
+    utmSource: touch.source,
+    utmMedium: touch.medium,
+    utmCampaign: touch.campaign,
+    locale: navigator.language || navigator.languages?.[0] || null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
     device: detectDevice(),
     viewportW: window.innerWidth,
     scrollPct: extras.scrollPct,
