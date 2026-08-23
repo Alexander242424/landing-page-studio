@@ -18,8 +18,6 @@ import {
   useArticleCatalog,
 } from "@/hooks/useArticleCatalog";
 import { megaArticles } from "@/lib/articleCatalog";
-import { useWorkCatalog, workCatalogItems } from "@/hooks/useWorkCatalog";
-import { megaWorkItems } from "@/lib/workCatalog";
 import { SOLUTIONS } from "@/lib/solutions";
 import {
   solutionHasLanding,
@@ -27,13 +25,13 @@ import {
 } from "@/lib/servicePages";
 import { cn } from "@/lib/utils";
 
-type MegaKind = "work" | "solutions" | "resources";
+type MegaKind = "solutions" | "resources";
 
 /** Keep panel mounted through CSS close (opacity + slight y). */
 const MEGA_EXIT_MS = 320;
 
 const NAV_ITEMS = [
-  { label: "Work", href: "/work", mega: "work" as const },
+  { label: "Work", href: "/work" },
   { label: "Solutions", href: "#solutions", mega: "solutions" as const },
   { label: "Resources", href: "/resources", mega: "resources" as const },
 ] as const;
@@ -51,21 +49,15 @@ function navMega(item: NavItem): MegaKind | null {
 
 const MEGA_ARTICLES_FALLBACK = ARTICLES.slice(0, 4);
 
-function glanceLogoSrc(slug: string) {
-  return `/glance/${slug}.svg`;
-}
-
 type SiteHeaderProps = {
   /** `home` = hash scroll-spy; `site` = navigate to home sections */
   variant?: "home" | "site";
 };
 
 /**
- * Fixed mix-blend header: scroll-spy nav, desktop megas (Work / Solutions / Resources), mobile burger.
+ * Fixed mix-blend header: scroll-spy nav, desktop megas (Solutions / Resources), mobile burger.
  */
 export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
-  const workCatalog = useWorkCatalog();
-  const megaWorkCases = megaWorkItems(workCatalogItems(workCatalog.data));
   const articleCatalog = useArticleCatalog();
   const fromCatalog = megaArticles(articleCatalogItems(articleCatalog.data), 4);
   const megaResourceArticles =
@@ -646,86 +638,13 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
         role="region"
         aria-hidden={!megaOpen}
         inert={!megaOpen}
-        aria-label={
-          megaKind === "work"
-            ? "Work"
-            : megaKind === "resources"
-              ? "Resources"
-              : "Solutions"
-        }
+        aria-label={megaKind === "resources" ? "Resources" : "Solutions"}
         onMouseEnter={
           megaOpen && megaKind ? () => openMega(megaKind) : undefined
         }
         onMouseLeave={scheduleMegaClose}
       >
         <div className="rj-mega__panel">
-          {megaKind === "work" ? (
-            <>
-              <ul className="rj-mega-work">
-                {megaWorkCases.map((item) => (
-                  <li key={item.slug} className="rj-mega-work__item rj-mega__enter">
-                    <Link
-                      to="/work/$slug"
-                      params={{ slug: item.slug }}
-                      viewTransition
-                      className="rj-mega-work__tile"
-                      onClick={closeMega}
-                    >
-                      <div className="rj-mega-work__bg">
-                        <img
-                          src={item.image}
-                          alt=""
-                          width={640}
-                          height={480}
-                          decoding="async"
-                          draggable={false}
-                        />
-                      </div>
-                      <div className="rj-mega-work__card">
-                        <div className="rj-mega-work__title">
-                          <p>
-                            {item.headline.line}
-                            <br />
-                            {item.headline.emphasis}
-                          </p>
-                        </div>
-                        <div className="rj-mega-work__bottom">
-                          <span className="rj-mega-work__cta">
-                            <ArrowCue className="rj-link-active">
-                              Case Study
-                            </ArrowCue>
-                          </span>
-                          <img
-                            className="rj-mega-work__logo"
-                            src={glanceLogoSrc(item.slug)}
-                            alt=""
-                            width={118}
-                            height={34}
-                            decoding="async"
-                            draggable={false}
-                            onError={(event) => {
-                              event.currentTarget.src = item.logo;
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <div className="rj-mega__footer rj-mega__enter">
-                <Link
-                  to="/work"
-                  viewTransition
-                  className="rj-mega__footer-link"
-                  onClick={closeMega}
-                >
-                  <ArrowCue>All work</ArrowCue>
-                </Link>
-              </div>
-            </>
-          ) : null}
-
           {megaKind === "resources" ? (
             <>
               <ul className="rj-mega-resources">
