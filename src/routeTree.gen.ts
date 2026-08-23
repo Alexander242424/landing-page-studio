@@ -23,6 +23,7 @@ import { Route as SolutionsSlugRouteImport } from './routes/solutions/$slug'
 import { Route as ResourcesSlugRouteImport } from './routes/resources/$slug'
 import { Route as ApiAnalyticsRouteImport } from './routes/api/analytics'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as ApiCronDailyDigestRouteImport } from './routes/api/cron/daily-digest'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -94,6 +95,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiCronDailyDigestRoute = ApiCronDailyDigestRouteImport.update({
+  id: '/api/cron/daily-digest',
+  path: '/api/cron/daily-digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/resources/': typeof ResourcesIndexRoute
   '/work/': typeof WorkIndexRoute
+  '/api/cron/daily-digest': typeof ApiCronDailyDigestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/resources': typeof ResourcesIndexRoute
   '/work': typeof WorkIndexRoute
+  '/api/cron/daily-digest': typeof ApiCronDailyDigestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/resources/': typeof ResourcesIndexRoute
   '/work/': typeof WorkIndexRoute
+  '/api/cron/daily-digest': typeof ApiCronDailyDigestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/resources/'
     | '/work/'
+    | '/api/cron/daily-digest'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/resources'
     | '/work'
+    | '/api/cron/daily-digest'
   id:
     | '__root__'
     | '/'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/resources/'
     | '/work/'
+    | '/api/cron/daily-digest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   WorkSlugRoute: typeof WorkSlugRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
   WorkIndexRoute: typeof WorkIndexRoute
+  ApiCronDailyDigestRoute: typeof ApiCronDailyDigestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -308,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/api/cron/daily-digest': {
+      id: '/api/cron/daily-digest'
+      path: '/api/cron/daily-digest'
+      fullPath: '/api/cron/daily-digest'
+      preLoaderRoute: typeof ApiCronDailyDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -338,6 +358,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkSlugRoute: WorkSlugRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
   WorkIndexRoute: WorkIndexRoute,
+  ApiCronDailyDigestRoute: ApiCronDailyDigestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

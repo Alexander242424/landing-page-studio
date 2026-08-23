@@ -19,8 +19,12 @@ export const AnalyticsIngestInput = z.object({
 export type AnalyticsIngestInput = z.infer<typeof AnalyticsIngestInput>;
 
 export function supabaseConfig(): { url: string; key: string } | null {
-  const url = process.env["SUPABASE_URL"]?.replace(/\/$/, "");
+  // UXLAB_* names first: the SUPABASE_ prefix is reserved in Lovable secrets.
+  const url = (
+    process.env["UXLAB_SUPABASE_URL"] ?? process.env["SUPABASE_URL"]
+  )?.replace(/\/$/, "");
   const key =
+    process.env["UXLAB_SUPABASE_SERVICE_ROLE_KEY"] ??
     process.env["SUPABASE_SERVICE_ROLE_KEY"] ??
     process.env["SUPABASE_ANON_KEY"];
   if (!url || !key) return null;
