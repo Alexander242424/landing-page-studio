@@ -81,7 +81,7 @@ const CASES: GlanceWidget[] = [
     theme: "dark",
     title: caseHeadlineTitle("grono"),
     logo: "/glance/grono.svg",
-    backgroundImage: "/glance/grono.jpg",
+    backgroundImage: "/glance/grono.webp",
     linkLabel: "Case Study",
   },
   {
@@ -101,7 +101,7 @@ const CASES: GlanceWidget[] = [
     theme: "dark",
     title: caseHeadlineTitle("foundrae"),
     logo: "/glance/foundrae.svg",
-    backgroundImage: "/glance/foundrae.jpg",
+    backgroundImage: "/glance/foundrae.webp",
     linkLabel: "Case Study",
   },
   {

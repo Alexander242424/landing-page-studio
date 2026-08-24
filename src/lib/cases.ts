@@ -356,9 +356,9 @@ export const CASES: CaseStudy[] = [
     },
     description:
       "+4x weekly output after we turned Grono's dashboard sprawl into one surface that plans a week of content.",
-    heroSrc: "/cases/grono/hero.jpg",
-    glanceSrc: "/glance/grono.jpg",
-    aspectRatio: "992 / 1150",
+    heroSrc: "/cases/grono/hero.webp",
+    glanceSrc: "/glance/grono.webp",
+    aspectRatio: "1488 / 1725",
     services: ["Product design", "Brand systems", "Activation"],
     intro:
       "Grono helps teams turn one idea into a week of content. The product had to feel composed — a single surface that absorbs planning chaos instead of mirroring it.",
@@ -404,8 +404,8 @@ export const CASES: CaseStudy[] = [
     },
     description:
       "+2.8x add-to-cart after we led with story and opened a clear path into the Foundrae shop.",
-    heroSrc: "/cases/foundrae/hero.jpg",
-    glanceSrc: "/glance/foundrae.jpg",
+    heroSrc: "/cases/foundrae/hero.webp",
+    glanceSrc: "/glance/foundrae.webp",
     aspectRatio: "992 / 1150",
     services: ["Product design", "Brand systems", "Ecommerce"],
     intro:
