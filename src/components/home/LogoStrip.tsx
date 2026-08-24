@@ -6,6 +6,7 @@ import {
   LOGO_STRIP_SEED_IDS,
   type ClientLogo,
 } from "@/lib/clientLogos";
+import { usePageReveal } from "@/lib/pageReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -232,6 +233,7 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
   const enteredRef = useRef(false);
   const heroEntrancePlayedRef = useRef(false);
   const isHero = variant === "hero";
+  const { isRevealed } = usePageReveal();
 
   useEffect(() => {
     const motionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -302,6 +304,8 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
   }, []);
 
   // Hero: each mark flips in on first load, left to right.
+  // Wait for page reveal so the stagger does not finish (or get forced
+  // visible) while the preloader still hides the bar.
   useLayoutEffect(() => {
     if (!isHero) return;
 
@@ -317,10 +321,24 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
     const half = Math.floor(trackItems.length / 2);
     const items = isMarquee ? trackItems.slice(0, half) : rowItems;
     const copies = isMarquee ? trackItems.slice(half) : [];
+    const all = [...items, ...copies];
+
+    const hideMarks = () => {
+      if (!all.length) return;
+      const parent = items[0]?.parentElement;
+      if (parent) gsap.set(parent, { perspective: 800 });
+      gsap.set(all, {
+        opacity: 0,
+        visibility: "visible",
+        rotateX: 90,
+        rotateY: -5,
+        yPercent: 70,
+        transformOrigin: "50% 80%",
+      });
+    };
 
     if (reducedMotion || heroEntrancePlayedRef.current) {
       enteredRef.current = true;
-      const all = [...items, ...copies];
       if (all.length) {
         gsap.set(all, {
           opacity: 1,
@@ -333,17 +351,15 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
 
     if (!items.length) return;
 
+    // Stay hidden until the homepage wipe finishes — otherwise the 2.5s
+    // delayed tween completes off-screen and logos look pre-revealed.
+    if (!isRevealed) {
+      hideMarks();
+      return;
+    }
+
     const ctx = gsap.context(() => {
-      const parent = items[0]?.parentElement;
-      if (parent) gsap.set(parent, { perspective: 800 });
-      gsap.set([...items, ...copies], {
-        opacity: 0,
-        visibility: "visible",
-        rotateX: 90,
-        rotateY: -5,
-        yPercent: 70,
-        transformOrigin: "50% 80%",
-      });
+      hideMarks();
       const finish = () => {
         heroEntrancePlayedRef.current = true;
         enteredRef.current = true;
@@ -376,14 +392,14 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
     return () => {
       ctx.revert();
       if (heroEntrancePlayedRef.current) {
-        gsap.set([...items, ...copies], {
+        gsap.set(all, {
           opacity: 1,
           visibility: "visible",
           clearProps: "transform",
         });
       }
     };
-  }, [isHero, isMarquee, reducedMotion, visibleCount]);
+  }, [isHero, isMarquee, reducedMotion, visibleCount, isRevealed]);
 
   // Entrance: stagger fade/slide up — opacity + transform only (never autoAlpha).
   useEffect(() => {
@@ -464,7 +480,10 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
       const count = visibleCountRef.current;
       slotsRef.current.slice(0, count).forEach((slot, i) => {
         const item = slotRefs.current[i];
+        // Do not unhide slot wrappers before the load stagger finishes —
+        // otherwise the watchdog reveals every mark at once.
         if (
+          enteredRef.current &&
           item &&
           (Number(gsap.getProperty(item, "opacity")) < 0.95 ||
             getComputedStyle(item).visibility === "hidden")
@@ -686,9 +705,11 @@ export function LogoStrip({ variant = "band" }: { variant?: "band" | "hero" }) {
       slotsRef.current.forEach((slot, i) => {
         forceSlotVisible(layerRefs.current[i], slot.active);
       });
-      // Also force every slot <li> visible after entrance interrupt.
+      // After entrance, keep wrappers visible if the swap loop remounts.
+      // Before entrance, leave them hidden so Strict Mode / deps cleanup
+      // cannot flash the row as already-revealed.
       const items = slotRefs.current.filter(Boolean) as HTMLLIElement[];
-      if (items.length) {
+      if (enteredRef.current && items.length) {
         gsap.set(items, {
           opacity: 1,
           visibility: "visible",
