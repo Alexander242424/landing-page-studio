@@ -11,6 +11,35 @@ import {
 import { SITE, absoluteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
+function CaseImpactSection({ caseStudy }: { caseStudy: CaseStudy }) {
+  const items = caseStudy.heroStats;
+  if (!items?.length) return null;
+
+  const title = caseStudy.stats?.title ?? "The Impact";
+
+  return (
+    <section
+      className="rj-case__stats"
+      aria-label={title}
+      data-reveal="section"
+    >
+      <div className="rj-case__stats-inner">
+        <h2 className="rj-case__stats-title">{title}</h2>
+        <ul className="rj-case__stats-list">
+          {items.map((stat) => (
+            <li key={stat.label} className="rj-case__stat">
+              <div className="rj-case__stat-row">
+                <span className="rj-case__stat-value">{stat.value}</span>
+                <p className="rj-case__stat-label">{stat.label}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 gsap.registerPlugin(ScrollTrigger);
 
 type CaseViewProps = {
@@ -181,6 +210,8 @@ export function CaseView({ caseStudy }: CaseViewProps) {
           autoAlpha: 1,
         });
         if (heroMedia) gsap.set(heroMedia, { clipPath: "none" });
+        const reducedHeroImg = heroMedia?.querySelector("img");
+        if (reducedHeroImg) gsap.set(reducedHeroImg, { clearProps: "transform" });
         mediaBlocks.forEach((figure) => {
           gsap.set(figure, { clipPath: "none" });
           const img = figure.querySelector("img");
@@ -190,13 +221,13 @@ export function CaseView({ caseStudy }: CaseViewProps) {
       }
 
       gsap.set(heroItems, { autoAlpha: 0, y: 28 });
+      const heroImg = heroMedia?.querySelector("img");
       if (heroMedia) {
         gsap.set(heroMedia, {
           autoAlpha: 1,
           clipPath: "inset(0% 0% 100% 0%)",
         });
-        const heroImg = heroMedia.querySelector("img");
-        if (heroImg) gsap.set(heroImg, { scale: 1.06 });
+        if (heroImg) gsap.set(heroImg, { scale: 1.18, yPercent: -6 });
       }
       gsap.set(sections, { autoAlpha: 0, y: 40 });
       mediaBlocks.forEach((figure) => {
@@ -219,19 +250,40 @@ export function CaseView({ caseStudy }: CaseViewProps) {
       });
 
       if (heroMedia) {
-        const heroImg = heroMedia.querySelector("img");
         gsap.to(heroMedia, {
           clipPath: "inset(0% 0% 0% 0%)",
           duration: 1.2,
           ease: "power3.inOut",
           delay: 0.22,
         });
+
         if (heroImg) {
-          gsap.to(heroImg, {
-            scale: 1,
-            duration: 1.45,
-            ease: "power3.out",
-            delay: 0.22,
+          const mm = gsap.matchMedia();
+          mm.add("(min-width: 768px)", () => {
+            gsap.to(heroImg, {
+              yPercent: 8,
+              ease: "none",
+              scrollTrigger: {
+                trigger: heroMedia,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
+            });
+          });
+          mm.add("(max-width: 767px)", () => {
+            gsap.to(heroImg, {
+              yPercent: 3,
+              ease: "none",
+              scrollTrigger: {
+                trigger: heroMedia,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
+            });
           });
         }
       }
@@ -307,11 +359,11 @@ export function CaseView({ caseStudy }: CaseViewProps) {
             {headlineText}
           </h1>
 
-          <dl className="rj-case__meta" data-reveal="hero">
-            {caseStudy.meta.map((field) => (
-              <div key={field.label} className="rj-case__meta-item">
-                <dt>{field.label}</dt>
-                <dd>{field.value}</dd>
+          <dl className="rj-case__hero-stats" data-reveal="hero">
+            {caseStudy.heroStats.map((stat) => (
+              <div key={stat.label} className="rj-case__hero-stat">
+                <dt>{stat.value}</dt>
+                <dd>{stat.label}</dd>
               </div>
             ))}
           </dl>
@@ -322,7 +374,6 @@ export function CaseView({ caseStudy }: CaseViewProps) {
             src={caseStudy.hero.src}
             alt={caseStudy.hero.alt}
             layout="full"
-            aspectRatio={caseStudy.hero.aspectRatio}
             priority
           />
         </div>
@@ -334,39 +385,7 @@ export function CaseView({ caseStudy }: CaseViewProps) {
         ))}
       </div>
 
-      {caseStudy.stats?.items?.length ? (
-        <section
-          className="rj-case__stats"
-          aria-label={caseStudy.stats.title}
-          data-reveal="section"
-        >
-          <div className="rj-case__stats-inner">
-            <h2 className="rj-case__stats-title">{caseStudy.stats.title}</h2>
-
-            {caseStudy.stats.intro ? (
-              <dl className="rj-case__stats-intro">
-                {caseStudy.stats.introLabel ? (
-                  <dt>{caseStudy.stats.introLabel}</dt>
-                ) : null}
-                <dd>
-                  <p>{caseStudy.stats.intro}</p>
-                </dd>
-              </dl>
-            ) : null}
-
-            <ul className="rj-case__stats-list">
-              {caseStudy.stats.items.map((stat) => (
-                <li key={stat.label} className="rj-case__stat">
-                  <div className="rj-case__stat-row">
-                    <span className="rj-case__stat-value">{stat.value}</span>
-                    <p className="rj-case__stat-label">{stat.label}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      ) : null}
+      <CaseImpactSection caseStudy={caseStudy} />
 
       <meta itemProp="description" content={caseStudy.description} />
     </article>

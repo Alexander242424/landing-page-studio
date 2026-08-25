@@ -1,12 +1,31 @@
 import { Fragment, type ReactNode } from "react";
 
-/** Hide an unclosed ** / * at the end so streaming does not flash raw markers. */
+/** Hide an unclosed ** / * on the last line so streaming does not flash raw markers. */
 function hideOpenMarkers(text: string) {
   return text
-    .replace(/\*\*[^*]*$/, (chunk) => chunk.slice(2))
-    .replace(/(^|[^*\n])\*[^*]*$/, (chunk) =>
+    .replace(/\*\*[^*\n]*$/, (chunk) => chunk.slice(2))
+    .replace(/(^|[^*\n])\*[^*\n]*$/, (chunk) =>
       chunk.endsWith("*") ? chunk.slice(0, -1) : chunk,
     );
+}
+
+/**
+ * Model often writes section titles as `**Title` on its own line and drops the closer.
+ * Close those so they parse as bold instead of raw asterisks.
+ */
+function closeUnmatchedBoldLines(text: string) {
+  return text
+    .split("\n")
+    .map((line) => {
+      const indent = line.match(/^\s*/)?.[0] ?? "";
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("**")) return line;
+      if (trimmed.slice(2).includes("**")) return line;
+      const inner = trimmed.slice(2).replace(/\*+$/, "").trimEnd();
+      if (!inner) return line;
+      return `${indent}**${inner}**`;
+    })
+    .join("\n");
 }
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
@@ -39,7 +58,11 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
 }
 
 function isHeadingLine(line: string) {
-  return /^\*\*[^*]+\*\*$/.test(line.trim());
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("**") || trimmed.length < 4) return false;
+  if (!trimmed.endsWith("**")) return false;
+  const inner = trimmed.slice(2, -2);
+  return inner.length > 0 && !inner.includes("**");
 }
 
 function isBullet(line: string) {
@@ -74,7 +97,9 @@ export function ChatMarkdown({
   text: string;
   streaming?: boolean;
 }) {
-  const source = streaming ? hideOpenMarkers(text) : text;
+  const source = closeUnmatchedBoldLines(
+    streaming ? hideOpenMarkers(text) : text,
+  );
   const lines = source.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let i = 0;
@@ -91,7 +116,7 @@ export function ChatMarkdown({
     if (isHeadingLine(line)) {
       blocks.push(
         <p key={`h-${block++}`} className="rj-ask__md-heading">
-          {headingText(line)}
+          <strong>{headingText(line)}</strong>
         </p>,
       );
       i += 1;

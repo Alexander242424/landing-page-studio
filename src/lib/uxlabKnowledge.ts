@@ -32,7 +32,7 @@ Approach:
 - Success measured in conversion, activation, retention, ARPU, LTV
 
 Site orientation (this page):
-- Work / cases: /work listing; homepage glance at #glance; full case studies at /work/<slug> (e.g. /work/oura, /work/grono)
+- Work / cases: /work listing; homepage glance at #glance; full case studies at /work/<slug> (e.g. /work/oura, /work/grono, /work/tradevision)
 - Solutions: #solutions
 - Process: #process
 - Approach: #approach

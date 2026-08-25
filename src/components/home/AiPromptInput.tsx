@@ -384,7 +384,7 @@ function useRotatingPlaceholderIndex(paused: boolean) {
  * Gemini 3 Flash via Lovable gateway, grounded on UXLAB.
  * “Let’s talk” / footer “Get in touch” runs scripted lead capture.
  * Footer “Subscribe” runs a newsletter email capture in the same ask bar.
- * CRO Audit runs a scripted URL → scan → name → email flow.
+ * CRO Audit runs a scripted URL → scan → email flow.
  * Call / “Book a call” opens an inline Cal.com calendar in the chat.
  */
 export function AiPromptInput() {
@@ -1070,6 +1070,42 @@ export function AiPromptInput() {
     );
   }
 
+  async function startProjectLeadFromChat() {
+    revealRef.current.cancelled = true;
+    await sleep(0);
+    revealRef.current = { cancelled: false };
+
+    resetCroFlow();
+    resetNewsletterFlow();
+    leadServiceRef.current = null;
+    leadAnswersRef.current = { email: "", goal: "", company: "" };
+    setLeadStep("email");
+    commercialStartedRef.current = true;
+    clearChatActions();
+    setShowCal(false);
+    setInputHint(null);
+    setPending(false);
+    setValue("");
+    setOpen(true);
+    focusAskInput();
+
+    const userMsg: ChatMessage = {
+      id: uid(),
+      role: "user",
+      text: "Tell me about a project",
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    logChatEvent({
+      eventType: "user_message",
+      intent: "contact",
+      role: "user",
+      content: userMsg.text,
+      metadata: { messageId: userMsg.id, source: "chat_action" },
+    });
+
+    await pushScriptedReply(leadIntroForService(null), "contact");
+  }
+
   async function startNewsletterFlow() {
     revealRef.current.cancelled = true;
     await sleep(0);
@@ -1309,8 +1345,8 @@ export function AiPromptInput() {
       await runCroScan(parsed.domain);
       if (revealRef.current.cancelled) return;
 
-      croStepRef.current = "name";
-      setCroStep("name");
+      croStepRef.current = "email";
+      setCroStep("email");
       await pushScriptedReply(CRO.afterScan, "cro");
       return;
     }
@@ -1369,11 +1405,7 @@ export function AiPromptInput() {
     }
 
     if (id === "project") {
-      clearChatActions();
-      setShowCal(false);
-      setInputHint("Describe your project…");
-      setOpen(true);
-      focusAskInput();
+      void startProjectLeadFromChat();
       return;
     }
 

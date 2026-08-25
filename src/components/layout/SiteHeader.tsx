@@ -31,7 +31,7 @@ type MegaKind = "solutions" | "resources";
 const MEGA_EXIT_MS = 320;
 
 const NAV_ITEMS = [
-  { label: "Work", href: "/work" },
+  { label: "Case studies", href: "/work" },
   { label: "Solutions", href: "#solutions", mega: "solutions" as const },
   { label: "Resources", href: "/resources", mega: "resources" as const },
 ] as const;

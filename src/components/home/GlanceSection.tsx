@@ -62,12 +62,12 @@ function caseHeadlineTitle(slug: string): ReactNode {
   return glanceHeadline(study.headline);
 }
 
-/** Heights alternate — no two neighbors share the same size (incl. loop seam). */
+/** Card height follows the still: small 1488×1320, medium 1488×1482, full 1488×1725. */
 const CASES: GlanceWidget[] = [
   {
     id: "bankrollu",
     caseSlug: "bankrollu",
-    size: "small",
+    size: "full",
     theme: "dark",
     title: caseHeadlineTitle("bankrollu"),
     logo: "/glance/bankrollu.svg",
@@ -117,11 +117,11 @@ const CASES: GlanceWidget[] = [
   {
     id: "stan",
     caseSlug: "stan",
-    size: "medium",
+    size: "full",
     theme: "dark",
     title: caseHeadlineTitle("stan"),
     logo: "/glance/stan.svg",
-    backgroundImage: "/glance/stan.jpg",
+    backgroundImage: "/glance/stan.webp",
     linkLabel: "Case Study",
   },
   {
@@ -132,6 +132,16 @@ const CASES: GlanceWidget[] = [
     title: caseHeadlineTitle("forbes"),
     logo: "/glance/forbes.svg",
     backgroundImage: "/glance/forbes.jpg",
+    linkLabel: "Case Study",
+  },
+  {
+    id: "tradevision",
+    caseSlug: "tradevision",
+    size: "medium",
+    theme: "dark",
+    title: caseHeadlineTitle("tradevision"),
+    logo: "/glance/tradevision.svg",
+    backgroundImage: "/glance/tradevision.jpg",
     linkLabel: "Case Study",
   },
 ];
@@ -187,9 +197,9 @@ function WidgetCard({
           <img
             src={widget.backgroundImage}
             alt=""
-            width={992}
+            width={1488}
             height={
-              widget.size === "small" ? 880 : widget.size === "medium" ? 988 : 1150
+              widget.size === "small" ? 1320 : widget.size === "medium" ? 1482 : 1725
             }
             decoding="async"
             // Eager: transform-based marquees are unreliable with native lazy-load.

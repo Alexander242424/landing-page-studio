@@ -15,6 +15,7 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   /* Asset is Tapmy wordmark (+ mark); strip uses brightness(0) — black paths are strip-safe. */
   { id: "stan", src: "/logos/stan.svg", alt: "Tapmy" },
   { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes" },
+  { id: "tradevision", src: "/logos/tradevision.svg", alt: "TradeVision" },
   { id: "nespresso", src: "/logos/nespresso.svg", alt: "Nespresso" },
   { id: "softr", src: "/logos/softr.svg", alt: "softr" },
   { id: "zara", src: "/logos/zara.svg", alt: "ZARA" },

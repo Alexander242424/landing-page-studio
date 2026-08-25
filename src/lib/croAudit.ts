@@ -25,9 +25,9 @@ export const CRO = {
   urlRetry:
     "That doesn’t look like a valid URL. Try something like example.com or https://example.com/pricing.",
   afterScan:
-    "Scan complete — we’ve mapped the first-pass signals. What’s your name?",
+    "Scan complete — we’ve mapped the first-pass signals. What’s the best email to send the audit report to?",
   namePrompt: "What’s your name?",
-  emailPrompt: "Thanks. What’s the best email to send the audit report to?",
+  emailPrompt: "What’s the best email to send the audit report to?",
   emailRetry: "Please share a valid email so we can send the report.",
   done: (email: string) =>
     `Perfect. We’ll send your CRO audit report to ${email} within 24 hours.`,

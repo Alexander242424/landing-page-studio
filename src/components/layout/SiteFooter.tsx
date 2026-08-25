@@ -6,7 +6,7 @@ import { SOLUTIONS } from "@/lib/solutions";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { label: "Work", href: "/work" },
+  { label: "Case studies", href: "/work" },
   { label: "Solutions", href: "#solutions" },
   { label: "Process", href: "#process" },
 ] as const;
