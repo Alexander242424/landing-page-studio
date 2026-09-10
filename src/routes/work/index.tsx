@@ -14,6 +14,7 @@ import {
   absoluteUrl,
   defaultLinks,
   defaultMeta,
+  organizationJsonLd,
 } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
@@ -23,7 +24,7 @@ const SiteFooter = lazy(() =>
 );
 
 const WORK_DESCRIPTION =
-  "Selected product and brand work from UXLAB — case studies in activation, CRO, and growth UX.";
+  "Selected work from UXLAB — conversion, product design, and AI engineering case studies with high-growth startups.";
 
 export const Route = createFileRoute("/work/")({
   loader: async ({ context }) => {
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/work/")({
   },
   head: () => ({
     meta: defaultMeta({
-      title: "Work",
+      title: "Work / case studies",
       description: WORK_DESCRIPTION,
       path: WORK_PATH,
       keywords: [
@@ -64,6 +65,7 @@ function buildWorkJsonLd(items: ReturnType<typeof getWorkCatalogSeed>) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      organizationJsonLd(),
       {
         "@type": "CollectionPage",
         "@id": `${url}#collection`,

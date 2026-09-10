@@ -750,6 +750,13 @@ ul {
   opacity: 0.72;
 }
 
+/* Dark bands: full white nav; muted opacity only on light backgrounds */
+.theme-dark .rj-header__menu-item a:not(.rj-header__link--active),
+body.rj-scroll-hero .rj-header__menu-item a:not(.rj-header__link--active),
+body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
+  opacity: 1;
+}
+
 .rj-header__link--active,
 .rj-header__link--mega-open {
   opacity: 1;
@@ -1640,6 +1647,7 @@ ul {
 
 .rj-hero__headline {
   min-width: 0;
+  line-height: 0.93;
   /* Mobile: a bit larger so the flowing title lands on ~3 lines */
   font-size: clamp(47px, 12.2vw, 82px);
   color: var(--rj-white);
@@ -1676,7 +1684,7 @@ ul {
     /* Tablet: keep 2 authored lines, scale toward the 1024 desktop size (~57px).
        The old `clamp(...) - 18px` crushed H1 to ~32–45px — smaller than phone. */
     font-size: clamp(5.4rem, 2.8rem + 3.4vw, 6rem);
-    line-height: 0.92;
+    line-height: 0.97;
     text-wrap: wrap;
   }
 
@@ -1723,6 +1731,7 @@ ul {
   /* +15% vs mid fluid scale */
   .rj-hero__headline {
     font-size: calc(clamp(5.5rem, 1.38rem + 5.98vw, 12.88rem) - 18px);
+    line-height: 0.85;
   }
 
   .rj-challenges__headline,
@@ -1869,12 +1878,6 @@ ul {
 .rj-hero__cta .rj-arrow__icon {
   font: inherit;
   font-weight: 400;
-}
-
-.rj-hero__cta--process,
-.rj-hero__cta--process .rj-arrow__content,
-.rj-hero__cta--process .rj-arrow__icon {
-  font-weight: 300;
 }
 
 .rj-hero__cta:hover {
@@ -2313,33 +2316,19 @@ html.rj-preloading body {
 .rj-preloader__word {
   display: block;
   color: #000;
+  transform: translate3d(0, 110%, 0);
 }
 
-/* Intro lives in keyframes only. A static translateY(110%) + overflow:hidden
-   leaves Safari/desktop blank if the animation never starts (or GSAP owns transform). */
-.rj-preloader--in:not(.rj-preloader--exiting):not(.rj-preloader--shown)
-  .rj-preloader__word {
+/* Arm `--in` only after hydrate (not in SSR HTML) so the reveal plays once.
+   Per-word delay is inline on each span, so any phrase length works. */
+.rj-preloader--in:not(.rj-preloader--exiting) .rj-preloader__word {
   animation-name: rj-preloader-word-in;
   animation-duration: 0.95s;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-fill-mode: both;
 }
 
-.rj-preloader__word-wrap:nth-of-type(1) .rj-preloader__word {
-  animation-delay: 0.08s;
-}
-.rj-preloader__word-wrap:nth-of-type(2) .rj-preloader__word {
-  animation-delay: 0.15s;
-}
-.rj-preloader__word-wrap:nth-of-type(3) .rj-preloader__word {
-  animation-delay: 0.22s;
-}
-.rj-preloader__word-wrap:nth-of-type(4) .rj-preloader__word {
-  animation-delay: 0.29s;
-}
-
-.rj-preloader--exiting .rj-preloader__word,
-.rj-preloader--shown .rj-preloader__word {
+.rj-preloader--exiting .rj-preloader__word {
   animation: none;
   transform: none;
 }
@@ -2360,7 +2349,6 @@ html.rj-preloading body {
     will-change: auto;
   }
 
-  .rj-preloader--in .rj-preloader__word,
   .rj-preloader__word {
     transform: none;
     animation: none;

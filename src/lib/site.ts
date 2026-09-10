@@ -1,27 +1,28 @@
 import { HOME_FAQS } from "@/lib/faq";
+import { SOLUTIONS } from "@/lib/solutions";
 
 /** Canonical site identity + default SEO / GEO helpers for uxlab.digital */
 export const SITE = {
   origin: "https://uxlab.digital",
   name: "UXLAB",
   legalName: "UXLAB",
-  tagline: "Growth through product performance",
-  title: "UXLAB — Growth Product Performance Agency",
+  tagline: "Product + build partner for high-growth startups",
+  title: "UXLAB — Product + build partner for high-growth startups",
   titleTemplate: "%s — UXLAB",
   description:
-    "UXLAB is a growth product performance agency. We improve conversion, activation, retention, and LTV through UX, CRO, experimentation, and AI-native product work.",
+    "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
   keywords: [
     "UXLAB",
-    "growth agency",
-    "product performance",
-    "conversion rate optimization",
+    "product partner",
+    "high-growth startups",
+    "AI startups",
+    "conversion rate optimisation",
     "CRO",
-    "activation",
-    "retention",
-    "LTV",
-    "product UX",
-    "experimentation",
-    "AI transformation",
+    "product design",
+    "websites",
+    "landing pages",
+    "testing and experimentation",
+    "AI native engineering",
     "Warsaw",
   ],
   author: "Alex Tyshchenko",
@@ -43,6 +44,7 @@ export const SITE = {
     country: "Poland",
     countryCode: "PL",
   },
+  /** Real profile URLs only — footer placeholders are not sameAs. */
   sameAs: [] as string[],
 } as const;
 
@@ -79,9 +81,13 @@ type DefaultMetaOptions = {
   type?: "website" | "article";
   keywords?: string[];
   robots?: string;
+  author?: string;
+  themeColor?: string;
   /** Override OG image dimensions (width × height) */
   imageWidth?: string;
   imageHeight?: string;
+  imageAlt?: string;
+  imageType?: string;
   /** article:published_time — set for blog/article pages */
   publishedTime?: string;
   /** article:modified_time */
@@ -96,20 +102,32 @@ export function defaultMeta(options: DefaultMetaOptions = {}): SiteMetaTag[] {
   const image = absoluteUrl(options.image ?? SITE.ogImage);
   const imageWidth = options.imageWidth ?? SITE.ogImageWidth;
   const imageHeight = options.imageHeight ?? SITE.ogImageHeight;
+  const imageAlt = options.imageAlt ?? `${SITE.name} — ${SITE.tagline}`;
+  const imageType =
+    options.imageType ??
+    (image.endsWith(".png")
+      ? "image/png"
+      : image.endsWith(".webp")
+        ? "image/webp"
+        : image.endsWith(".jpg") || image.endsWith(".jpeg")
+          ? "image/jpeg"
+          : undefined);
   const keywords = (options.keywords ?? [...SITE.keywords]).join(", ");
   const robots =
-    options.robots ?? "index,follow,max-image-preview:large,max-snippet:-1";
+    options.robots ??
+    "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
   const type = options.type ?? "website";
+  const themeColor = options.themeColor ?? SITE.themeColor;
 
   const tags: SiteMetaTag[] = [
     { title },
     { name: "description", content: description },
-    { name: "author", content: SITE.author },
+    { name: "author", content: options.author ?? SITE.author },
     { name: "keywords", content: keywords },
     { name: "robots", content: robots },
     { name: "googlebot", content: robots },
     { name: "bingbot", content: robots },
-    { name: "theme-color", content: SITE.themeColor },
+    { name: "theme-color", content: themeColor },
     { name: "geo.region", content: SITE.location.countryCode },
     { name: "geo.placename", content: SITE.location.city },
     { name: "language", content: SITE.language },
@@ -124,12 +142,17 @@ export function defaultMeta(options: DefaultMetaOptions = {}): SiteMetaTag[] {
     { property: "og:image", content: image },
     { property: "og:image:width", content: imageWidth },
     { property: "og:image:height", content: imageHeight },
-    { property: "og:image:alt", content: `${SITE.name} — ${SITE.tagline}` },
+    { property: "og:image:alt", content: imageAlt },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
     { name: "twitter:image", content: image },
+    { name: "twitter:image:alt", content: imageAlt },
   ];
+
+  if (imageType) {
+    tags.push({ property: "og:image:type", content: imageType });
+  }
 
   if (SITE.twitterHandle) {
     tags.push(
@@ -175,6 +198,11 @@ export function defaultLinks(path = "/"): SiteMetaLink[] {
       rel: "alternate",
       type: "application/rss+xml",
       href: absoluteUrl("/feed.xml"),
+    },
+    {
+      rel: "sitemap",
+      type: "application/xml",
+      href: absoluteUrl("/sitemap.xml"),
     },
     { rel: "author", href: absoluteUrl("/humans.txt") },
     { rel: "describedby", href: absoluteUrl("/llms.txt") },
@@ -229,16 +257,11 @@ export function organizationJsonLd() {
     },
     areaServed: "Worldwide",
     knowsAbout: [
-      "Conversion Rate Optimization",
-      "Product UX Design",
-      "User Activation Design",
-      "A/B Experimentation",
-      "Retention Optimization",
-      "LTV Growth",
-      "AI Product Engineering",
-      "SaaS Growth Design",
-      "Growth Product Performance",
-      "Product Analytics",
+      ...SOLUTIONS.map((item) => item.title),
+      "AI startups",
+      "High-growth startups",
+      "Product engineering",
+      "Conversion design",
     ],
     contactPoint: {
       "@type": "ContactPoint",
@@ -290,7 +313,7 @@ export function professionalServiceJsonLd() {
   return {
     "@type": ["LocalBusiness", "ProfessionalService"],
     "@id": `${SITE.origin}/#professional-service`,
-    name: `${SITE.name} — Growth Product Agency`,
+    name: `${SITE.name} — Product + build partner`,
     description: SITE.description,
     url: SITE.origin,
     email: SITE.email,
@@ -301,71 +324,19 @@ export function professionalServiceJsonLd() {
       addressLocality: SITE.location.city,
       addressCountry: SITE.location.countryCode,
     },
+    knowsAbout: SOLUTIONS.map((item) => item.title),
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Growth product performance services",
-      itemListElement: [
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "Product metrics performance",
-            description:
-              "CRO, activation, retention, and LTV lifts that compound — fixing the screens and steps where people stall.",
-            url: `${SITE.origin}/solutions/product-performance`,
-          },
+      name: "Product, conversion, and AI engineering services",
+      itemListElement: SOLUTIONS.map((item) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: item.title,
+          description: item.body,
+          url: `${SITE.origin}/solutions/${item.slug}`,
         },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "Product Design",
-            description:
-              "Product design for SaaS, AI, and digital products, covering UX audits, user flows, product UI, design systems, and developer-ready handoff.",
-            url: `${SITE.origin}/solutions/product-design`,
-          },
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "Websites + Funnels",
-            description:
-              "Conversion-first sites and funnels for B2B and AI startups — clear offer, buyer path, and CRO instrumentation that turn visits into qualified demos and pipeline.",
-            url: `${SITE.origin}/solutions/websites`,
-          },
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "Testing & Experimentation",
-            description:
-              "User research and A/B experiments that validate changes before you ship.",
-            url: `${SITE.origin}/solutions/testing-experimentation`,
-          },
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "AI Engineering",
-            description:
-              "AI-native product features that cut friction or open revenue — clearer workflows, smarter surfaces.",
-            url: `${SITE.origin}/solutions/ai-engineering`,
-          },
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "AI MVP to Product",
-            description:
-              "Closing the gap between demo-ready and product-ready — activation flows, UI coherence, edge cases, and backend logic review for Lovable, Cursor, Bolt, and v0 builds.",
-            url: `${SITE.origin}/solutions/ai-mvp-to-product`,
-          },
-        },
-      ],
+      })),
     },
     parentOrganization: { "@id": `${SITE.origin}/#organization` },
   };

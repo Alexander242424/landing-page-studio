@@ -11,7 +11,7 @@ import {
   getRelatedArticles,
   type Article,
 } from "@/lib/articles";
-import { SITE, absoluteUrl } from "@/lib/site";
+import { SITE, absoluteUrl, organizationJsonLd } from "@/lib/site";
 
 type ArticleViewProps = {
   article: Article;
@@ -204,6 +204,7 @@ export function buildArticleJsonLd(article: Article, canonicalUrl: string) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      organizationJsonLd(),
       {
         "@type": "Article",
         "@id": `${canonicalUrl}#article`,
@@ -246,6 +247,7 @@ export function buildArticleJsonLd(article: Article, canonicalUrl: string) {
       },
       {
         "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
         itemListElement: [
           {
             "@type": "ListItem",

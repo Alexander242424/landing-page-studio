@@ -18,13 +18,13 @@ const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
 
 const DEFAULT_HERO: ServiceHeroContent = {
-  ariaLabel: "We turn your product experience into revenue.",
-  lines: ["We turn your product", "experience into revenue."],
+  ariaLabel: "Product + build partner for high-growth startups.",
+  lines: ["Product + build partner", "for high-growth startups."],
   description:
-    "Growth partner for AI startups and product teams to boost conversions, retention, user experience, funnels, and AI transformation.",
+    "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
   primaryCta: { label: "Let's talk", href: "#contact" },
   secondaryCta: { label: "See results", href: "#glance" },
-  logosStat: "Trusted by 200+ YCombinator \n& Speedrun founders",
+  logosStat: "Trusted by YCombinator \n& Speedrun founders",
 };
 
 /**

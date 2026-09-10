@@ -8,7 +8,7 @@ import {
   type CaseMedia,
   type CaseStudy,
 } from "@/lib/cases";
-import { SITE, absoluteUrl } from "@/lib/site";
+import { SITE, absoluteUrl, organizationJsonLd } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function CaseImpactSection({ caseStudy }: { caseStudy: CaseStudy }) {
@@ -399,9 +399,11 @@ export function buildCaseJsonLd(caseStudy: CaseStudy, canonicalUrl: string) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      organizationJsonLd(),
       {
-        "@type": ["CreativeWork", "Article"],
+        "@type": ["CaseStudy", "CreativeWork"],
         "@id": `${canonicalUrl}#case`,
+        url: canonicalUrl,
         name: `${caseStudy.client} case study`,
         headline,
         description: caseStudy.description,
@@ -419,6 +421,7 @@ export function buildCaseJsonLd(caseStudy: CaseStudy, canonicalUrl: string) {
           name: SITE.name,
           url: SITE.origin,
         },
+        provider: { "@id": `${SITE.origin}/#organization` },
         publisher: { "@id": `${SITE.origin}/#organization` },
         about: {
           "@type": "Organization",
@@ -432,6 +435,7 @@ export function buildCaseJsonLd(caseStudy: CaseStudy, canonicalUrl: string) {
       },
       {
         "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
         itemListElement: [
           {
             "@type": "ListItem",

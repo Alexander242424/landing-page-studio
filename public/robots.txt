@@ -6,179 +6,241 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # OpenAI / ChatGPT
 User-agent: GPTBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Anthropic / Claude
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: anthropic-ai
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: Claude-Web
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Google Gemini / AI Overviews
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Perplexity
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Apple Intelligence / Applebot
 User-agent: Applebot-Extended
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: Applebot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # xAI / Grok
 User-agent: Grok
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # ByteDance
 User-agent: Bytespider
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Cohere
 User-agent: cohere-ai
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Common Crawl (training corpora often sourced here)
 User-agent: CCBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Meta AI
 User-agent: meta-externalagent
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: FacebookBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Microsoft / Bing
 User-agent: Bingbot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Diffbot
 User-agent: Diffbot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # You.com
 User-agent: YouBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # AI2 / Allen Institute
 User-agent: AI2Bot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Amazon
 User-agent: Amazonbot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # DuckDuckGo / DuckAssist
 User-agent: DuckDuckBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 User-agent: DuckAssistBot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Mistral
 User-agent: MistralAI-User
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Hugging Face
 User-agent: HuggingFace-Bot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Brave
 User-agent: Bravebot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Kagi
 User-agent: Kagibot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Perplexity user-initiated fetch
 User-agent: Perplexity-User
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Internet Archive
 User-agent: ia_archiver
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 # Timpi
 User-agent: Timpibot
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 
 Sitemap: https://uxlab.digital/sitemap.xml
 

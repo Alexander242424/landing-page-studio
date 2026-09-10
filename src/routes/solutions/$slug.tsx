@@ -11,7 +11,7 @@ import {
   getServicePage,
   type ServicePageContent,
 } from "@/lib/servicePages";
-import { defaultLinks, defaultMeta, SITE, absoluteUrl } from "@/lib/site";
+import { defaultLinks, defaultMeta, SITE, absoluteUrl, organizationJsonLd } from "@/lib/site";
 
 const GlanceSection = lazy(() =>
   import("@/components/home/GlanceSection").then((m) => ({
@@ -80,12 +80,14 @@ function buildJsonLd(page: ServicePageContent) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      organizationJsonLd(),
       {
         "@type": "WebPage",
         "@id": `${url}#webpage`,
         url,
         name: page.title,
         description: page.description,
+        inLanguage: SITE.language,
         isPartOf: { "@id": `${SITE.origin}/#website` },
         about: { "@id": `${url}#service` },
         breadcrumb: { "@id": `${url}#breadcrumb` },
@@ -99,11 +101,8 @@ function buildJsonLd(page: ServicePageContent) {
         "@id": `${url}#service`,
         name: page.title,
         description: page.description,
-        provider: {
-          "@type": "Organization",
-          name: SITE.name,
-          url: SITE.origin,
-        },
+        url,
+        provider: { "@id": `${SITE.origin}/#organization` },
         areaServed: "Worldwide",
         serviceType: page.serviceType,
       },

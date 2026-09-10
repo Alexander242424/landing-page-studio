@@ -153,6 +153,8 @@ function LogoMark({ src }: { src: string }) {
         <img
           src={src}
           alt=""
+          width={160}
+          height={40}
           decoding="async"
           loading="lazy"
           draggable={false}

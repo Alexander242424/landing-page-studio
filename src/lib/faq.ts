@@ -6,33 +6,33 @@ export type HomeFaq = {
 /** Home FAQ — shared by FaqSection UI and FAQPage JSON-LD. */
 export const HOME_FAQS: HomeFaq[] = [
   {
-    question: "What does UXLAB actually do?",
+    question: "What does UXLAB do?",
     answer:
-      "We grow revenue by fixing the product moments that kill it. UX, CRO, conversion, activation, retention, and LTV — strategy and execution in one loop, not slides that never ship.",
+      "We are a product + build partner for high-growth startups. We help innovative AI startups and product teams grow revenue and scale the business through conversions, design, and AI engineering — then we ship the work, not a slide deck.",
   },
   {
-    question: "Who do you partner with?",
+    question: "Who do you work with?",
     answer:
-      "Product-led teams and founders who already have traction and need sharper growth. SaaS, marketplaces, consumer apps, and growth-stage brands where the experience is the product.",
+      "High-growth startups and product teams where the product is the growth engine — including YCombinator and Speedrun founders. If you already have traction and need a partner that can lift conversion and ship, we are a fit.",
   },
   {
-    question: "How do engagements usually start?",
+    question: "How do you help us grow revenue?",
     answer:
-      "Share your product or site. We diagnose the highest-friction moments, align on the growth lever, then move into design, validation, and shipping — no months-long discovery phase.",
+      "Through conversion rate optimisation, product design, websites and landing pages, testing and experimentation, and AI native engineering. We find the product and funnel moments that leak revenue, then design and ship the fixes so conversion actually moves.",
   },
   {
-    question: "Do you only design, or do you ship?",
+    question: "Do you only design, or do you also build?",
     answer:
-      "We design to ship. We work closely with your engineering and product teams so changes land in production, get measured, and feed the next iteration.",
+      "Both. Product + build means we stay through production. We work with your product and engineering teams so CRO, UI, landing pages, experiments, and AI-native features land in the product, get measured, and feed the next loop.",
+  },
+  {
+    question: "How do engagements start?",
+    answer:
+      "Share the product or site. We diagnose the highest-friction conversion moments, agree the growth lever, then design, test, and ship. No months-long discovery. The first loop is meant to start growth, not fill a research archive.",
   },
   {
     question: "How do you measure success?",
     answer:
-      "Against the metric that matters for your model — conversion, activation, retention, ARPU, or LTV. Every change is framed as a hypothesis with a clear read on impact.",
-  },
-  {
-    question: "How many clients do you take?",
-    answer:
-      "A small number each year. Limited capacity is intentional: deeper focus, faster loops, and outcomes that compound instead of parallel agency output.",
+      "Better products, higher conversion, and real revenue growth. Every change is a hypothesis against conversion, activation, or revenue — not vanity metrics. Results live in the case studies.",
   },
 ];

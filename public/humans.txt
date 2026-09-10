@@ -9,6 +9,8 @@ Standards: HTML5, Schema.org, Open Graph
 Components: TanStack Start, React
 Language: English
 Doctype: HTML5
+Positioning: Product + build partner for high-growth startups
+Solutions: Conversion Rate Optimisation, Product Design, Websites + Landing Pages, Testing & Experimentation, AI Native Engineering
 LLM index: https://uxlab.digital/llms.txt
 Sitemap: https://uxlab.digital/sitemap.xml
 RSS: https://uxlab.digital/feed.xml

@@ -16,6 +16,7 @@ import {
   absoluteUrl,
   defaultLinks,
   defaultMeta,
+  organizationJsonLd,
 } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
@@ -26,7 +27,7 @@ const SiteFooter = lazy(() =>
 
 const RESOURCES_PATH = "/resources";
 const RESOURCES_DESCRIPTION =
-  "UXLAB resources on activation, CRO, design systems, and AI in growth UX — practical notes from shipping product performance work.";
+  "UXLAB resources on conversion, product design, experimentation, and AI engineering — practical notes from shipping with high-growth startups.";
 
 type ResourcesSearch = {
   category?: string;
@@ -92,6 +93,7 @@ function buildResourcesJsonLd(articles: Array<{ slug: string; title: string }>) 
   return {
     "@context": "https://schema.org",
     "@graph": [
+      organizationJsonLd(),
       {
         "@type": "CollectionPage",
         "@id": `${url}#collection`,

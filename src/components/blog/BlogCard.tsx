@@ -21,8 +21,11 @@ export function BlogCard({ article }: BlogCardProps) {
           <img
             src={article.image}
             alt={article.imageAlt}
-            draggable={false}
+            width={1600}
+            height={1000}
+            decoding="async"
             loading="lazy"
+            draggable={false}
           />
         </div>
         <span className="rj-blog__category">{article.category}</span>

@@ -15,7 +15,7 @@ import { SmoothScrollProvider } from "@/components/scroll/SmoothScrollProvider";
 import { PageRevealProvider } from "@/lib/pageReveal";
 import { Preloader } from "@/components/preloader/Preloader";
 import { AnalyticsBeacon } from "@/components/analytics/AnalyticsBeacon";
-import { SITE, absoluteUrl, defaultMeta } from "@/lib/site";
+import { SITE, absoluteUrl } from "@/lib/site";
 
 function Arr404() {
   return (
@@ -188,7 +188,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      ...defaultMeta({ path: "/" }),
+      { name: "theme-color", content: SITE.themeColor },
     ],
     links: [
       {
@@ -226,6 +226,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "alternate",
         type: "application/rss+xml",
         href: absoluteUrl("/feed.xml"),
+      },
+      {
+        rel: "sitemap",
+        type: "application/xml",
+        href: absoluteUrl("/sitemap.xml"),
       },
       {
         rel: "preload",

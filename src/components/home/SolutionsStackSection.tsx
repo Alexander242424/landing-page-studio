@@ -358,6 +358,11 @@ export function SolutionsStackSection({
                             src={item.image}
                             alt=""
                             className="rj-solutions-stack__image"
+                            width={1600}
+                            height={1000}
+                            decoding="async"
+                            loading="lazy"
+                            draggable={false}
                           />
                         ) : (
                           <LazyVideo

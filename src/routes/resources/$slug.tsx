@@ -14,7 +14,7 @@ import {
 } from "@/lib/articleCatalog";
 import { listPublishedArticles } from "@/lib/articleCatalog.functions";
 import { articlePath } from "@/lib/articles";
-import { SITE, absoluteUrl, pageTitle } from "@/lib/site";
+import { SITE, absoluteUrl, defaultLinks, defaultMeta, pageTitle } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
   import("@/components/layout/SiteFooter").then((m) => ({
@@ -59,37 +59,27 @@ export const Route = createFileRoute("/resources/$slug")({
     }
 
     const path = articlePath(article.slug);
-    const canonical = absoluteUrl(path);
-    const image = absoluteUrl(article.image);
-    const title = pageTitle(article.title);
 
     return {
       meta: [
-        { title },
-        { name: "description", content: article.description },
-        { name: "author", content: article.author.name },
-        { name: "keywords", content: article.keywords.join(", ") },
-        { name: "robots", content: "index,follow,max-image-preview:large" },
-        { name: "theme-color", content: SITE.themeColor },
-        { property: "og:type", content: "article" },
-        { property: "og:title", content: article.title },
-        { property: "og:description", content: article.description },
-        { property: "og:url", content: canonical },
-        { property: "og:image", content: image },
-        { property: "og:site_name", content: SITE.name },
-        { property: "og:locale", content: SITE.locale },
-        { property: "article:published_time", content: article.datePublished },
-        { property: "article:modified_time", content: article.dateModified },
+        ...defaultMeta({
+          title: article.title,
+          description: article.description,
+          path,
+          image: article.image,
+          type: "article",
+          keywords: [...SITE.keywords, ...article.keywords],
+          author: article.author.name,
+          publishedTime: article.datePublished,
+          modifiedTime: article.dateModified,
+          imageAlt: article.imageAlt || article.title,
+        }),
         { property: "article:section", content: article.category },
         { property: "article:author", content: article.author.name },
         ...article.keywords.map((keyword) => ({
           property: "article:tag" as const,
           content: keyword,
         })),
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: article.title },
-        { name: "twitter:description", content: article.description },
-        { name: "twitter:image", content: image },
         { name: "citation_title", content: article.title },
         { name: "citation_author", content: article.author.name },
         {
@@ -97,19 +87,7 @@ export const Route = createFileRoute("/resources/$slug")({
           content: article.datePublished,
         },
       ],
-      links: [
-        { rel: "canonical", href: canonical },
-        {
-          rel: "alternate",
-          type: "text/plain",
-          href: absoluteUrl("/llms.txt"),
-        },
-        {
-          rel: "alternate",
-          type: "text/plain",
-          href: absoluteUrl("/llms-full.txt"),
-        },
-      ],
+      links: defaultLinks(path),
     };
   },
   component: ArticlePage,

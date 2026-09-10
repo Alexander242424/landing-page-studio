@@ -52,50 +52,54 @@ export const Route = createFileRoute("/sitemap.xml")({
         }, "2026-08-11");
 
         const catalog = await resolveWorkCatalog();
-        const casesBySlug = new Map(
-          getListedCases().map((item) => [item.slug, item]),
-        );
+        const listedCases = getListedCases();
+        const casesBySlug = new Map(listedCases.map((item) => [item.slug, item]));
+        const latestCaseMod = listedCases.reduce((latest, item) => {
+          return item.dateModified > latest ? item.dateModified : latest;
+        }, "2026-08-11");
+        const latestMod =
+          latestArticleMod > latestCaseMod ? latestArticleMod : latestCaseMod;
 
         const entries: SitemapEntry[] = [
           {
             path: "/",
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "weekly",
             priority: "1.0",
           },
           {
             path: "/resources",
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "weekly",
             priority: "0.9",
           },
           {
             path: WORK_PATH,
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "weekly",
             priority: "0.9",
           },
           {
             path: "/feed.xml",
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "weekly",
             priority: "0.4",
           },
           {
             path: "/llms.txt",
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "weekly",
             priority: "0.5",
           },
           {
             path: "/llms-full.txt",
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "weekly",
             priority: "0.5",
           },
           ...getAllServicePages().map((page) => ({
             path: page.path,
-            lastmod: latestArticleMod,
+            lastmod: latestMod,
             changefreq: "monthly" as const,
             priority: "0.85",
           })),

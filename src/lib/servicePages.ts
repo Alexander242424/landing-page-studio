@@ -55,7 +55,7 @@ export type ServicePageContent = {
   faqs: HomeFaq[];
 };
 
-const LOGOS_STAT = "Trusted by 200+ YCombinator \n& Speedrun founders";
+const LOGOS_STAT = "Trusted by YCombinator \n& Speedrun founders";
 
 const SHARED_CTAS = {
   primaryCta: { label: "Let's talk", href: "#contact" },
@@ -71,7 +71,7 @@ function pathFor(slug: string) {
 export const PRODUCT_PERFORMANCE: ServicePageContent = {
   slug: "product-performance",
   path: pathFor("product-performance"),
-  title: "Product metrics performance",
+  title: "Conversion Rate Optimisation",
   description:
     "You already have the traffic. UXLAB finds where your product leaks revenue — at signup, activation, the paywall, retention — fixes it, and installs a system that keeps compounding after we leave.",
   keywords: [
@@ -313,7 +313,7 @@ export const PRODUCT_DESIGN: ServicePageContent = {
 export const WEBSITES: ServicePageContent = {
   slug: "websites",
   path: pathFor("websites"),
-  title: "Websites + Funnels",
+  title: "Websites + Landing Pages",
   description:
     "You're spending on traffic but the site isn't closing. UXLAB builds conversion-first sites and funnels that turn visits into qualified demos, trials, and pipeline for funded B2B and AI startups.",
   keywords: [
@@ -554,7 +554,7 @@ export const TESTING: ServicePageContent = {
 export const AI_ENGINEERING: ServicePageContent = {
   slug: "ai-engineering",
   path: pathFor("ai-engineering"),
-  title: "AI Engineering",
+  title: "AI Native Engineering",
   description:
     "You have more roadmap than cycles. UXLAB ships your features in days using AI-first engineering — production quality, your stack, your team keeps the velocity after we leave.",
   keywords: [
@@ -668,138 +668,12 @@ export const AI_ENGINEERING: ServicePageContent = {
   ],
 };
 
-/** AI MVP to Product */
-export const AI_MVP: ServicePageContent = {
-  slug: "ai-mvp-to-product",
-  path: pathFor("ai-mvp-to-product"),
-  title: "AI MVP to Product",
-  description:
-    "Your Lovable, Cursor, or Bolt build impresses in the demo. Real users stall. UXLAB closes the gap between demo-ready and product-ready — UX, UI, edge cases, and activation — before you scale acquisition into a leaky funnel.",
-  keywords: [
-    "AI MVP",
-    "prototype to product",
-    "vibe coding cleanup",
-    "Lovable build",
-    "Cursor build",
-    "AI startup product",
-    "productization",
-    "UXLAB",
-  ],
-  serviceType: "AI MVP to product",
-  hero: {
-    ariaLabel: "Turn a vibe-coded MVP into a product real users trust.",
-    lines: ["Turn a vibe-coded MVP", "into a product real users trust."],
-    description:
-      "AI builds fast. Products still need structure, edge cases, and an activation path — or your early adopters churn before you scale.",
-    ...SHARED_CTAS,
-  },
-  valueProp: {
-    id: "value",
-    taglineBefore:
-      "Your Lovable, Cursor, or Bolt build impressed in the demo. Real users try it — stall, get confused, or don't return. We close the gap between demo-ready and",
-    taglineLinkLabel: "product-ready",
-    taglineLinkHref: "#outcomes",
-    taglineAfter: " — before you scale acquisition into a leaky funnel.",
-    title: "From vibe-coded idea to product-ready build.",
-    paragraphs: [
-      "AI tools ship fast. They optimize for the happy path — the one you narrate. Real users arrive without context, hit edge cases, stall on unclear IA, and churn before they've seen the core value. That gap between demo and product is where early adoption dies.",
-      "We close it: clear activation flows, coherent UI patterns, error states that maintain trust, and a backend logic review that keeps the product stable under real load.",
-    ],
-  },
-  outcomes: {
-    id: "outcomes",
-    leadBefore:
-      "What you leave with is a product people navigate, trust, and return to — not just a demo that wows in a pitch. See",
-    leadLinkLabel: "our process",
-    leadLinkHref: "#process",
-    leadAfter: ".",
-    items: [
-      {
-        title: "UX gaps found and fixed.",
-        body: "Users stall on your demo flow, not the one you scripted. We map where real users actually get confused and redesign the paths that matter.",
-      },
-      {
-        title: "Activation path designed.",
-        body: "No happy path without onboarding. We define the first-value moment and build the flow that reliably gets users there — without you in the room.",
-      },
-      {
-        title: "UI coherence and design system.",
-        body: "Tokens, components, and consistent patterns so the product feels intentional — not stitched together from five different AI sessions.",
-      },
-      {
-        title: "Edge cases and error states.",
-        body: "Empty states, loading, error handling, and permission failures designed so users feel in control even when things don't go perfectly.",
-      },
-      {
-        title: "Backend logic review.",
-        body: "If the AI scaffold has gaps in data handling, state management, or security, we surface them before you scale traffic to a fragile build.",
-      },
-      {
-        title: "Handoff and documentation.",
-        body: "Production-ready specs and clear documentation so your engineering team can maintain, extend, and own the product after the sprint.",
-      },
-    ],
-  },
-  process: {
-    items: [
-      {
-        title: "Diagnose",
-        body: "You get an honest read: what's demo magic versus product debt, where real users stall, and what the minimum trust bar is before you scale acquisition.",
-      },
-      {
-        title: "Prototype",
-        body: "You see restructured flows and UI that keep what makes the vibe build impressive — while removing the confusion and dead ends that kill retention.",
-      },
-      {
-        title: "Validate",
-        body: "You get activation signal from real users on the hardened experience — before you spend money sending traffic to a product that still breaks at step three.",
-      },
-      {
-        title: "Ship",
-        body: "Your engineering team gets production-ready specs and a build partner — so the MVP becomes a maintainable product your team can extend without heroic explanations.",
-      },
-      {
-        title: "Compound",
-        body: "You leave with a growth-oriented backlog: activation, retention, and monetization next — so the demo becomes a product trajectory, not a plateau.",
-      },
-    ],
-  },
-  faqs: [
-    {
-      question: "Our demo works fine — why do we need this?",
-      answer:
-        "Demos optimize for the pitch moment. Products optimize for repeated, independent success. Real users don't have you narrating. We close that gap: clarity, trust, edge cases, and activation so users return without you in the room.",
-    },
-    {
-      question: "Do you work with Lovable, Cursor, Bolt, and v0 builds?",
-      answer:
-        "Yes — this service is built specifically for AI-scaffolded products. We know how these tools generate code and where the gaps appear under real use: missing states, fragile data handling, and UX that only works when someone is guiding the session.",
-    },
-    {
-      question: "Will you rewrite everything?",
-      answer:
-        "Only what blocks trust or activation. The insight of the vibe build — what makes it impressive — stays. We replace what confuses, crashes, or can't scale.",
-    },
-    {
-      question: "Won't this slow us down?",
-      answer:
-        "It protects your acquisition spend. Sending traffic to a product that breaks on real users is what slows you down — churn before retention and early adopters who tell others. We get you production-ready fast.",
-    },
-    {
-      question: "What does done look like?",
-      answer:
-        "Users complete the core job without hand-holding, return for a second session, and you have a clear roadmap toward the retention and revenue milestones that matter.",
-    },
-  ],
-};
-
 export const SERVICE_PAGES: ServicePageContent[] = [
   PRODUCT_PERFORMANCE,
   PRODUCT_DESIGN,
   WEBSITES,
   TESTING,
   AI_ENGINEERING,
-  AI_MVP,
 ];
 
 export const SERVICE_SLUGS = SERVICE_PAGES.map((page) => page.slug);

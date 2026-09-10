@@ -667,6 +667,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                           width={640}
                           height={400}
                           decoding="async"
+                          loading="lazy"
                           draggable={false}
                         />
                       </div>

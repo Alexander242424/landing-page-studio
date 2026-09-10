@@ -19,46 +19,14 @@ export type HomeIntroContent = {
 
 const DEFAULT_INTRO: HomeIntroContent = {
   id: "about",
-  ariaLabel: "Introduction",
+  ariaLabel: "Results",
   taglineBefore:
-    "A senior product studio for teams that need a partner in the work, not another agency deck.",
-  taglineLinkLabel: "Explore our solutions",
-  taglineLinkHref: "#solutions",
+    "Better products, higher conversion and real revenue growth for the teams we work with. ",
+  taglineLinkLabel: "Explore our case studies",
+  taglineLinkHref: "#glance",
   taglineAfter: ".",
-  title: "Your growth starts here.",
-  paragraphs: [
-    "Since 2014 we have worked with product teams at every stage, from early funded startups to brands already in market.",
-    <>
-      We also build products of our own.{" "}
-      <a
-        href="https://getboostra.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rj-link-active-full"
-      >
-        Boostra
-      </a>
-      ,{" "}
-      <a
-        href="https://grono.ai"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rj-link-active-full"
-      >
-        Grono
-      </a>
-      , and{" "}
-      <a
-        href="https://tapmy.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rj-link-active-full"
-      >
-        Tapmy
-      </a>
-      , tools shaped by the same product thinking we bring to every engagement.
-    </>,
-  ],
+  title: "Our results speak for themselves.",
+  paragraphs: [],
 };
 
 /**

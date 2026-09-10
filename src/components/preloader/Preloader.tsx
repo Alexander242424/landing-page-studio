@@ -6,7 +6,43 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const WORDS = ["Growth", "product", "performance", "agency."] as const;
+const PRELOADER_MESSAGES = [
+  {
+    words: ["Your", "growth", "starts", "here."],
+    ariaLabel: "Your growth starts here.",
+  },
+  {
+    words: ["Growth", "product", "performance", "agency."],
+    ariaLabel: "Growth product performance agency.",
+  },
+] as const;
+
+type PreloaderMessage = (typeof PRELOADER_MESSAGES)[number];
+
+const PRELOADER_MESSAGE_KEY = "rj-preloader-message";
+
+/** Cache so Strict Mode / effect re-entry cannot advance the rotation twice. */
+let pickedMessage: PreloaderMessage | null = null;
+
+function pickPreloaderMessage(): PreloaderMessage {
+  if (pickedMessage) return pickedMessage;
+  try {
+    const raw = Number(sessionStorage.getItem(PRELOADER_MESSAGE_KEY) ?? "0");
+    const index =
+      (Number.isFinite(raw) ? Math.max(0, Math.trunc(raw)) : 0) %
+      PRELOADER_MESSAGES.length;
+    sessionStorage.setItem(
+      PRELOADER_MESSAGE_KEY,
+      String((index + 1) % PRELOADER_MESSAGES.length),
+    );
+    pickedMessage = PRELOADER_MESSAGES[index]!;
+    return pickedMessage;
+  } catch {
+    pickedMessage = PRELOADER_MESSAGES[0]!;
+    return pickedMessage;
+  }
+}
+
 const MIN_VISIBLE_MS = 1800;
 const MAX_WAIT_MS = 4500;
 const MEDIA_GIVE_UP_MS = 3800;
@@ -76,6 +112,10 @@ async function waitUntilReady() {
   }
 }
 
+function preloaderWords(title: HTMLElement) {
+  return gsap.utils.toArray<HTMLElement>(title.querySelectorAll(".rj-preloader__word"));
+}
+
 /**
  * Rejouice-style first-load gate: lock scroll, wait for fonts + hero media,
  * then wipe away so entrance / ScrollTrigger / Lenis start on a settled page.
@@ -89,6 +129,11 @@ export function Preloader() {
   const exitStartedRef = useRef(false);
   const playExitRef = useRef<() => void>(() => undefined);
   const [mounted, setMounted] = useState(shouldPlay && !isRevealed);
+  // SSR + first hydrate always use message[0] so markup matches. The client
+  // swaps (if needed) in layout before paint, then arms CSS intro once.
+  const [message, setMessage] = useState<PreloaderMessage>(
+    PRELOADER_MESSAGES[0],
+  );
 
   lenisRef.current = lenis;
 
@@ -127,17 +172,19 @@ export function Preloader() {
   useLayoutEffect(() => {
     if (!mounted) return;
 
+    const chosen = pickPreloaderMessage();
+    if (chosen !== message) {
+      setMessage(chosen);
+      return;
+    }
+
     const root = rootRef.current;
     const title = titleRef.current;
     if (!root || !title) return;
 
-    const words = Array.from(
-      title.querySelectorAll<HTMLElement>(".rj-preloader__word"),
-    );
     const reduced = prefersReducedMotion();
     let cancelled = false;
     let exit: gsap.core.Timeline | null = null;
-    let shownTimer = 0;
 
     const finish = () => {
       if (cancelled) return;
@@ -159,41 +206,44 @@ export function Preloader() {
     const playExit = () => {
       if (cancelled || exitStartedRef.current) return;
       exitStartedRef.current = true;
-      // Start hero/header/video under the wipe — not after it.
       reveal();
       playExitRef.current = () => undefined;
+
+      const words = preloaderWords(title);
 
       if (reduced) {
         finish();
         return;
       }
 
-      // CSS animation owns intro transforms; disable it before GSAP exit
-      // so fill-mode / translateY(110%) cannot override yPercent.
       root.classList.add("rj-preloader--exiting");
       root.classList.remove("rj-preloader--in");
-      gsap.set(words, {
-        overwrite: true,
-        x: 0,
-        xPercent: 0,
-        y: 0,
-        yPercent: 0,
-      });
+      if (words.length) {
+        gsap.set(words, {
+          overwrite: true,
+          x: 0,
+          xPercent: 0,
+          y: 0,
+          yPercent: 0,
+        });
+      }
 
       exit = gsap.timeline({
         onComplete: finish,
       });
-      exit.to(
-        words,
-        {
-          yPercent: -110,
-          duration: 0.72,
-          ease: "expo.inOut",
-          stagger: 0.045,
-          overwrite: true,
-        },
-        0,
-      );
+      if (words.length) {
+        exit.to(
+          words,
+          {
+            yPercent: -110,
+            duration: 0.72,
+            ease: "expo.inOut",
+            stagger: 0.045,
+            overwrite: true,
+          },
+          0,
+        );
+      }
       exit.to(
         root,
         {
@@ -207,15 +257,9 @@ export function Preloader() {
 
     if (reduced) {
       root.classList.remove("rj-preloader--in");
-    } else {
-      // Re-arm CSS intro after insert so Safari actually runs keyframes.
-      root.classList.remove("rj-preloader--in");
-      void root.offsetWidth;
+    } else if (!root.classList.contains("rj-preloader--in")) {
+      // Arm once after hydrate. Do not toggle off/on — that replays the reveal.
       root.classList.add("rj-preloader--in");
-      shownTimer = window.setTimeout(() => {
-        if (cancelled || exitStartedRef.current) return;
-        root.classList.add("rj-preloader--shown");
-      }, 1400);
     }
 
     void waitUntilReady().then(() => {
@@ -227,12 +271,13 @@ export function Preloader() {
 
     return () => {
       cancelled = true;
-      window.clearTimeout(shownTimer);
       playExitRef.current = () => undefined;
       exit?.kill();
-      gsap.killTweensOf([root, title, ...words]);
+      gsap.killTweensOf(root);
+      gsap.killTweensOf(title);
+      gsap.killTweensOf(preloaderWords(title));
     };
-  }, [mounted, reveal]);
+  }, [mounted, message, reveal]);
 
   useLayoutEffect(() => {
     if (!mounted || !isRevealed) return;
@@ -244,7 +289,7 @@ export function Preloader() {
   return (
     <div
       ref={rootRef}
-      className="rj-preloader rj-preloader--in"
+      className="rj-preloader"
       role="status"
       aria-live="polite"
       aria-busy="true"
@@ -257,11 +302,20 @@ export function Preloader() {
       <h2
         ref={titleRef}
         className="rj-preloader__title"
-        aria-label="Growth product performance agency."
+        aria-label={message.ariaLabel}
       >
-        {WORDS.map((word) => (
-          <span key={word} className="rj-preloader__word-wrap" aria-hidden="true">
-            <span className="rj-preloader__word">{word}</span>
+        {message.words.map((word, index) => (
+          <span
+            key={`${index}-${word}`}
+            className="rj-preloader__word-wrap"
+            aria-hidden="true"
+          >
+            <span
+              className="rj-preloader__word"
+              style={{ animationDelay: `${0.06 + index * 0.06}s` }}
+            >
+              {word}
+            </span>
           </span>
         ))}
       </h2>

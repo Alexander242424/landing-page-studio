@@ -9,7 +9,7 @@ import {
   applyWorkCatalogOverlay,
 } from "@/lib/workCatalog";
 import { listWorkCatalog } from "@/lib/workCatalog.functions";
-import { SITE, absoluteUrl, pageTitle } from "@/lib/site";
+import { SITE, absoluteUrl, defaultLinks, defaultMeta, pageTitle } from "@/lib/site";
 
 const SiteFooter = lazy(() =>
   import("@/components/layout/SiteFooter").then((m) => ({
@@ -43,42 +43,21 @@ export const Route = createFileRoute("/work/$slug")({
     }
 
     const path = casePath(caseStudy.slug);
-    const canonical = absoluteUrl(path);
-    const image = absoluteUrl(caseStudy.ogImage);
-    const title = pageTitle(`${caseStudy.client} case study`);
 
     return {
-      meta: [
-        { title },
-        { name: "description", content: caseStudy.description },
-        { name: "keywords", content: caseStudy.keywords.join(", ") },
-        { name: "robots", content: "index,follow,max-image-preview:large" },
-        { name: "theme-color", content: "#ffffff" },
-        { property: "og:type", content: "website" },
-        { property: "og:title", content: `${caseStudy.client} case study` },
-        { property: "og:description", content: caseStudy.description },
-        { property: "og:url", content: canonical },
-        { property: "og:image", content: image },
-        { property: "og:site_name", content: SITE.name },
-        { property: "og:locale", content: SITE.locale },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${caseStudy.client} case study` },
-        { name: "twitter:description", content: caseStudy.description },
-        { name: "twitter:image", content: image },
-      ],
-      links: [
-        { rel: "canonical", href: canonical },
-        {
-          rel: "alternate",
-          type: "text/plain",
-          href: absoluteUrl("/llms.txt"),
-        },
-        {
-          rel: "alternate",
-          type: "text/plain",
-          href: absoluteUrl("/llms-full.txt"),
-        },
-      ],
+      meta: defaultMeta({
+        title: `${caseStudy.client} case study`,
+        description: caseStudy.description,
+        path,
+        image: caseStudy.ogImage,
+        type: "article",
+        keywords: [...SITE.keywords, ...caseStudy.keywords],
+        publishedTime: caseStudy.datePublished,
+        modifiedTime: caseStudy.dateModified,
+        imageAlt: `${caseStudy.client} case study`,
+        themeColor: "#ffffff",
+      }),
+      links: defaultLinks(path),
     };
   },
   component: CasePage,
