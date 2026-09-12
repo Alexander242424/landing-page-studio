@@ -24,7 +24,29 @@ const SEED_ADMIN: AdminUserRecord = {
   role: "superadmin",
 };
 
+/**
+ * Production source of truth: ADMIN_USERS_JSON secret — JSON array of
+ * { email, passwordHash, role }. On Cloudflare Workers there is no durable
+ * filesystem, so data/admin-users.json never exists on prod.
+ */
+function usersFromEnv(): AdminUserRecord[] | null {
+  const raw = process.env["ADMIN_USERS_JSON"];
+  if (!raw || !raw.trim()) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed as AdminUserRecord[];
+    }
+  } catch (error) {
+    console.error("[admin] ADMIN_USERS_JSON is not valid JSON", error);
+  }
+  return null;
+}
+
 async function ensureUsersFile(): Promise<AdminUserRecord[]> {
+  const fromEnv = usersFromEnv();
+  if (fromEnv) return fromEnv;
+
   // Cloudflare Workers (Lovable prod) have no durable filesystem.
   if (!isNodeRuntime()) {
     return [SEED_ADMIN];
