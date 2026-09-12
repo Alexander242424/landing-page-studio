@@ -107,7 +107,7 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
         type: orderTypeFromEvent(row),
         email,
         summary: summarizeLead(row),
-        metadata: meta,
+        metadata: meta as JsonRecord,
         createdAt: row.created_at,
       });
     }
@@ -120,7 +120,7 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
         type: "booking",
         email: null,
         summary: "Cal booking opened",
-        metadata: row.metadata ?? {},
+        metadata: (row.metadata ?? {}) as JsonRecord,
         createdAt: row.created_at,
       });
     }
@@ -214,7 +214,7 @@ export const getAdminConversation = createServerFn({ method: "GET" })
         intent: r.intent ?? null,
         role: r.role ?? null,
         content: r.content ?? null,
-        metadata: r.metadata ?? {},
+        metadata: (r.metadata ?? {}) as JsonRecord,
         createdAt: r.created_at,
       })),
     };
