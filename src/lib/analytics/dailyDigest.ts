@@ -169,6 +169,26 @@ async function claimDigestDay(day: string): Promise<boolean> {
   }
 }
 
+/** Undo claim when Telegram send fails so the next cron can retry. */
+async function releaseDigestDay(day: string): Promise<void> {
+  const cfg = supabaseConfig();
+  if (!cfg) return;
+  try {
+    await fetch(
+      `${cfg.url}/rest/v1/analytics_digest_log?day=eq.${encodeURIComponent(day)}`,
+      {
+        method: "DELETE",
+        headers: {
+          apikey: cfg.key,
+          Authorization: `Bearer ${cfg.key}`,
+        },
+      },
+    );
+  } catch (error) {
+    console.warn("[digest] release day error", error);
+  }
+}
+
 async function loadPageHits(sinceIso: string): Promise<PageHit[]> {
   const hits: PageHit[] = [];
   const local = await readJsonl<AnalyticsEventRow>(analyticsEventsPath());
@@ -534,6 +554,9 @@ export async function runDailyAnalyticsDigest(options?: {
   const report = await buildDailyDigest(now);
   const sent = await sendTelegramMessage(formatDailyDigest(report));
   if (!sent) {
+    if (!options?.force) {
+      await releaseDigestDay(day);
+    }
     return { ok: false, sent: false, reason: "telegram_failed", day };
   }
   console.info(`[digest] sent daily analytics for ${day}`);

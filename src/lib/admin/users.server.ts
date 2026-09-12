@@ -18,7 +18,7 @@ const SEED_ADMIN: AdminUserRecord = {
   email: "alex@uxdrive.io",
   // Dev bootstrap hash only — rotate for production.
   passwordHash:
-    "scrypt$a1b2c3d4e5f60718293a4b5c6d7e8f90$a9d64864af2d1a20dd05dcedfc79428bdd31e858fbf71ce8b14128e626ee5c1a345f27188b1a9c791b49fe3ee3aead7da30832fa57f7d4b90ff1023a8ff5ea9d",
+    "scrypt$a1b2c3d4e5f60718293a4b5c6d7e8f90$20e3d9b6de3cc0984a4c880efe6fae03066ba97badd19dd13f563d2c026dfc3426b31ea856b5e82fd7c4665ae575b135337a9c9ad10f35a20fc99226edeebdfb",
   role: "superadmin",
 };
 
