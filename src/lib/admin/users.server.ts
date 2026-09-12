@@ -18,9 +18,9 @@ export type AdminUserRecord = {
  */
 const SEED_ADMIN: AdminUserRecord = {
   email: "alex@uxdrive.io",
-  // Dev bootstrap hash only — rotate for production.
+  // Fallback hash — the real source of truth is the ADMIN_USERS_JSON secret.
   passwordHash:
-    "scrypt$a1b2c3d4e5f60718293a4b5c6d7e8f90$20e3d9b6de3cc0984a4c880efe6fae03066ba97badd19dd13f563d2c026dfc3426b31ea856b5e82fd7c4665ae575b135337a9c9ad10f35a20fc99226edeebdfb",
+    "scrypt$497aba5bea6c2833191445add769af4f$18cf578b8af7c96659072e5ba66d448793d9e62caae06acf239e030a01ad985dac646fd26a48a2dea1011416d3ba7a236ddf73213b9ecbce7bbfa64d58f5674b",
   role: "superadmin",
 };
 
