@@ -1,7 +1,9 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import { adminUsersPath } from "@/lib/admin/paths.server";
 import { verifyPassword } from "@/lib/admin/password.server";
+
+function isNodeRuntime(): boolean {
+  return typeof process !== "undefined" && Boolean(process.versions?.node);
+}
 
 export type AdminUserRecord = {
   email: string;
@@ -23,6 +25,13 @@ const SEED_ADMIN: AdminUserRecord = {
 };
 
 async function ensureUsersFile(): Promise<AdminUserRecord[]> {
+  // Cloudflare Workers (Lovable prod) have no durable filesystem.
+  if (!isNodeRuntime()) {
+    return [SEED_ADMIN];
+  }
+
+  const { mkdir, readFile, writeFile } = await import("node:fs/promises");
+  const { dirname } = await import("node:path");
   const path = adminUsersPath();
   try {
     const raw = await readFile(path, "utf8");
