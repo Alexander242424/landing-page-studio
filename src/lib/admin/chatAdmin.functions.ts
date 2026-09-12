@@ -25,13 +25,23 @@ async function readChatEvents(limit = 8000): Promise<ChatEventRow[]> {
   }
 }
 
+/** Server fns must return provably serializable data — `unknown` is not. */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+export type JsonRecord = { [key: string]: JsonValue };
+
 export type OrderLead = {
   id: string;
   sessionId: string;
   type: "contact" | "cro_audit" | "newsletter" | "booking" | "other";
   email: string | null;
   summary: string;
-  metadata: Record<string, unknown>;
+  metadata: JsonRecord;
   createdAt: string;
 };
 
@@ -97,7 +107,7 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
         type: orderTypeFromEvent(row),
         email,
         summary: summarizeLead(row),
-        metadata: meta,
+        metadata: meta as JsonRecord,
         createdAt: row.created_at,
       });
     }
@@ -110,7 +120,7 @@ export const listAdminOrders = createServerFn({ method: "GET" }).handler(
         type: "booking",
         email: null,
         summary: "Cal booking opened",
-        metadata: row.metadata ?? {},
+        metadata: (row.metadata ?? {}) as JsonRecord,
         createdAt: row.created_at,
       });
     }
@@ -204,7 +214,7 @@ export const getAdminConversation = createServerFn({ method: "GET" })
         intent: r.intent ?? null,
         role: r.role ?? null,
         content: r.content ?? null,
-        metadata: r.metadata ?? {},
+        metadata: (r.metadata ?? {}) as JsonRecord,
         createdAt: r.created_at,
       })),
     };
