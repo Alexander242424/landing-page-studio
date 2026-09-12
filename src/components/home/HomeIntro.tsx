@@ -13,6 +13,8 @@ export type HomeIntroContent = {
   taglineLinkLabel: string;
   taglineLinkHref: string;
   taglineAfter?: string;
+  taglineSecondLinkLabel?: string;
+  taglineSecondLinkHref?: string;
   title: string;
   paragraphs: (string | ReactNode)[];
 };
@@ -24,7 +26,9 @@ const DEFAULT_INTRO: HomeIntroContent = {
     "Better products, higher conversion and real revenue growth for the teams we work with. ",
   taglineLinkLabel: "Explore our case studies",
   taglineLinkHref: "#glance",
-  taglineAfter: ".",
+  taglineAfter: ". ",
+  taglineSecondLinkLabel: "See our process.",
+  taglineSecondLinkHref: "#process",
   title: "Our results speak for themselves.",
   paragraphs: [],
 };
@@ -57,12 +61,12 @@ export function HomeIntro({
     }
   };
 
-  const onLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    const href = intro.taglineLinkHref;
-    if (!href.startsWith("#")) return;
-    event.preventDefault();
-    scrollToHref(href);
-  };
+  const onAnchorClick =
+    (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+      if (!href.startsWith("#")) return;
+      event.preventDefault();
+      scrollToHref(href);
+    };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -124,11 +128,20 @@ export function HomeIntro({
               <a
                 href={intro.taglineLinkHref}
                 className="rj-link-active-full"
-                onClick={onLinkClick}
+                onClick={onAnchorClick(intro.taglineLinkHref)}
               >
                 {intro.taglineLinkLabel}
               </a>
               {intro.taglineAfter ?? ""}
+              {intro.taglineSecondLinkLabel && intro.taglineSecondLinkHref ? (
+                <a
+                  href={intro.taglineSecondLinkHref}
+                  className="rj-link-active-full"
+                  onClick={onAnchorClick(intro.taglineSecondLinkHref)}
+                >
+                  {intro.taglineSecondLinkLabel}
+                </a>
+              ) : null}
             </p>
           </div>
         </div>

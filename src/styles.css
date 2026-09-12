@@ -1939,7 +1939,7 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
     padding-right: 0;
     margin-right: 0;
     border-right: none;
-    font-size: clamp(0.78rem, 3.1vw, 1.05rem);
+    font-size: calc(clamp(0.78rem, 3.1vw, 1.05rem) + 2px);
     white-space: nowrap;
     line-height: 1.2;
     text-align: center;
@@ -5823,7 +5823,7 @@ body.rj-scroll-dark .rj-page__main {
   display: grid;
   grid-template-columns: 1fr;
   align-items: stretch;
-  gap: 1.2rem;
+  gap: 40px;
   perspective: 800px;
 }
 
@@ -5926,6 +5926,7 @@ body.rj-scroll-dark .rj-page__main {
 @media (min-width: 768px) {
   .rj-blog__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
   }
 }
 

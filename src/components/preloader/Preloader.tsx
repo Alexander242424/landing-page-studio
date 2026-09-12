@@ -6,42 +6,10 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PRELOADER_MESSAGES = [
-  {
-    words: ["Your", "growth", "starts", "here."],
-    ariaLabel: "Your growth starts here.",
-  },
-  {
-    words: ["Growth", "product", "performance", "agency."],
-    ariaLabel: "Growth product performance agency.",
-  },
-] as const;
-
-type PreloaderMessage = (typeof PRELOADER_MESSAGES)[number];
-
-const PRELOADER_MESSAGE_KEY = "rj-preloader-message";
-
-/** Cache so Strict Mode / effect re-entry cannot advance the rotation twice. */
-let pickedMessage: PreloaderMessage | null = null;
-
-function pickPreloaderMessage(): PreloaderMessage {
-  if (pickedMessage) return pickedMessage;
-  try {
-    const raw = Number(sessionStorage.getItem(PRELOADER_MESSAGE_KEY) ?? "0");
-    const index =
-      (Number.isFinite(raw) ? Math.max(0, Math.trunc(raw)) : 0) %
-      PRELOADER_MESSAGES.length;
-    sessionStorage.setItem(
-      PRELOADER_MESSAGE_KEY,
-      String((index + 1) % PRELOADER_MESSAGES.length),
-    );
-    pickedMessage = PRELOADER_MESSAGES[index]!;
-    return pickedMessage;
-  } catch {
-    pickedMessage = PRELOADER_MESSAGES[0]!;
-    return pickedMessage;
-  }
-}
+const PRELOADER_MESSAGE = {
+  words: ["Your", "growth", "starts", "here."],
+  ariaLabel: "Your growth starts here.",
+} as const;
 
 const MIN_VISIBLE_MS = 1800;
 const MAX_WAIT_MS = 4500;
@@ -129,11 +97,6 @@ export function Preloader() {
   const exitStartedRef = useRef(false);
   const playExitRef = useRef<() => void>(() => undefined);
   const [mounted, setMounted] = useState(shouldPlay && !isRevealed);
-  // SSR + first hydrate always use message[0] so markup matches. The client
-  // swaps (if needed) in layout before paint, then arms CSS intro once.
-  const [message, setMessage] = useState<PreloaderMessage>(
-    PRELOADER_MESSAGES[0],
-  );
 
   lenisRef.current = lenis;
 
@@ -171,12 +134,6 @@ export function Preloader() {
 
   useLayoutEffect(() => {
     if (!mounted) return;
-
-    const chosen = pickPreloaderMessage();
-    if (chosen !== message) {
-      setMessage(chosen);
-      return;
-    }
 
     const root = rootRef.current;
     const title = titleRef.current;
@@ -277,7 +234,7 @@ export function Preloader() {
       gsap.killTweensOf(title);
       gsap.killTweensOf(preloaderWords(title));
     };
-  }, [mounted, message, reveal]);
+  }, [mounted, reveal]);
 
   useLayoutEffect(() => {
     if (!mounted || !isRevealed) return;
@@ -302,9 +259,9 @@ export function Preloader() {
       <h2
         ref={titleRef}
         className="rj-preloader__title"
-        aria-label={message.ariaLabel}
+        aria-label={PRELOADER_MESSAGE.ariaLabel}
       >
-        {message.words.map((word, index) => (
+        {PRELOADER_MESSAGE.words.map((word, index) => (
           <span
             key={`${index}-${word}`}
             className="rj-preloader__word-wrap"
