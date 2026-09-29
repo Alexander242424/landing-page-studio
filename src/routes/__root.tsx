@@ -190,6 +190,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: SITE.themeColor },
     ],
+    scripts: [
+      {
+        src: "https://cdn.visitors.now/v.js",
+        "data-token": "9ddb4420-dd29-4381-846c-d082f3888546",
+      },
+    ],
     links: [
       {
         rel: "preload",
