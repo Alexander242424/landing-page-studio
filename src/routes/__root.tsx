@@ -193,7 +193,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       {
         src: "https://cdn.visitors.now/v.js",
-        "data-token": "9ddb4420-dd29-4381-846c-d082f3888546",
+        "data-token": "dbf30a1f-7abe-4ee0-bc23-9a66841a7bd7",
       },
     ],
     links: [
