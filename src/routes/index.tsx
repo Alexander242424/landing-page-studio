@@ -1,21 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ServiceLandingPage } from "@/components/pages/ServiceLandingPage";
-import { PRODUCT_PERFORMANCE } from "@/lib/servicePages";
+import { MarketingHomePage } from "@/components/pages/MarketingHomePage";
 import { defaultLinks, defaultMeta, SITE } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: defaultMeta({
       title: SITE.title,
-      description: PRODUCT_PERFORMANCE.description,
+      description: SITE.description,
       path: "/",
-      keywords: [...SITE.keywords, ...PRODUCT_PERFORMANCE.keywords],
+      keywords: [...SITE.keywords],
     }),
     links: defaultLinks("/"),
   }),
-  component: CroHomePage,
+  component: HomePage,
 });
 
-function CroHomePage() {
-  return <ServiceLandingPage page={PRODUCT_PERFORMANCE} canonicalPath="/" />;
+function HomePage() {
+  return <MarketingHomePage canonicalPath="/" />;
 }

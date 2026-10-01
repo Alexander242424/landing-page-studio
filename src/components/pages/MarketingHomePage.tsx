@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { playHomeEntrance } from "@/lib/homeEntrance";
 import { usePageReveal } from "@/lib/pageReveal";
-import { homeJsonLd, MARKETING_HOME } from "@/lib/site";
+import { homeJsonLd } from "@/lib/site";
 
 const GlanceSection = lazy(() =>
   import("@/components/home/GlanceSection").then((m) => ({
@@ -60,7 +60,7 @@ type MarketingHomePageProps = {
 };
 
 export function MarketingHomePage({
-  canonicalPath = MARKETING_HOME.path,
+  canonicalPath = "/",
 }: MarketingHomePageProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const hash = useRouterState({ select: (s) => s.location.hash });
@@ -122,7 +122,7 @@ export function MarketingHomePage({
       <AiPromptInput />
 
       <main className="rj-page__main">
-        <HeroReel content={MARKETING_HOME.hero} />
+        <HeroReel />
         <HomeIntro />
         <Deferred>
           <GlanceSection />

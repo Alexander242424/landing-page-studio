@@ -701,19 +701,11 @@ export function getAllServicePages(): ServicePageContent[] {
   return SERVICE_PAGES;
 }
 
-/** CRO landing is the site homepage; former home lives at the service path. */
+/** Path for a solution — dedicated landing when available, else home hash. */
 export function solutionPath(item: Solution): string {
-  if (item.slug === PRODUCT_PERFORMANCE.slug) return "/";
   const page = getServicePage(item.slug);
   if (page) return page.path;
   return `/#solution-${item.slug}`;
-}
-
-export function solutionNavigateTarget(slug: string) {
-  if (slug === PRODUCT_PERFORMANCE.slug) {
-    return { to: "/" as const };
-  }
-  return { to: "/solutions/$slug" as const, params: { slug } };
 }
 
 export function solutionHasLanding(slug: string): boolean {

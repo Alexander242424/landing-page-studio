@@ -21,7 +21,6 @@ import { megaArticles } from "@/lib/articleCatalog";
 import { SOLUTIONS } from "@/lib/solutions";
 import {
   solutionHasLanding,
-  solutionNavigateTarget,
   solutionPath,
 } from "@/lib/servicePages";
 import { cn } from "@/lib/utils";
@@ -487,7 +486,8 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     const item = SOLUTIONS.find((entry) => entry.slug === slug);
     if (item && solutionHasLanding(slug)) {
       void navigate({
-        ...solutionNavigateTarget(slug),
+        to: "/solutions/$slug",
+        params: { slug },
         viewTransition: true,
       });
       return;

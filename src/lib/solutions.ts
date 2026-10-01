@@ -36,10 +36,11 @@ export const SOLUTIONS: Solution[] = [
     image: "/challenges/websites.jpg",
   },
   {
-    title: "Testing & Experimentation",
+    title: "Product and pricing experimentation",
     slug: "testing-experimentation",
-    blurb: "User research and experiments that validate product decisions.",
-    body: "We test ideas with real users and clear metrics before full build, so the team can move forward with evidence instead of assumptions.",
+    blurb: "Experimentation that finds your most effective product and pricing strategies.",
+    body:
+      "We'll use experimentation – rather than focus groups – to help you discover the most effective product and pricing strategies.",
     video: "/challenges/c2.mp4",
     image: "/challenges/testing-experimentation.jpg",
   },
