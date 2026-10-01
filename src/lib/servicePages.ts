@@ -86,11 +86,13 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
   ],
   serviceType: "Product performance / CRO",
   hero: {
-    ariaLabel: "Turn the same traffic into compounding revenue.",
-    lines: ["Turn the same traffic", "into compounding revenue."],
+    ariaLabel: "Convert 2-3x more revenue with the same traffic.",
+    lines: ["Convert 2-3x more revenue", "with the same traffic."],
     description:
-      "We find where conversion drops — signup, activation, paywall, retention — ship the metric lifts that pay, and leave a system that keeps compounding after we leave.",
-    ...SHARED_CTAS,
+      "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
+    primaryCta: { label: "Let's talk", href: "#contact" },
+    secondaryCta: { label: "Free CRO audit", href: "#contact" },
+    logosStat: LOGOS_STAT,
   },
   valueProp: {
     id: "value",
@@ -114,16 +116,29 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
     leadAfter: ".",
     items: [
       {
-        title: "A friction map ranked by money.",
-        body: "Every drop-off moment across signup, onboarding, paywall, and retention — ranked by revenue impact. You know what to fix first, and why.",
+        title: "Full-journey visibility.",
+        body:
+          "We analyze every step from first touchpoint to checkout, across devices and segments, to pinpoint exactly where revenue is lost.",
       },
       {
-        title: "Shippable experiments, not slide decks.",
-        body: "Flows, UI, and messaging built to land with your eng team — plus a sequenced experiment roadmap so wins stack instead of resetting each sprint.",
+        title: "Outcomes, not deliverables.",
+        body:
+          "We don't sell test quotas or monthly reports. We isolate the highest-impact 10% of opportunities first and concentrate our effort where it compounds.",
       },
       {
-        title: "Metrics your whole team agrees on.",
-        body: "Clear definitions for conversion, activation, retention, and LTV — plus playbooks that stick — so product, growth, and leadership pull in the same direction.",
+        title: "One integrated methodology.",
+        body:
+          "Behavioral data, user research and design, unified in a single conversion strategy rather than split across disconnected CRO and UX teams.",
+      },
+      {
+        title: "Senior-led, system-powered.",
+        body:
+          "Our most experienced strategists stay hands-on, backed by engineers, analytics and proprietary tooling, so their time goes into decisions that move conversion.",
+      },
+      {
+        title: "Measured against your baseline.",
+        body:
+          "We go beyond traffic and clicks, benchmarking conversion rate and revenue per visitor and reporting the lift with full accountability.",
       },
     ],
   },
@@ -686,11 +701,19 @@ export function getAllServicePages(): ServicePageContent[] {
   return SERVICE_PAGES;
 }
 
-/** Path for a solution — dedicated landing when available, else home hash. */
+/** CRO landing is the site homepage; former home lives at the service path. */
 export function solutionPath(item: Solution): string {
+  if (item.slug === PRODUCT_PERFORMANCE.slug) return "/";
   const page = getServicePage(item.slug);
   if (page) return page.path;
   return `/#solution-${item.slug}`;
+}
+
+export function solutionNavigateTarget(slug: string) {
+  if (slug === PRODUCT_PERFORMANCE.slug) {
+    return { to: "/" as const };
+  }
+  return { to: "/solutions/$slug" as const, params: { slug } };
 }
 
 export function solutionHasLanding(slug: string): boolean {

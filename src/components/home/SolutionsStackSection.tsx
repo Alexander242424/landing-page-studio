@@ -8,6 +8,7 @@ import { openContactChat } from "@/lib/askChat";
 import { SOLUTIONS, solutionChatContext, type Solution } from "@/lib/solutions";
 import {
   solutionHasLanding,
+  solutionNavigateTarget,
   solutionPath,
 } from "@/lib/servicePages";
 import { createAwardsCharReveal } from "@/lib/textReveal";
@@ -336,8 +337,7 @@ export function SolutionsStackSection({
                             event.stopPropagation();
                             if (solutionHasLanding(item.slug)) {
                               void navigate({
-                                to: "/solutions/$slug",
-                                params: { slug: item.slug },
+                                ...solutionNavigateTarget(item.slug),
                                 viewTransition: true,
                               });
                               return;

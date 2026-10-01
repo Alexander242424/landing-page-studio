@@ -2,6 +2,7 @@
 
 export const OPEN_LEAD_CHAT_EVENT = "uxlab:open-lead-chat";
 export const OPEN_NEWSLETTER_CHAT_EVENT = "uxlab:open-newsletter-chat";
+export const OPEN_CRO_AUDIT_EVENT = "uxlab:open-cro-audit";
 
 export type AskChatOpenIntent = "contact" | "newsletter";
 
@@ -33,6 +34,12 @@ export function openNewsletterChat() {
 /** Footer / Solutions / hero “Let’s talk” → contact / lead capture in the ask bar. */
 export function openContactChat(detail?: OpenLeadChatDetail) {
   openLeadChat(detail);
+}
+
+/** Hero “Free CRO audit” → scripted CRO Audit chat flow. */
+export function openCroAuditChat() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(OPEN_CRO_AUDIT_EVENT));
 }
 
 /** Scripted lead intro — generic or service-personalized. */

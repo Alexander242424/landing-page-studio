@@ -14,6 +14,7 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import {
   OPEN_LEAD_CHAT_EVENT,
   OPEN_NEWSLETTER_CHAT_EVENT,
+  OPEN_CRO_AUDIT_EVENT,
   askPlaceholderForService,
   leadCompanyPromptForService,
   leadGoalForService,
@@ -1535,9 +1536,14 @@ export function AiPromptInput() {
     };
     window.addEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
     window.addEventListener(OPEN_NEWSLETTER_CHAT_EVENT, onOpenNewsletter);
+    const onOpenCroAudit = () => {
+      void startCroAuditFlow("CRO Audit");
+    };
+    window.addEventListener(OPEN_CRO_AUDIT_EVENT, onOpenCroAudit);
     return () => {
       window.removeEventListener(OPEN_LEAD_CHAT_EVENT, onOpenLead);
       window.removeEventListener(OPEN_NEWSLETTER_CHAT_EVENT, onOpenNewsletter);
+      window.removeEventListener(OPEN_CRO_AUDIT_EVENT, onOpenCroAudit);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stable listener; flows close over latest refs
   }, []);

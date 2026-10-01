@@ -8,11 +8,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 const DEFAULT_ITEMS = [
   {
-    title: "Look",
+    title: "Diagnose",
     body: "We watch how people use the product and find where they drop off. Then we pick the one or two moments that matter most.",
   },
   {
-    title: "Design",
+    title: "Ship",
     body: "We sketch the smallest change that could fix that moment. A new flow, screen, or step, ready to try, not a big presentation.",
   },
   {

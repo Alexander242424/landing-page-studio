@@ -7,8 +7,8 @@ import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 gsap.registerPlugin(ScrollTrigger);
 
 const PRELOADER_MESSAGE = {
-  words: ["Your", "growth", "starts", "here."],
-  ariaLabel: "Your growth starts here.",
+  words: ["#1", "Conversion", "Rate", "Optimisation", "Agency"],
+  ariaLabel: "#1 Conversion Rate Optimisation Agency",
 } as const;
 
 const MIN_VISIBLE_MS = 1800;

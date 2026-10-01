@@ -1,4 +1,5 @@
 import { HOME_FAQS } from "@/lib/faq";
+import type { ServiceHeroContent } from "@/lib/servicePages";
 import { SOLUTIONS } from "@/lib/solutions";
 
 /** Canonical site identity + default SEO / GEO helpers for uxlab.digital */
@@ -6,8 +7,8 @@ export const SITE = {
   origin: "https://uxlab.digital",
   name: "UXLAB",
   legalName: "UXLAB",
-  tagline: "Product + build partner for high-growth startups",
-  title: "UXLAB — Product + build partner for high-growth startups",
+  tagline: "Convert 2-3x more revenue with the same traffic",
+  title: "UXLAB — Convert 2-3x more revenue with the same traffic",
   titleTemplate: "%s — UXLAB",
   description:
     "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
@@ -46,6 +47,21 @@ export const SITE = {
   },
   /** Real profile URLs only — footer placeholders are not sameAs. */
   sameAs: [] as string[],
+} as const;
+
+/** Former homepage — now served at /solutions/product-performance */
+export const MARKETING_HOME = {
+  title: "UXLAB — Product + build partner for high-growth startups",
+  description: SITE.description,
+  path: "/solutions/product-performance",
+  hero: {
+    ariaLabel: "Product + build partner for high-growth startups.",
+    lines: ["Product + build partner", "for high-growth startups."],
+    description: SITE.description,
+    primaryCta: { label: "Let's talk", href: "#contact" },
+    secondaryCta: { label: "See results", href: "#glance" },
+    logosStat: "Trusted by YCombinator \n& Speedrun founders",
+  } satisfies ServiceHeroContent,
 } as const;
 
 export type SiteMetaLink = {
@@ -287,13 +303,15 @@ export function webSiteJsonLd() {
   };
 }
 
-export function homeWebPageJsonLd() {
+export function homeWebPageJsonLd(path = "/") {
+  const url = absoluteUrl(path);
+  const isRoot = path === "/";
   return {
     "@type": "WebPage",
-    "@id": `${SITE.origin}/#webpage`,
-    url: SITE.origin,
-    name: SITE.title,
-    description: SITE.description,
+    "@id": `${url}#webpage`,
+    url,
+    name: isRoot ? SITE.title : MARKETING_HOME.title,
+    description: isRoot ? SITE.description : MARKETING_HOME.description,
     inLanguage: SITE.language,
     isPartOf: { "@id": `${SITE.origin}/#website` },
     about: { "@id": `${SITE.origin}/#professional-service` },
@@ -360,14 +378,14 @@ export function faqPageJsonLd(
 }
 
 /** Home page JSON-LD graph: Organization + WebSite + ProfessionalService + FAQPage. */
-export function homeJsonLd() {
+export function homeJsonLd(path = "/") {
   return {
     "@context": "https://schema.org",
     "@graph": [
       personJsonLd(),
       organizationJsonLd(),
       webSiteJsonLd(),
-      homeWebPageJsonLd(),
+      homeWebPageJsonLd(path),
       professionalServiceJsonLd(),
       faqPageJsonLd(),
     ],

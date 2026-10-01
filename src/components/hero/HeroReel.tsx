@@ -3,9 +3,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoStrip } from "@/components/home/LogoStrip";
 import { LazyVideo } from "@/components/media/LazyVideo";
-import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { ArrowLink } from "@/components/ui/ArrowLink";
-import { openContactChat } from "@/lib/askChat";
+import { openContactChat, openCroAuditChat } from "@/lib/askChat";
 import type { ServiceHeroContent } from "@/lib/servicePages";
 import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 import { usePageReveal } from "@/lib/pageReveal";
@@ -18,12 +17,12 @@ const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
 
 const DEFAULT_HERO: ServiceHeroContent = {
-  ariaLabel: "Product + build partner for high-growth startups.",
-  lines: ["Product + build partner", "for high-growth startups."],
+  ariaLabel: "Convert 2-3x more revenue with the same traffic.",
+  lines: ["Convert 2-3x more revenue", "with the same traffic."],
   description:
     "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
   primaryCta: { label: "Let's talk", href: "#contact" },
-  secondaryCta: { label: "See results", href: "#glance" },
+  secondaryCta: { label: "Free CRO audit", href: "#contact" },
   logosStat: "Trusted by YCombinator \n& Speedrun founders",
 };
 
@@ -41,7 +40,6 @@ const DEFAULT_HERO: ServiceHeroContent = {
  */
 export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const hero = content ?? DEFAULT_HERO;
-  const { lenis } = useSmoothScroll();
   const { isRevealed, shouldPlay } = usePageReveal();
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -56,21 +54,21 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const scrollToHref = (href: string) => {
-    const id = href.replace("#", "");
-    const target = document.getElementById(id);
-    if (!target) return;
-
-    if (lenis) {
-      lenis.scrollTo(target, { offset: 0, duration: 1.2 });
-    } else {
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   const onResultsClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    scrollToHref(hero.secondaryCta.href);
+    if (hero.secondaryCta.label === "Free CRO audit") {
+      event.preventDefault();
+      openCroAuditChat();
+      return;
+    }
+
+    const href = hero.secondaryCta.href;
+    if (href.startsWith("#")) {
+      event.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   };
 
   const onTalkClick = (event: MouseEvent<HTMLAnchorElement>) => {

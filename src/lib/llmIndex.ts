@@ -6,11 +6,11 @@ import { SITE, absoluteUrl } from "@/lib/site";
 
 const PROCESS = [
   {
-    title: "Look",
+    title: "Diagnose",
     body: "Watch how people use the product, find where they drop off, and pick the one or two moments that matter most.",
   },
   {
-    title: "Design",
+    title: "Ship",
     body: "Sketch the smallest change that could fix that moment — a new flow, screen, or step, ready to try.",
   },
   {
