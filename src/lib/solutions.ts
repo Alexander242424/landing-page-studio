@@ -28,14 +28,6 @@ export const SOLUTIONS: Solution[] = [
     image: "/challenges/product-design.jpg",
   },
   {
-    title: "Websites + Landing Pages",
-    slug: "websites",
-    blurb: "Conversion-focused sites and funnels built for qualified demand.",
-    body: "We shape the positioning, page structure, product story, and conversion paths that turn visits into qualified demos, trials, and pipeline.",
-    video: "/challenges/c4.mp4",
-    image: "/challenges/websites.jpg",
-  },
-  {
     title: "Product and pricing experimentation",
     slug: "testing-experimentation",
     blurb: "Experimentation that finds your most effective product and pricing strategies.",

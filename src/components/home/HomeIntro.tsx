@@ -23,12 +23,12 @@ const DEFAULT_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Results",
   taglineBefore:
-    "Better products, higher conversion and real revenue growth for the teams we work with. ",
-  taglineLinkLabel: "Explore our case studies",
+    "Better products, higher conversion and real revenue growth for the teams we work with. Across mobile apps, SaaS, e-commerce and web funnels.",
+  taglineLinkLabel: "",
   taglineLinkHref: "#glance",
-  taglineAfter: ". ",
-  taglineSecondLinkLabel: "See our process.",
-  taglineSecondLinkHref: "#process",
+  taglineAfter: "",
+  taglineSecondLinkLabel: undefined,
+  taglineSecondLinkHref: undefined,
   title: "Our results speak for themselves.",
   paragraphs: [],
 };
@@ -124,15 +124,20 @@ export function HomeIntro({
           <div className="rj-intro__space" aria-hidden="true" />
           <div className="rj-intro__content">
             <p ref={taglineRef}>
-              {intro.taglineBefore}{" "}
-              <a
-                href={intro.taglineLinkHref}
-                className="rj-link-active-full"
-                onClick={onAnchorClick(intro.taglineLinkHref)}
-              >
-                {intro.taglineLinkLabel}
-              </a>
-              {intro.taglineAfter ?? ""}
+              {intro.taglineBefore}
+              {intro.taglineLinkLabel ? (
+                <>
+                  {" "}
+                  <a
+                    href={intro.taglineLinkHref}
+                    className="rj-link-active-full"
+                    onClick={onAnchorClick(intro.taglineLinkHref)}
+                  >
+                    {intro.taglineLinkLabel}
+                  </a>
+                  {intro.taglineAfter ?? ""}
+                </>
+              ) : null}
               {intro.taglineSecondLinkLabel && intro.taglineSecondLinkHref ? (
                 <a
                   href={intro.taglineSecondLinkHref}
