@@ -1181,7 +1181,7 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 
 @media (hover: hover) and (pointer: fine) {
   .rj-mega-work__tile:hover .rj-mega-work__bg img {
-    transform: scale(1.04);
+    transform: scale(1.02);
   }
 
   .rj-mega-work__tile:hover .rj-arrow__content {
@@ -3203,7 +3203,7 @@ body.rj-scroll-dark .rj-page__main {
 @media (hover: hover) and (pointer: fine) {
   .rj-glance__widget:hover .rj-glance__bg img,
   .rj-glance__widget:hover .rj-glance__bg video {
-    transform: scale(1.06);
+    transform: scale(1.03);
   }
 
   .rj-glance__widget:hover .rj-arrow__content {
@@ -3236,7 +3236,7 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-glance__widget:focus-visible .rj-glance__bg img,
 .rj-glance__widget:focus-visible .rj-glance__bg video {
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 .rj-glance__widget:focus-visible .rj-arrow__content {

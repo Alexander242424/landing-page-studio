@@ -369,9 +369,9 @@ export const CASES: CaseStudy[] = [
     },
     description:
       "+4x weekly output after we turned Grono's dashboard sprawl into one surface that plans a week of content.",
-    heroSrc: "/cases/grono/hero.webp",
-    glanceSrc: "/glance/grono.webp",
-    aspectRatio: "1488 / 1725",
+    heroSrc: "/cases/grono/hero.jpg",
+    glanceSrc: "/glance/grono.jpg",
+    aspectRatio: "992 / 1150",
     services: ["Product design", "Brand systems", "Activation"],
     heroStats: [
       { value: "+4x", label: "Weekly output by redesigning the planning surface" },
@@ -402,7 +402,7 @@ export const CASES: CaseStudy[] = [
       "9x revenue lift by boosting conversions on Nespresso mobile — assortment, membership, and checkout without breaking the ritual.",
     heroSrc: "/cases/nespresso/hero.jpg",
     glanceSrc: "/glance/nespresso.jpg",
-    aspectRatio: "1488 / 1482",
+    aspectRatio: "1488 / 1725",
     services: ["Product design", "CRO", "Ecommerce"],
     heroStats: [
       { value: "9x", label: "Revenue lift by boosting mobile conversions" },
@@ -431,8 +431,8 @@ export const CASES: CaseStudy[] = [
     },
     description:
       "+2.8x add-to-cart after we led with story and opened a clear path into the Foundrae shop.",
-    heroSrc: "/cases/foundrae/hero.webp",
-    glanceSrc: "/glance/foundrae.webp",
+    heroSrc: "/cases/foundrae/hero.jpg",
+    glanceSrc: "/glance/foundrae.jpg",
     aspectRatio: "992 / 1150",
     services: ["Product design", "Brand systems", "Ecommerce"],
     heroStats: [
@@ -464,7 +464,7 @@ export const CASES: CaseStudy[] = [
       "+2.1x tests shipped after we turned Boostra analysis into a short list of moves for this sprint.",
     heroSrc: "/cases/boostra/hero.jpg",
     glanceSrc: "/glance/boostra.jpg",
-    aspectRatio: "1488 / 1320",
+    aspectRatio: "1488 / 1725",
     services: ["CRO", "Product design", "Experimentation"],
     heroStats: [
       { value: "+2.1x", label: "Tests shipped from analysis teams can act on" },
@@ -493,8 +493,8 @@ export const CASES: CaseStudy[] = [
     },
     description:
       "+197% conversions after we rebuilt Tapmy exclusive access as a clear trials system — offer first, join in one step.",
-    heroSrc: "/cases/stan/hero.webp",
-    glanceSrc: "/glance/stan.webp",
+    heroSrc: "/cases/stan/hero.jpg",
+    glanceSrc: "/glance/stan.jpg",
     aspectRatio: "1488 / 1725",
     services: ["Product design", "Brand systems", "Activation"],
     heroStats: [

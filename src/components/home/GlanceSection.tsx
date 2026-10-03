@@ -43,6 +43,10 @@ type GlanceWidget = {
   logo: string;
   backgroundImage?: string;
   backgroundVideo?: string;
+  /** CSS aspect-ratio from the still (e.g. "1488 / 1725"). */
+  aspectRatio?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   linkLabel?: string;
 };
 
@@ -62,89 +66,94 @@ function caseHeadlineTitle(slug: string): ReactNode {
   return glanceHeadline(study.headline);
 }
 
-/** Card height follows the still: small 1488×1320, medium 1488×1482, full 1488×1725. */
-const CASES: GlanceWidget[] = [
+type GlanceFrame = {
+  slug: string;
+  size: WidgetSize;
+  backgroundImage: string;
+  logo: string;
+};
+
+/** Card height follows each still's native ratio (1488×1725, 1488×1482, 992×1150). */
+const GLANCE_FRAMES: GlanceFrame[] = [
   {
-    id: "bankrollu",
-    caseSlug: "bankrollu",
+    slug: "bankrollu",
     size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("bankrollu"),
     logo: "/glance/bankrollu.svg",
     backgroundImage: "/glance/bankrollu.jpg",
-    linkLabel: "Case Study",
   },
   {
-    id: "grono",
-    caseSlug: "grono",
+    slug: "grono",
     size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("grono"),
     logo: "/glance/grono.svg",
-    backgroundImage: "/glance/grono.webp",
-    linkLabel: "Case Study",
+    backgroundImage: "/glance/grono.jpg",
   },
   {
-    id: "nespresso",
-    caseSlug: "nespresso",
-    size: "medium",
-    theme: "dark",
-    title: caseHeadlineTitle("nespresso"),
+    slug: "nespresso",
+    size: "full",
     logo: "/glance/nespresso.svg",
     backgroundImage: "/glance/nespresso.jpg",
-    linkLabel: "Case Study",
   },
   {
-    id: "foundrae",
-    caseSlug: "foundrae",
+    slug: "foundrae",
     size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("foundrae"),
     logo: "/glance/foundrae.svg",
-    backgroundImage: "/glance/foundrae.webp",
-    linkLabel: "Case Study",
+    backgroundImage: "/glance/foundrae.jpg",
   },
   {
-    id: "boostra",
-    caseSlug: "boostra",
-    size: "small",
-    theme: "dark",
-    title: caseHeadlineTitle("boostra"),
+    slug: "boostra",
+    size: "full",
     logo: "/glance/boostra.svg",
     backgroundImage: "/glance/boostra.jpg",
-    linkLabel: "Case Study",
   },
   {
-    id: "stan",
-    caseSlug: "stan",
+    slug: "stan",
     size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("stan"),
     logo: "/glance/stan.svg",
-    backgroundImage: "/glance/stan.webp",
-    linkLabel: "Case Study",
+    backgroundImage: "/glance/stan.jpg",
   },
   {
-    id: "forbes",
-    caseSlug: "forbes",
+    slug: "forbes",
     size: "full",
-    theme: "dark",
-    title: caseHeadlineTitle("forbes"),
     logo: "/glance/forbes.svg",
     backgroundImage: "/glance/forbes.jpg",
-    linkLabel: "Case Study",
   },
   {
-    id: "tradevision",
-    caseSlug: "tradevision",
+    slug: "tradevision",
     size: "medium",
-    theme: "dark",
-    title: caseHeadlineTitle("tradevision"),
     logo: "/glance/tradevision.svg",
     backgroundImage: "/glance/tradevision.jpg",
-    linkLabel: "Case Study",
   },
 ];
+
+function parseAspectRatio(ratio?: string) {
+  if (!ratio) return null;
+  const [width, height] = ratio.split("/").map((part) => Number(part.trim()));
+  if (!width || !height) return null;
+  return { width, height };
+}
+
+function buildGlanceWidgets(): GlanceWidget[] {
+  return GLANCE_FRAMES.map((frame) => {
+    const study = getCase(frame.slug);
+    const parsed = parseAspectRatio(study?.hero.aspectRatio);
+
+    return {
+      id: frame.slug,
+      caseSlug: frame.slug,
+      size: frame.size,
+      theme: "dark",
+      title: caseHeadlineTitle(frame.slug),
+      logo: frame.logo,
+      backgroundImage: frame.backgroundImage,
+      aspectRatio: study?.hero.aspectRatio,
+      imageWidth: parsed?.width ?? 1488,
+      imageHeight: parsed?.height ?? 1725,
+      linkLabel: "Case Study",
+    };
+  });
+}
+
+const CASES = buildGlanceWidgets();
 
 function LogoMark({ src }: { src: string }) {
   return (
@@ -190,6 +199,9 @@ function WidgetCard({
         `rj-glance__widget--${widget.size}`,
         `rj-glance__widget--${widget.theme}`,
       )}
+      style={
+        widget.aspectRatio ? { aspectRatio: widget.aspectRatio } : undefined
+      }
       aria-label={`${widget.caseSlug} case study`}
       onClick={onClick}
       draggable={false}
@@ -199,10 +211,8 @@ function WidgetCard({
           <img
             src={widget.backgroundImage}
             alt=""
-            width={1488}
-            height={
-              widget.size === "small" ? 1320 : widget.size === "medium" ? 1482 : 1725
-            }
+            width={widget.imageWidth ?? 1488}
+            height={widget.imageHeight ?? 1725}
             decoding="async"
             // Eager: transform-based marquees are unreliable with native lazy-load.
             loading="eager"
