@@ -7,14 +7,9 @@ import {
 import gsap from "gsap";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
-import { ArrowCue, ArrowLink } from "@/components/ui/ArrowLink";
+import { ArrowLink } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { openLeadChat } from "@/lib/askChat";
-import { SOLUTIONS } from "@/lib/solutions";
-import {
-  solutionHasLanding,
-  solutionPath,
-} from "@/lib/servicePages";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -62,23 +57,11 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
 
     const panel = root.querySelector<HTMLElement>(".rj-mobile-menu__inner");
     const links = root.querySelectorAll<HTMLElement>(".rj-mobile-menu__link");
-    const solutionsLabel = root.querySelector<HTMLElement>(
-      ".rj-mobile-menu__solutions-label",
-    );
-    const solutionRows = root.querySelectorAll<HTMLElement>(
-      ".rj-mobile-menu__solution",
-    );
-    const rules = root.querySelectorAll<HTMLElement>(".rj-mobile-menu__rule");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const clearMotion = () => {
       if (panel) gsap.set(panel, { clearProps: "transform" });
       gsap.set(links, { clearProps: "opacity,transform" });
-      if (solutionsLabel) {
-        gsap.set(solutionsLabel, { clearProps: "opacity,transform" });
-      }
-      gsap.set(solutionRows, { clearProps: "opacity,transform" });
-      gsap.set(rules, { clearProps: "transform" });
     };
 
     if (!mobileOpen) {
@@ -88,7 +71,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
 
     if (reduced) {
       clearMotion();
-      gsap.set(rules, { scaleX: 1 });
       return;
     }
 
@@ -97,9 +79,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
       gsap.set(panel, { scale: 1.045, y: -10, transformOrigin: "50% 0%" });
     }
     gsap.set(links, { opacity: 0, y: 28 });
-    if (solutionsLabel) gsap.set(solutionsLabel, { opacity: 0, y: 16 });
-    gsap.set(solutionRows, { opacity: 0, y: 18 });
-    gsap.set(rules, { scaleX: 0, transformOrigin: "left center" });
 
     const tl = gsap.timeline({
       defaults: { ease: "expo.out" },
@@ -134,7 +113,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
       );
     }
 
-    // Top nav first…
     tl.to(
       links,
       {
@@ -144,43 +122,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
         stagger: 0.08,
       },
       0.16,
-    );
-
-    // …then Solutions block (label → rows + rules).
-    const solutionsStart = 0.16 + links.length * 0.08 + 0.12;
-
-    if (solutionsLabel) {
-      tl.to(
-        solutionsLabel,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-        },
-        solutionsStart,
-      );
-    }
-
-    tl.to(
-      solutionRows,
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.55,
-        stagger: 0.06,
-      },
-      solutionsStart + 0.08,
-    );
-
-    tl.to(
-      rules,
-      {
-        scaleX: 1,
-        duration: 0.55,
-        stagger: 0.05,
-        ease: "power3.out",
-      },
-      solutionsStart + 0.06,
     );
 
     return () => {
@@ -262,15 +203,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     }
   };
 
-  const goToHash = (hash: string) => {
-    setMobileOpen(false);
-    if (isHome) {
-      scrollToHref(`#${hash}`);
-      return;
-    }
-    void navigate({ to: "/", hash, viewTransition: true });
-  };
-
   const onNavClick = (event: MouseEvent<HTMLAnchorElement>, href: NavHref) => {
     event.preventDefault();
     setMobileOpen(false);
@@ -290,24 +222,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     event.preventDefault();
     setMobileOpen(false);
     openLeadChat();
-  };
-
-  const onSolutionClick = (
-    event: MouseEvent<HTMLAnchorElement>,
-    slug: string,
-  ) => {
-    event.preventDefault();
-    setMobileOpen(false);
-    const item = SOLUTIONS.find((entry) => entry.slug === slug);
-    if (item && solutionHasLanding(slug)) {
-      void navigate({
-        to: "/solutions/$slug",
-        params: { slug },
-        viewTransition: true,
-      });
-      return;
-    }
-    goToHash(`solution-${slug}`);
   };
 
   const logo = isHome ? (
@@ -451,32 +365,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
               );
             })}
           </nav>
-
-          <div className="rj-mobile-menu__solutions">
-            <p className="rj-mobile-menu__solutions-label">Solutions</p>
-            <ul className="rj-mobile-menu__solutions-list">
-              {SOLUTIONS.map((item, index) => (
-                <li key={item.slug} className="rj-mobile-menu__solution-item">
-                  {index === 0 ? (
-                    <span className="rj-mobile-menu__rule" aria-hidden="true" />
-                  ) : null}
-                  <a
-                    href={
-                      solutionHasLanding(item.slug)
-                        ? solutionPath(item)
-                        : `#solution-${item.slug}`
-                    }
-                    className="rj-mobile-menu__solution"
-                    onClick={(event) => onSolutionClick(event, item.slug)}
-                  >
-                    <span>{item.title}</span>
-                    <ArrowCue className="rj-link-active" />
-                  </a>
-                  <span className="rj-mobile-menu__rule" aria-hidden="true" />
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       </div>
     </div>
