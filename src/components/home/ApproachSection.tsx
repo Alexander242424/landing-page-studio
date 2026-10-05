@@ -14,7 +14,7 @@ const ITEMS = [
         Small roster, full focus.
       </>
     ),
-    body: "A limited number of clients, so the same specialists stay on your project and every test builds on the last, compounding your conversion and revenue. You work directly with the people doing the work, with no account managers and no handoffs.",
+    body: "A limited roster, so the same specialists stay on your project and each test builds on the last, compounding conversion and revenue. Direct team access—no account managers, no handoffs.",
   },
   {
     title: (
@@ -24,7 +24,7 @@ const ITEMS = [
         the job.
       </>
     ),
-    body: "A cleaner screen that doesn't convert is still a miss. Every change is judged by what it adds to your revenue: more users completing the flow, coming back and paying.",
+    body: "A screen that doesn't convert is still a miss. Every change is judged by revenue: completions, returns, and paying users.",
   },
 ] as const;
 
@@ -47,6 +47,7 @@ export function ApproachSection() {
       cleanups.push(
         createTextReveal(lead, {
           trigger: lead.closest(".rj-approach__lead-content") ?? lead,
+          animateLinkScale: true,
           start: "top 92%",
         }),
       );

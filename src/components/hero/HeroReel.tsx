@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoStrip } from "@/components/home/LogoStrip";
@@ -15,10 +15,11 @@ const HERO_VIDEO = "/video/hero.mp4";
 const HERO_POSTER = "/video/hero-poster.jpg";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
+const HIDE_REEL_MQ = "(max-width: 767px)";
 
 const DEFAULT_HERO: ServiceHeroContent = {
   ariaLabel: "Convert 2-3x more revenue with the same traffic.",
-  lines: ["Convert 2-3x more revenue", "with the same traffic."],
+  lines: ["Convert 2-3x", "more revenue with", "the same traffic."],
   description:
     "We help AI startups, product teams and DTC brands double revenue with CRO, user experience and AI engineering.",
   primaryCta: { label: "Let's talk", href: "#contact" },
@@ -28,7 +29,7 @@ const DEFAULT_HERO: ServiceHeroContent = {
 
 /**
  * Rejouice-matched hero + showreel:
- * - Awards char reveal on 2-line static headline
+ * - Awards char reveal on authored headline lines
  * - Description via createTextReveal (same masked word reveal as HomeIntro / approach)
  * - Scrubbed title+description parallax; showreel stays full-bleed (no clip grow)
  * - Logo bar sits outside the copy unit so it rides up with the video
@@ -75,6 +76,23 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
     event.preventDefault();
     openContactChat();
   };
+
+  // Pause showreel when hidden on mobile so it does not decode/play off-screen.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const mq = window.matchMedia(HIDE_REEL_MQ);
+    const syncPlayback = () => {
+      if (mq.matches) {
+        video.pause();
+      }
+    };
+
+    syncPlayback();
+    mq.addEventListener("change", syncPlayback);
+    return () => mq.removeEventListener("change", syncPlayback);
+  }, []);
 
   useLayoutEffect(() => {
     const hero = heroRef.current;
@@ -260,8 +278,12 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
               className="rj-hero__logo rj-hero__headline rj-awards-title"
               aria-label={hero.ariaLabel}
             >
-              <span className="rj-hero__line">{hero.lines[0]}</span>{" "}
-              <span className="rj-hero__line">{hero.lines[1]}</span>
+              {hero.lines.map((line, index) => (
+                <span key={line} className="rj-hero__line">
+                  {line}
+                  {index < hero.lines.length - 1 ? " " : null}
+                </span>
+              ))}
             </h1>
             <div className="rj-hero__taglines">
               <p

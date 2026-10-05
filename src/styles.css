@@ -1486,23 +1486,23 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 .rj-hero__headline {
   min-width: 0;
   line-height: 0.93;
-  /* Mobile: a bit larger so the flowing title lands on ~3 lines */
-  font-size: clamp(47px, 12.2vw, 82px);
+  /* Mobile: scale so three authored lines stay on one row each (longest: "more revenue with") */
+  font-size: min(clamp(47px, 12.2vw, 82px), calc((100vw - 24px) * 47 / 360));
   color: var(--rj-white);
   overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
   max-width: 100%;
   text-align: center;
-  text-wrap: balance;
   /* Optical balance: letter-spacing isn't applied after the last glyph */
   padding-inline-start: 0.05em;
 }
 
-/* Desktop: authored 2-line boxes. Mobile: inline so the title wraps as one phrase. */
+/* Authored headline lines — block on all breakpoints so breaks match copy rhythm. */
 .rj-hero__line {
-  display: inline;
+  display: block;
   text-align: center;
+  white-space: nowrap;
 }
 
 .rj-challenges__headline {
@@ -1581,7 +1581,7 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 /* Short viewports: keep headline from colliding with header / bottom copy */
 @media (max-height: 720px) {
   .rj-hero__headline {
-    font-size: min(12.2vw, 9.2vh, 70px);
+    font-size: min(12.2vw, 9.2vh, 70px, calc((100vw - 24px) * 47 / 360));
   }
 }
 
@@ -1621,6 +1621,11 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   margin-left: 0 !important;
   margin-right: 0 !important;
   text-align: center !important;
+}
+
+/* Keep SplitText line groups on one row — mobile was wrapping "more" alone */
+.rj-hero__headline .rj-text-reveal__line {
+  white-space: nowrap;
 }
 
 .rj-text-reveal__word {
@@ -1736,9 +1741,13 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 
 /* Mobile: +15% on hero-bottom copy only — CTAs stay 1.4rem like header Let's talk */
 @media (max-width: 767px) {
+  /* Hide showreel on phones — tablet/desktop (768px+) keeps full-bleed video */
+  .rj-reel {
+    display: none;
+  }
+
   .rj-hero {
-    height: calc(80dvh + 88px);
-    height: calc(80svh + 88px);
+    height: auto;
     min-height: calc(80dvh + 88px);
     min-height: calc(80svh + 88px);
   }
@@ -2859,6 +2868,16 @@ body.rj-scroll-dark .rj-page__main {
   line-height: 1.35;
 }
 
+@media (max-width: 1023px) {
+  .rj-intro__title {
+    grid-column: 1 / -1;
+  }
+
+  .rj-intro__body {
+    grid-column: 1 / -1;
+  }
+}
+
 .rj-intro__body-inner {
   display: flex;
   flex-direction: column;
@@ -3109,9 +3128,10 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-glance__card-title {
-  font-size: 2.1rem;
-  letter-spacing: -0.021rem;
-  line-height: 1.14;
+  font-size: clamp(2.8rem, 4.2vw, 4.4rem);
+  font-weight: 300;
+  letter-spacing: var(--rj-tracking-heading);
+  line-height: 1.2;
   color: var(--rj-white);
 }
 
@@ -3392,9 +3412,9 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-glance__card-title {
-    font-size: 3rem;
-    letter-spacing: -0.03rem;
-    line-height: 3.6rem;
+    font-size: clamp(3.6rem, 3.4vw, 5.2rem);
+    letter-spacing: var(--rj-tracking-heading);
+    line-height: 1.2;
   }
 
   .rj-glance__card-logos {

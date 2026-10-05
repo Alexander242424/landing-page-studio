@@ -48,10 +48,10 @@ export function SolutionsStackSection({
     <>
       How we invent
       <br />
-      your growth
+      your growth.
     </>
   ),
-  ariaLabel = "How we invent your growth",
+  ariaLabel = "How we invent your growth.",
 }: {
   solutions?: readonly Solution[];
   /** Hide the active service when embedding on a service landing. */
@@ -78,9 +78,19 @@ export function SolutionsStackSection({
     if (!root || !headline || !pinHeight || !pin) return;
 
     const cleanups: Array<() => void> = [];
+    let headlineRevealed = false;
+    const pendingCardReveals: Array<() => void> = [];
+
+    const markHeadlineRevealed = () => {
+      if (headlineRevealed) return;
+      headlineRevealed = true;
+      pendingCardReveals.splice(0).forEach((run) => run());
+    };
+
     cleanups.push(
       createAwardsCharReveal(headline, {
         start: "top 85%",
+        onComplete: markHeadlineRevealed,
       }),
     );
 
@@ -130,19 +140,27 @@ export function SolutionsStackSection({
 
               gsap.set(parts, { opacity: 0, y: 28 });
 
+              const revealCard = () => {
+                gsap.to(parts, {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.9,
+                  stagger: 0.12,
+                  ease: "power3.out",
+                  overwrite: "auto",
+                });
+              };
+
               ScrollTrigger.create({
                 trigger: card,
                 start: "top 90%",
                 once: true,
                 onEnter: () => {
-                  gsap.to(parts, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.9,
-                    stagger: 0.12,
-                    ease: "power3.out",
-                    overwrite: "auto",
-                  });
+                  if (headlineRevealed) {
+                    revealCard();
+                    return;
+                  }
+                  pendingCardReveals.push(revealCard);
                 },
               });
             });
@@ -181,6 +199,7 @@ export function SolutionsStackSection({
         });
 
         // One ScrollTrigger owns pin + scrub so they can't drift apart.
+        const holdProgress = introHold / timelineUnits;
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: pinHeight,
@@ -191,6 +210,11 @@ export function SolutionsStackSection({
             anticipatePin: 0,
             scrub: true,
             invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              if (headlineRevealed) return;
+              if (self.progress <= holdProgress) return;
+              self.animation?.progress(holdProgress);
+            },
           },
         });
 

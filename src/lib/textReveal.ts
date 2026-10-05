@@ -212,6 +212,8 @@ export type AwardsCharRevealOptions = {
   stagger?: number;
   /** Char yPercent stagger (default 0.02). */
   yStagger?: number;
+  /** Fires when the reveal timeline finishes (scroll-triggered or playOnLoad). */
+  onComplete?: () => void;
 };
 
 /**
@@ -233,6 +235,7 @@ export function createAwardsCharReveal(
     duration = 1.8,
     stagger = 0.06,
     yStagger = 0.02,
+    onComplete,
   } = options;
 
   const originalHTML = element.innerHTML;
@@ -304,6 +307,10 @@ export function createAwardsCharReveal(
     0.2,
   );
   timeline.to(chars, { yPercent: 0, stagger: yStagger }, 0);
+
+  if (onComplete) {
+    timeline.eventCallback("onComplete", onComplete);
+  }
 
   return () => {
     const done = timeline.progress() === 1;
