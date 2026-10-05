@@ -14,33 +14,45 @@ export const SOLUTIONS: Solution[] = [
   {
     title: "Conversion Rate Optimisation",
     slug: "product-performance",
-    blurb: "CRO, activation, retention, and LTV improvements that compound.",
-    body: "We find the highest-impact opportunities across the product journey and improve the screens and steps that shape conversion, activation, retention, and revenue.",
+    blurb:
+      "Data-driven audits that remove friction from key user journeys.",
+    body: "Data-driven audit and optimisation of your key user journeys, removing friction at every step so more visitors become paying customers.",
     video: "/challenges/c1.mp4",
     image: "/challenges/product-metrics.jpg",
   },
   {
-    title: "Product Design",
+    title: "Conversion-Centered Design",
     slug: "product-design",
-    blurb: "Clear product experiences, ready to build.",
-    body: "We design the flows, screens, states, and systems that make complex products easier to understand, use, and ship.",
+    blurb:
+      "Interfaces and flows designed around your key business actions, tested before launch.",
+    body: "Interfaces and user flows designed around your key business actions and tested before launch, so your product is easier to use and converts better.",
     video: "/challenges/c3.mp4",
     image: "/challenges/product-design.jpg",
   },
   {
+    title: "Data & Analytics",
+    slug: "data-analytics",
+    blurb:
+      "Event tracking, dashboards, and reporting built around your revenue metrics.",
+    body: "Event tracking, dashboards and reporting built around your revenue metrics, giving you a clear view of where users drop off and what drives growth.",
+    video: "/challenges/c4.mp4",
+    image: "/challenges/websites.jpg",
+  },
+  {
     title: "Product and pricing experimentation",
     slug: "testing-experimentation",
-    blurb: "Experimentation that finds your most effective product and pricing strategies.",
-    body:
-      "We'll use experimentation – rather than focus groups – to help you discover the most effective product and pricing strategies.",
+    blurb:
+      "Structured A/B testing for product and pricing, backed by real user behaviour.",
+    body: "A structured A/B testing programme for product and pricing, so every decision is backed by real user behaviour and measurable results.",
     video: "/challenges/c2.mp4",
     image: "/challenges/testing-experimentation.jpg",
   },
   {
     title: "AI Native Engineering",
     slug: "ai-engineering",
-    blurb: "AI-native product engineering from brief to production.",
-    body: "We use AI-native tools to design, build, and ship reliable product experiences faster, with production quality and maintainable code.",
+    blurb:
+      "AI-native product experiences that ship faster without compromising quality.",
+    body: "Product experiences built with AI-native tools and clean, maintainable code, so you ship faster without compromising quality.",
     video: "/challenges/c5.mp4",
     image: "/challenges/ai-engineering.jpg",
   },

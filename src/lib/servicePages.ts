@@ -200,11 +200,11 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
   ],
 };
 
-/** Product Design */
+/** Conversion-Centered Design */
 export const PRODUCT_DESIGN: ServicePageContent = {
   slug: "product-design",
   path: pathFor("product-design"),
-  title: "Product Design",
+  title: "Conversion-Centered Design",
   description:
     "Product design for SaaS, AI, and digital products. We make complex workflows clearer, easier to use, and ready for your team to build.",
   keywords: [

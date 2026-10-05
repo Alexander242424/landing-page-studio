@@ -20,7 +20,7 @@ const DEFAULT_HERO: ServiceHeroContent = {
   ariaLabel: "Convert 2-3x more revenue with the same traffic.",
   lines: ["Convert 2-3x more revenue", "with the same traffic."],
   description:
-    "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
+    "We help AI startups, product teams and DTC brands double revenue with CRO, user experience and AI engineering.",
   primaryCta: { label: "Let's talk", href: "#contact" },
   secondaryCta: { label: "Free CRO audit", href: "#contact" },
   logosStat: "Trusted by YCombinator \n& Speedrun founders",

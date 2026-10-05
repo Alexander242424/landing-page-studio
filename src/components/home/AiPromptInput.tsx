@@ -153,7 +153,7 @@ const PRICING_REPLY = [
   "Directional ranges, not quotes — but enough to know if we’re in the same universe:",
   "",
   "Brand — $15K–$40K. Identity, positioning, marketing sites.",
-  "Product Design — $35K–$75K. UI/UX, design systems, user testing.",
+  "Conversion-Centered Design — $35K–$75K. UI/UX, design systems, user testing.",
   "Design + Build — $75K minimum. End-to-end design and engineering.",
   "MVP Sprint — $40K fixed. Fast, focused build to validate.",
   "Ongoing Partnership — Retainer-based. Consistent design and dev support.",

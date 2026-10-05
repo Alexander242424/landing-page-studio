@@ -23,7 +23,7 @@ const DEFAULT_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Results",
   taglineBefore:
-    "Better products, higher conversion and real revenue growth for the teams we work with. Across mobile apps, SaaS, e-commerce and web funnels.",
+    "Real growth for mobile apps, SaaS, e-commerce and web funnels, measured in boosted revenue and higher conversion, not just redesigns.",
   taglineLinkLabel: "",
   taglineLinkHref: "#glance",
   taglineAfter: "",

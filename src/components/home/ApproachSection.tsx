@@ -15,7 +15,7 @@ const ITEMS = [
         Small roster, full focus.
       </>
     ),
-    body: "We take a small number of clients so the same people stay on the work. You get the team, not an account manager and a handoff.",
+    body: "A limited number of clients, so the same specialists stay on your project and every test builds on the last, compounding your conversion and revenue. You work directly with the people doing the work, with no account managers and no handoffs.",
   },
   {
     title: (
@@ -25,7 +25,7 @@ const ITEMS = [
         the job.
       </>
     ),
-    body: "A cleaner screen that nobody finishes is still a miss. We judge the work by whether people get through, come back, and pay.",
+    body: "A cleaner screen that doesn't convert is still a miss. Every change is judged by what it adds to your revenue: more users completing the flow, coming back and paying.",
   },
 ] as const;
 
@@ -39,10 +39,9 @@ export function ApproachSection() {
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   const scrollToHref = (href: string) => {
-    const id = href.replace("#", "");
-    const target = document.getElementById(id);
+    if (!href.startsWith("#")) return;
+    const target = document.getElementById(href.slice(1));
     if (!target) return;
-
     if (lenis) {
       lenis.scrollTo(target, { offset: 0, duration: 1.2 });
     } else {
@@ -50,7 +49,7 @@ export function ApproachSection() {
     }
   };
 
-  const onProcessClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  const onProcessLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     scrollToHref("#process");
   };
@@ -112,14 +111,15 @@ export function ApproachSection() {
           <div className="rj-approach__lead-space" aria-hidden="true" />
           <div className="rj-approach__lead-content">
             <p ref={leadRef}>
-              We do not hand over a deck and leave. We work inside the product
-              with your team, from the first look to the live change.{" "}
+              Working inside your product, side by side with your team, from the
+              first audit to the live change. You get shipped improvements that
+              lift conversion and revenue, not a deck.{" "}
               <a
                 href="#process"
                 className="rj-link-active-full"
-                onClick={onProcessClick}
+                onClick={onProcessLinkClick}
               >
-                See our process
+                See the process
               </a>
               .
             </p>

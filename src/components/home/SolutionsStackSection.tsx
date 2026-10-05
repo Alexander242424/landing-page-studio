@@ -347,9 +347,7 @@ export function SolutionsStackSection({
                             });
                           }}
                         >
-                          {solutionHasLanding(item.slug)
-                            ? "Explore"
-                            : "Let's talk"}
+                          Let's talk
                         </ArrowLink>
                       </div>
                       <div className="rj-solutions-stack__card-media">

@@ -10,7 +10,7 @@ export const SITE = {
   title: "UXLAB — Convert 2-3x more revenue with the same traffic",
   titleTemplate: "%s — UXLAB",
   description:
-    "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
+    "We help AI startups, product teams and DTC brands double revenue with CRO, user experience and AI engineering.",
   keywords: [
     "UXLAB",
     "product partner",

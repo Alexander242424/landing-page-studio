@@ -18,9 +18,9 @@ Who we are:
 
 What we do (services):
 - Conversion Rate Optimisation (CRO, activation, retention, LTV)
-- Product Design
-- Websites + Landing Pages
-- Testing & Experimentation
+- Conversion-Centered Design
+- Data & Analytics
+- Product and pricing experimentation
 - AI Native Engineering
 - Monetization & funnel architecture when relevant
 

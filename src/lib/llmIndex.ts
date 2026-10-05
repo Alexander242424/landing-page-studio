@@ -7,23 +7,23 @@ import { SITE, absoluteUrl } from "@/lib/site";
 const PROCESS = [
   {
     title: "Diagnose",
-    body: "Watch how people use the product, find where they drop off, and pick the one or two moments that matter most.",
+    body: "Analysis of user behaviour and drop-off points across your product, to find the one or two moments that cost you the most revenue.",
   },
   {
-    title: "Ship",
-    body: "Sketch the smallest change that could fix that moment — a new flow, screen, or step, ready to try.",
+    title: "Design",
+    body: "The smallest change that could fix that moment: a new flow, screen or step, ready to test, not buried in a presentation.",
   },
   {
     title: "Test",
-    body: "Try it with real users. Keep what works, drop what doesn't, and move to the next idea.",
+    body: "A/B tests with real users. Changes that lift conversion stay, the rest are dropped and the next idea goes in.",
   },
   {
     title: "Ship",
-    body: "Put the change live with the client team — clear owners, short loops, no leftover deck.",
+    body: "Winning changes go live together with your team. Clear owners and short loops, so the revenue gain starts right away.",
   },
   {
     title: "Grow",
-    body: "What works becomes the new default. The next round starts from a better product so results keep adding up.",
+    body: "Every winner becomes the new default, and each round starts from a better product, so conversion and revenue keep compounding.",
   },
 ] as const;
 

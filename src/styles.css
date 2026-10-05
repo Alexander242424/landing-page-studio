@@ -2128,7 +2128,7 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   }
 
   .rj-hero__description {
-    max-width: min(72rem, 90%);
+    max-width: min(64.8rem, 81%);
     width: auto;
     /* +15% vs prior desktop scale */
     font-size: clamp(2.07rem, 1.27rem + 0.63vw, 2.76rem);
@@ -2417,7 +2417,8 @@ body.rj-scroll-dark .rj-page__main {
 
 /* Light islands stay stable (no inherited dark flash) */
 .rj-faq.theme-light,
-.rj-blog.theme-light {
+.rj-blog.theme-light,
+.rj-get-in-touch.theme-light {
   --rj-bg: var(--rj-white);
   --rj-fg: var(--rj-black);
   --rj-fg-muted: var(--rj-muted);
@@ -5750,6 +5751,7 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-faq__answer p {
   margin: 0;
+  white-space: pre-line;
 }
 
 @media (min-width: 1024px) {
@@ -5790,7 +5792,7 @@ body.rj-scroll-dark .rj-page__main {
 /* ─── Blog / Latest articles (light island after FAQ) ─── */
 .rj-blog {
   /* Same side inset as intro / FAQ / process — no nested max-width centering */
-  padding: 0 var(--rj-grid-margin) 10rem;
+  padding: 0 var(--rj-grid-margin) 4rem;
   font-family: var(--rj-font-sans);
 }
 
@@ -5932,7 +5934,7 @@ body.rj-scroll-dark .rj-page__main {
 
 @media (min-width: 1024px) {
   .rj-blog {
-    padding: 0 var(--rj-grid-margin) 14rem;
+    padding: 0 var(--rj-grid-margin) 6rem;
   }
 
   .rj-blog--spacious-top {
@@ -5950,6 +5952,87 @@ body.rj-scroll-dark .rj-page__main {
 
   .rj-blog__title {
     font-size: 1.8rem;
+  }
+}
+
+/* ─── End-of-page CTA (Rejouice contact band) ─── */
+.rj-get-in-touch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 12rem var(--rj-grid-margin);
+  background: var(--rj-white);
+  color: var(--rj-black);
+  font-family: var(--rj-font-sans);
+}
+
+.rj-get-in-touch__heading {
+  margin: 0;
+}
+
+.rj-get-in-touch__cta {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 0 1.2rem;
+  color: inherit;
+  opacity: 0;
+}
+
+.rj-get-in-touch__label {
+  display: block;
+  font-size: clamp(2.8rem, 9vw, 6.2rem);
+  font-weight: 300;
+  letter-spacing: var(--rj-tracking-display);
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.rj-get-in-touch__link {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.12em;
+}
+
+.rj-get-in-touch__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: currentColor;
+  transform-origin: 50% 50%;
+}
+
+.rj-get-in-touch__cta:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 1.4rem;
+}
+
+@media (min-width: 768px) {
+  .rj-get-in-touch {
+    padding: 16rem var(--rj-grid-margin);
+  }
+
+  .rj-get-in-touch__cta {
+    padding-bottom: 1.4rem;
+  }
+
+  .rj-get-in-touch__bar {
+    height: 2.5px;
+  }
+
+  .rj-get-in-touch__link {
+    text-decoration-thickness: 2.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rj-get-in-touch__cta {
+    opacity: 1;
   }
 }
 

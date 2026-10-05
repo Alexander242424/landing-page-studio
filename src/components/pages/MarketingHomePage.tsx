@@ -45,6 +45,11 @@ const BlogSection = lazy(() =>
     default: m.BlogSection,
   })),
 );
+const GetInTouchSection = lazy(() =>
+  import("@/components/home/GetInTouchSection").then((m) => ({
+    default: m.GetInTouchSection,
+  })),
+);
 const SiteFooter = lazy(() =>
   import("@/components/layout/SiteFooter").then((m) => ({
     default: m.SiteFooter,
@@ -144,6 +149,9 @@ export function MarketingHomePage({
         </Deferred>
         <Deferred>
           <BlogSection />
+        </Deferred>
+        <Deferred>
+          <GetInTouchSection />
         </Deferred>
       </main>
 
