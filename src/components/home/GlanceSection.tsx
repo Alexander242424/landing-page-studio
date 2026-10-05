@@ -1,6 +1,7 @@
 import {
   useEffect,
   useRef,
+  useState,
   type MouseEvent,
   type MutableRefObject,
   type ReactNode,
@@ -8,6 +9,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CasePopup } from "@/components/case/CasePopup";
 import { LazyVideo } from "@/components/media/LazyVideo";
 import { ArrowCue } from "@/components/ui/ArrowLink";
 import {
@@ -176,9 +178,11 @@ function LogoMark({ src }: { src: string }) {
 function WidgetCard({
   widget,
   suppressNavRef,
+  onOpenPopup,
 }: {
   widget: GlanceWidget;
   suppressNavRef: MutableRefObject<boolean>;
+  onOpenPopup: (slug: string) => void;
 }) {
   const label = widget.linkLabel ?? "Case Study";
 
@@ -186,7 +190,13 @@ function WidgetCard({
     if (suppressNavRef.current) {
       event.preventDefault();
       event.stopPropagation();
+      return;
     }
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    event.preventDefault();
+    onOpenPopup(widget.caseSlug);
   };
 
   return (
@@ -273,6 +283,7 @@ export function GlanceSection() {
   const widgetsRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const suppressNavRef = useRef(false);
+  const [popupSlug, setPopupSlug] = useState<string | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -594,11 +605,16 @@ export function GlanceSection() {
         <div ref={trackRef} className="rj-glance__track">
           {sequence.map((widget, i) => (
             <div key={`${widget.id}-${i}`} className="rj-glance__enter">
-              <WidgetCard widget={widget} suppressNavRef={suppressNavRef} />
+              <WidgetCard
+                widget={widget}
+                suppressNavRef={suppressNavRef}
+                onOpenPopup={setPopupSlug}
+              />
             </div>
           ))}
         </div>
       </div>
+      <CasePopup slug={popupSlug} onClose={() => setPopupSlug(null)} />
     </section>
   );
 }

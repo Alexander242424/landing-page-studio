@@ -18,16 +18,12 @@ const DEFAULT_ITEMS = [
     body: "Analysis of user behaviour and drop-off points across your product, to find the one or two moments that cost you the most revenue.",
   },
   {
-    title: "Design",
-    body: "The smallest change that could fix that moment: a new flow, screen or step, ready to test, not buried in a presentation.",
-  },
-  {
     title: "Test",
     body: "A/B tests with real users. Changes that lift conversion stay, the rest are dropped and the next idea goes in.",
   },
   {
-    title: "Ship",
-    body: "Winning changes go live together with your team. Clear owners and short loops, so the revenue gain starts right away.",
+    title: "Design + Ship",
+    body: "The smallest change that could fix that moment — a new flow, screen or step — goes live with your team. Clear owners and short loops, so the revenue gain starts right away, not buried in a presentation.",
   },
   {
     title: "Grow",

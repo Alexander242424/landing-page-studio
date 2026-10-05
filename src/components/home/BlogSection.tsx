@@ -12,6 +12,9 @@ import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Temporarily hide homepage articles grid — set true to restore. */
+const SHOW_BLOG_INNER = false;
+
 type BlogSectionProps = {
   articles?: Article[];
   /** Skip scroll reveal / card entrance (e.g. embed in article page). */
@@ -90,13 +93,15 @@ export function BlogSection({
       )}
       aria-label="Latest articles"
     >
-      <div className="rj-blog__inner">
-        <h2 ref={headlineRef} className="rj-blog__headline">
-          Latest articles
-        </h2>
+      {SHOW_BLOG_INNER ? (
+        <div className="rj-blog__inner">
+          <h2 ref={headlineRef} className="rj-blog__headline">
+            Latest articles
+          </h2>
 
-        <BlogGrid ref={gridRef} articles={resolvedArticles} />
-      </div>
+          <BlogGrid ref={gridRef} articles={resolvedArticles} />
+        </div>
+      ) : null}
     </section>
   );
 }

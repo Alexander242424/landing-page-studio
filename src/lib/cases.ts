@@ -112,6 +112,8 @@ export type CaseStudy = {
   hoverImage?: string;
   stats?: CaseStatsSection;
   blocks: CaseBlock[];
+  /** Short results paragraph for the v2 case popup (“The Outcome”). */
+  impact?: string;
   ogImage: string;
   keywords: string[];
   datePublished: string;
@@ -138,6 +140,8 @@ export const CASES: CaseStudy[] = [
     },
     description:
       "+3.2x day-7 return after we mapped Oura onboarding to first value — readiness and recovery clicked in week one.",
+    impact:
+      "Day-7 return rose +3.2x after we mapped the first fourteen days to a score that actually changed behavior — readiness and recovery that click in week one.",
     year: "2024",
     meta: [
       { label: "Client", value: "Oura" },
@@ -154,15 +158,15 @@ export const CASES: CaseStudy[] = [
     heroStats: [
       {
         value: "+3.2x",
-        label: "Day-7 return by redesigning first value",
+        label: "Day-7 return",
       },
       {
         value: "14 days",
-        label: "Mapped from unbox to first behavior change",
+        label: "First behavior",
       },
       {
         value: "Week 1",
-        label: "Readiness and recovery that click",
+        label: "Early readiness",
       },
     ],
     blocks: [
@@ -343,9 +347,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "1488 / 1725",
     services: ["Product design", "CRO", "Activation"],
     heroStats: [
-      { value: "+2.6x", label: "Bets completed by simplifying market UI" },
-      { value: "Seconds", label: "Markets that read between plays" },
-      { value: "1 glance", label: "Hierarchy from browse to the next bet" },
+      { value: "+2.6x", label: "Bets completed" },
+      { value: "Seconds", label: "Between plays" },
+      { value: "1 glance", label: "Browse hierarchy" },
     ],
     challenge:
       "Bankroll U lives in the seconds between plays — odds, conviction, and the next move. Sports markets fail when the interface adds noise to an already loud moment.",
@@ -374,9 +378,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "992 / 1150",
     services: ["Product design", "Brand systems", "Activation"],
     heroStats: [
-      { value: "+4x", label: "Weekly output by redesigning the planning surface" },
-      { value: "1 surface", label: "A week of content, not dashboard sprawl" },
-      { value: "7 days", label: "One idea composed across the week" },
+      { value: "+4x", label: "Weekly output" },
+      { value: "1 surface", label: "Single surface" },
+      { value: "7 days", label: "Weekly composition" },
     ],
     challenge:
       "Grono helps teams turn one idea into a week of content. Content tools often grow by adding panes — the product had started to mirror planning chaos instead of absorbing it.",
@@ -405,9 +409,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "1488 / 1725",
     services: ["Product design", "CRO", "Ecommerce"],
     heroStats: [
-      { value: "9x", label: "Revenue lift by boosting mobile conversions" },
-      { value: "1 ritual", label: "Assortment to checkout without a break" },
-      { value: "1 screen", label: "Boutique feel on a small display" },
+      { value: "9x", label: "Revenue lift" },
+      { value: "1 ritual", label: "Seamless checkout" },
+      { value: "1 screen", label: "Boutique mobile" },
     ],
     challenge:
       "Nespresso’s commerce experience has to carry premium ritual on a small screen. Premium fails when mobile feels like a compressed desktop — assortment, membership, and checkout without losing the brand’s quiet confidence.",
@@ -436,9 +440,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "992 / 1150",
     services: ["Product design", "Brand systems", "Ecommerce"],
     heroStats: [
-      { value: "+2.8x", label: "Add-to-cart by leading story into the shop" },
-      { value: "1 path", label: "Narrative that earns the purchase" },
-      { value: "Story first", label: "Mythology that survives checkout" },
+      { value: "+2.8x", label: "Cart conversion" },
+      { value: "1 path", label: "Story path" },
+      { value: "Story first", label: "Brand mythology" },
     ],
     challenge:
       "Foundrae sells meaning as much as metal. Jewelry commerce often jumps to SKU grids — the digital experience had to honor symbolism first, then open a clear path into the shop without diluting the story.",
@@ -467,9 +471,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "1488 / 1725",
     services: ["CRO", "Product design", "Experimentation"],
     heroStats: [
-      { value: "+2.1x", label: "Tests shipped from analysis teams can act on" },
-      { value: "1 sprint", label: "A short list of moves, not another report" },
-      { value: "Leak → lift", label: "Find the leak, ship the fix, compound" },
+      { value: "+2.1x", label: "Tests shipped" },
+      { value: "1 sprint", label: "Sprint actions" },
+      { value: "Leak → lift", label: "Ship fixes" },
     ],
     challenge:
       "Boostra helps teams see where conversion breaks. Analytics products fail when signal stays trapped in dashboards — the job was not more charts, it was a short list of moves people can ship this sprint.",
@@ -498,9 +502,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "1488 / 1725",
     services: ["Product design", "Brand systems", "Activation"],
     heroStats: [
-      { value: "+197%", label: "Conversions from a clear trials system" },
-      { value: "1 step", label: "Offer first, join without friction" },
-      { value: "1 profile", label: "Access that sells belonging before signup" },
+      { value: "+197%", label: "Trial conversions" },
+      { value: "1 step", label: "Frictionless join" },
+      { value: "1 profile", label: "Exclusive access" },
     ],
     challenge:
       "Stan is where creators meet their closest audience. Creator platforms often bury exclusivity under generic social chrome — profiles had to feel like a destination, exclusive without being opaque.",
@@ -529,9 +533,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "1488 / 1725",
     services: ["Product design", "Brand systems", "Ecommerce"],
     heroStats: [
-      { value: "+3.1x", label: "Suite inquiries by leading with the destination" },
-      { value: "1 path", label: "Atmosphere first, then a clear book" },
-      { value: "1 stay", label: "Destination that earns the inquiry" },
+      { value: "+3.1x", label: "Suite inquiries" },
+      { value: "1 path", label: "Clear booking" },
+      { value: "1 stay", label: "Luxury destination" },
     ],
     challenge:
       "Forbes sells the destination as much as the stay. Hospitality often jumps to room grids — the digital experience had to honor atmosphere first, then open a clear path to inquire without flattening the luxury.",
@@ -560,9 +564,9 @@ export const CASES: CaseStudy[] = [
     aspectRatio: "1488 / 1482",
     services: ["Product design", "CRO", "Activation"],
     heroStats: [
-      { value: "+2.4x", label: "Daily sessions by making options flow readable" },
-      { value: "Minutes", label: "Flow that reads before the close" },
-      { value: "1 glance", label: "Prints ranked for the next trade" },
+      { value: "+2.4x", label: "Daily sessions" },
+      { value: "Minutes", label: "Pre-close flow" },
+      { value: "1 glance", label: "Ranked prints" },
     ],
     challenge:
       "TradeVision lives in the minutes before the close — flow, sentiment, and the next print. Options products fail when flow is a wall of prints.",
@@ -596,7 +600,7 @@ function publishedStub({
   heroStats,
   challenge,
   solution,
-  impact: _impact,
+  impact,
   narrativeHeading,
   narrative,
   year = "2024",
@@ -645,6 +649,7 @@ function publishedStub({
       aspectRatio,
     },
     heroStats,
+    impact,
     blocks: [
       {
         type: "lede",
@@ -723,4 +728,30 @@ export function casePath(slug: string): string {
 
 export function caseHoverImage(caseStudy: CaseStudy): string {
   return caseStudy.hoverImage ?? caseStudy.hero.src;
+}
+
+function caseLede(caseStudy: CaseStudy, label: string): string | undefined {
+  const block = caseStudy.blocks.find(
+    (item) => item.type === "lede" && item.label === label,
+  );
+  return block?.type === "lede" ? block.text : undefined;
+}
+
+/** Compact copy for the v2 case popup (Off Menu services panel). */
+export function getCasePopupCopy(caseStudy: CaseStudy) {
+  return {
+    eyebrow: "Case Study",
+    title: caseStudy.client,
+    logo: caseStudy.logo,
+    lead: caseStudy.description,
+    metrics: caseStudy.heroStats,
+    figureSrc: caseHoverImage(caseStudy),
+    figureAlt: caseStudy.hero.alt,
+    approach:
+      caseLede(caseStudy, "Solution") ??
+      caseLede(caseStudy, "Challenge") ??
+      caseStudy.description,
+    outcome: caseStudy.impact ?? caseStudy.description,
+    footerHeading: "Ready to start?",
+  };
 }

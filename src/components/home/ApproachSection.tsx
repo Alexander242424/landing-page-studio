@@ -1,7 +1,6 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -33,26 +32,9 @@ const ITEMS = [
  * Rejouice “Our approach” — intro-style lead + key-value block.
  */
 export function ApproachSection() {
-  const { lenis } = useSmoothScroll();
   const rootRef = useRef<HTMLElement>(null);
   const leadRef = useRef<HTMLParagraphElement>(null);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
-
-  const scrollToHref = (href: string) => {
-    if (!href.startsWith("#")) return;
-    const target = document.getElementById(href.slice(1));
-    if (!target) return;
-    if (lenis) {
-      lenis.scrollTo(target, { offset: 0, duration: 1.2 });
-    } else {
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const onProcessLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    scrollToHref("#process");
-  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -65,7 +47,6 @@ export function ApproachSection() {
       cleanups.push(
         createTextReveal(lead, {
           trigger: lead.closest(".rj-approach__lead-content") ?? lead,
-          animateLinkScale: true,
           start: "top 92%",
         }),
       );
@@ -113,15 +94,7 @@ export function ApproachSection() {
             <p ref={leadRef}>
               Working inside your product, side by side with your team, from the
               first audit to the live change. You get shipped improvements that
-              lift conversion and revenue, not a deck.{" "}
-              <a
-                href="#process"
-                className="rj-link-active-full"
-                onClick={onProcessLinkClick}
-              >
-                See the process
-              </a>
-              .
+              lift conversion and revenue, not a deck.
             </p>
           </div>
         </div>

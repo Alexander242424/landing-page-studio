@@ -1,7 +1,5 @@
 import {
   useEffect,
-  useId,
-  useLayoutEffect,
   useRef,
   useState,
   type MouseEvent,
@@ -11,13 +9,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
 import { ArrowCue, ArrowLink } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
-import { ARTICLES } from "@/lib/articles";
 import { openLeadChat } from "@/lib/askChat";
-import {
-  articleCatalogItems,
-  useArticleCatalog,
-} from "@/hooks/useArticleCatalog";
-import { megaArticles } from "@/lib/articleCatalog";
 import { SOLUTIONS } from "@/lib/solutions";
 import {
   solutionHasLanding,
@@ -25,29 +17,17 @@ import {
 } from "@/lib/servicePages";
 import { cn } from "@/lib/utils";
 
-type MegaKind = "solutions" | "resources";
-
-/** Keep panel mounted through CSS close (opacity + slight y). */
-const MEGA_EXIT_MS = 320;
-
 const NAV_ITEMS = [
   { label: "Case studies", href: "/work" },
-  { label: "Solutions", href: "#solutions", mega: "solutions" as const },
-  { label: "Resources", href: "/resources", mega: "resources" as const },
+  { label: "Solutions", href: "#solutions" },
+  { label: "Process", href: "#process" },
 ] as const;
 
 type NavHref = (typeof NAV_ITEMS)[number]["href"];
-type NavItem = (typeof NAV_ITEMS)[number];
 
 function isPathHref(href: string): href is `/${string}` {
   return href.startsWith("/");
 }
-
-function navMega(item: NavItem): MegaKind | null {
-  return "mega" in item ? item.mega : null;
-}
-
-const MEGA_ARTICLES_FALLBACK = ARTICLES.slice(0, 4);
 
 type SiteHeaderProps = {
   /** `home` = hash scroll-spy; `site` = navigate to home sections */
@@ -55,175 +35,23 @@ type SiteHeaderProps = {
 };
 
 /**
- * Fixed mix-blend header: scroll-spy nav, desktop megas (Solutions / Resources), mobile burger.
+ * Fixed mix-blend header: scroll-spy nav and mobile burger.
  */
 export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
-  const articleCatalog = useArticleCatalog();
-  const fromCatalog = megaArticles(articleCatalogItems(articleCatalog.data), 4);
-  const megaResourceArticles =
-    fromCatalog.length > 0 ? fromCatalog : MEGA_ARTICLES_FALLBACK;
   const [activeHref, setActiveHref] = useState<NavHref | null>(null);
-  const [megaKind, setMegaKind] = useState<MegaKind | null>(null);
-  const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const megaRef = useRef<HTMLDivElement>(null);
-  const megaTlRef = useRef<gsap.core.Timeline | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileTlRef = useRef<gsap.core.Timeline | null>(null);
-  const megaId = useId();
   const { lenis } = useSmoothScroll();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = variant === "home" || pathname === "/";
 
-  const clearMegaClose = () => {
-    if (megaCloseTimer.current) {
-      clearTimeout(megaCloseTimer.current);
-      megaCloseTimer.current = null;
-    }
-  };
-
-  const openMega = (kind: MegaKind) => {
-    clearMegaClose();
-    setMegaKind(kind);
-    setMegaOpen(true);
-  };
-
-  const closeMega = () => {
-    clearMegaClose();
-    setMegaOpen(false);
-  };
-
-  const scheduleMegaClose = () => {
-    clearMegaClose();
-    megaCloseTimer.current = setTimeout(() => setMegaOpen(false), 160);
-  };
-
-  // Unmount panel content after the close transition so it can ease out.
-  useEffect(() => {
-    if (megaOpen || !megaKind) return;
-    const id = window.setTimeout(() => setMegaKind(null), MEGA_EXIT_MS);
-    return () => window.clearTimeout(id);
-  }, [megaOpen, megaKind]);
-
   useEffect(() => {
     return () => {
-      clearMegaClose();
-      megaTlRef.current?.kill();
       mobileTlRef.current?.kill();
     };
   }, []);
-
-  // Desktop mega: divider draw (solutions) + staggered entrance on open.
-  useLayoutEffect(() => {
-    const root = megaRef.current;
-    if (!root) return;
-
-    megaTlRef.current?.kill();
-    megaTlRef.current = null;
-
-    const enters = root.querySelectorAll<HTMLElement>(".rj-mega__enter");
-    const solutionCards = root.querySelectorAll<HTMLElement>(".rj-mega__card");
-    const rulesV = root.querySelectorAll<HTMLElement>(".rj-mega__rule--v");
-    const ruleH = root.querySelector<HTMLElement>(".rj-mega__rule--h");
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const clearCardParts = () => {
-      solutionCards.forEach((card) => {
-        const parts = card.querySelectorAll<HTMLElement>(
-          ".rj-mega__card-title, .rj-mega__card-blurb, .rj-mega__card-arrow",
-        );
-        gsap.set(parts, { clearProps: "opacity,transform" });
-      });
-      gsap.set(enters, { clearProps: "opacity,transform" });
-    };
-
-    if (!megaKind) {
-      gsap.set(rulesV, { scaleY: 0 });
-      if (ruleH) gsap.set(ruleH, { scaleX: 0 });
-      clearCardParts();
-      return;
-    }
-
-    if (reduced) {
-      gsap.set(rulesV, { scaleY: 1 });
-      if (ruleH) gsap.set(ruleH, { scaleX: 1 });
-      clearCardParts();
-      return;
-    }
-
-    const tl = gsap.timeline({
-      defaults: { ease: "expo.out" },
-      onComplete: clearCardParts,
-    });
-    megaTlRef.current = tl;
-
-    if (megaKind === "solutions") {
-      gsap.set(rulesV, { scaleY: 0, transformOrigin: "50% 0%" });
-      if (ruleH) gsap.set(ruleH, { scaleX: 0, transformOrigin: "0% 50%" });
-
-      tl.to(
-        rulesV,
-        {
-          scaleY: 1,
-          duration: 0.7,
-          stagger: 0.08,
-          ease: "power3.out",
-        },
-        0.02,
-      );
-      if (ruleH) {
-        tl.to(
-          ruleH,
-          {
-            scaleX: 1,
-            duration: 0.75,
-            ease: "power3.out",
-          },
-          0.1,
-        );
-      }
-
-      solutionCards.forEach((card, index) => {
-        const title = card.querySelector<HTMLElement>(".rj-mega__card-title");
-        const blurb = card.querySelector<HTMLElement>(".rj-mega__card-blurb");
-        const arrow = card.querySelector<HTMLElement>(".rj-mega__card-arrow");
-        const parts = [title, blurb, arrow].filter(
-          (el): el is HTMLElement => Boolean(el),
-        );
-        if (parts.length === 0) return;
-
-        gsap.set(parts, { opacity: 0, y: 16 });
-        tl.to(
-          parts,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.55,
-            stagger: 0.05,
-          },
-          0.18 + index * 0.045,
-        );
-      });
-    } else {
-      gsap.set(enters, { opacity: 0, y: 18 });
-      tl.to(
-        enters,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.55,
-          stagger: 0.045,
-        },
-        0.06,
-      );
-    }
-
-    return () => {
-      tl.kill();
-    };
-  }, [megaKind]);
 
   useEffect(() => {
     const root = mobileMenuRef.current;
@@ -374,15 +202,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   }, [mobileOpen]);
 
   useEffect(() => {
-    if (!megaOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMega();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [megaOpen]);
-
-  useEffect(() => {
     if (!isHome) {
       setActiveHref(null);
       return;
@@ -444,7 +263,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   };
 
   const goToHash = (hash: string) => {
-    closeMega();
     setMobileOpen(false);
     if (isHome) {
       scrollToHref(`#${hash}`);
@@ -456,7 +274,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   const onNavClick = (event: MouseEvent<HTMLAnchorElement>, href: NavHref) => {
     event.preventDefault();
     setMobileOpen(false);
-    closeMega();
     if (isPathHref(href)) {
       void navigate({ to: href, viewTransition: true });
       return;
@@ -472,7 +289,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   const onConnectClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     setMobileOpen(false);
-    closeMega();
     openLeadChat();
   };
 
@@ -482,7 +298,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   ) => {
     event.preventDefault();
     setMobileOpen(false);
-    closeMega();
     const item = SOLUTIONS.find((entry) => entry.slug === slug);
     if (item && solutionHasLanding(slug)) {
       void navigate({
@@ -534,10 +349,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                   aria-label={mobileOpen ? "Close menu" : "Open menu"}
                   aria-expanded={mobileOpen}
                   aria-controls="rj-mobile-menu"
-                  onClick={() => {
-                    closeMega();
-                    setMobileOpen((open) => !open);
-                  }}
+                  onClick={() => setMobileOpen((open) => !open)}
                 >
                   <span className="rj-header__burger-lines" aria-hidden="true">
                     <span />
@@ -561,39 +373,16 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                       : isHome
                         ? item.href
                         : `/${item.href}`;
-                    const kind = navMega(item);
-                    const megaActive = kind !== null && megaOpen && megaKind === kind;
-
                     return (
-                      <li
-                        key={item.href}
-                        className={cn(
-                          "rj-header__menu-item",
-                          kind && "rj-header__menu-item--mega",
-                        )}
-                        onMouseEnter={
-                          kind ? () => openMega(kind) : undefined
-                        }
-                        onMouseLeave={
-                          kind ? scheduleMegaClose : undefined
-                        }
-                      >
+                      <li key={item.href} className="rj-header__menu-item">
                         <a
                           href={hrefAttr}
                           aria-current={isActive ? "true" : undefined}
-                          aria-expanded={
-                            kind ? megaActive : undefined
-                          }
-                          aria-controls={kind ? megaId : undefined}
                           className={cn(
                             "rj-link-active",
                             isActive && "rj-header__link--active",
-                            megaActive && "rj-header__link--mega-open",
                           )}
                           onClick={(event) => onNavClick(event, item.href)}
-                          onFocus={
-                            kind ? () => openMega(kind) : undefined
-                          }
                         >
                           {item.label}
                         </a>
@@ -625,111 +414,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
             </div>
           </div>
         </header>
-      </div>
-
-      <div
-        id={megaId}
-        ref={megaRef}
-        className={cn(
-          "rj-mega",
-          megaOpen && "is-open",
-          megaKind && `rj-mega--${megaKind}`,
-        )}
-        role="region"
-        aria-hidden={!megaOpen}
-        inert={!megaOpen}
-        aria-label={megaKind === "resources" ? "Resources" : "Solutions"}
-        onMouseEnter={
-          megaOpen && megaKind ? () => openMega(megaKind) : undefined
-        }
-        onMouseLeave={scheduleMegaClose}
-      >
-        <div className="rj-mega__panel">
-          {megaKind === "resources" ? (
-            <>
-              <ul className="rj-mega-resources">
-                {megaResourceArticles.map((article) => (
-                  <li
-                    key={article.slug}
-                    className="rj-mega-resources__item rj-mega__enter"
-                  >
-                    <Link
-                      to="/resources/$slug"
-                      params={{ slug: article.slug }}
-                      viewTransition
-                      className="rj-mega-resources__card"
-                      onClick={closeMega}
-                    >
-                      <div className="rj-mega-resources__media">
-                        <img
-                          src={article.image}
-                          alt=""
-                          width={640}
-                          height={400}
-                          decoding="async"
-                          loading="lazy"
-                          draggable={false}
-                        />
-                      </div>
-                      <span className="rj-mega-resources__category">
-                        {article.category}
-                      </span>
-                      <h3 className="rj-mega-resources__title">
-                        <span className="rj-mega-resources__title-text">
-                          {article.title}
-                        </span>
-                      </h3>
-                      <p className="rj-mega-resources__meta">
-                        {article.date} — {article.readTime}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <div className="rj-mega__footer rj-mega__enter">
-                <Link
-                  to="/resources"
-                  viewTransition
-                  className="rj-mega__footer-link"
-                  onClick={closeMega}
-                >
-                  <ArrowCue>All resources</ArrowCue>
-                </Link>
-              </div>
-            </>
-          ) : null}
-
-          {megaKind === "solutions" ? (
-            <>
-              <ul className="rj-mega__grid">
-                {SOLUTIONS.map((item) => (
-                  <li key={item.slug} className="rj-mega__item">
-                    <a
-                      href={
-                        solutionHasLanding(item.slug)
-                          ? solutionPath(item)
-                          : `#solution-${item.slug}`
-                      }
-                      className="rj-mega__card"
-                      onClick={(event) => onSolutionClick(event, item.slug)}
-                    >
-                      <span className="rj-mega__card-copy">
-                        <span className="rj-mega__card-title">{item.title}</span>
-                        <span className="rj-mega__card-blurb">{item.blurb}</span>
-                      </span>
-                      <ArrowCue className="rj-mega__card-arrow" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <div className="rj-mega__rules" aria-hidden="true">
-                <span className="rj-mega__rule rj-mega__rule--v rj-mega__rule--v1" />
-                <span className="rj-mega__rule rj-mega__rule--v rj-mega__rule--v2" />
-                <span className="rj-mega__rule rj-mega__rule--h" />
-              </div>
-            </>
-          ) : null}
-        </div>
       </div>
 
       <div

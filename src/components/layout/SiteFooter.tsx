@@ -1,8 +1,9 @@
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import type { MouseEvent } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { ArrowCue } from "@/components/ui/ArrowLink";
+import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { openContactChat, openNewsletterChat } from "@/lib/askChat";
-import { solutionPath } from "@/lib/servicePages";
-import { SOLUTIONS } from "@/lib/solutions";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -31,6 +32,38 @@ type SiteFooterProps = {
  */
 export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
   const year = new Date().getFullYear();
+  const { lenis } = useSmoothScroll();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isHome = pathname === "/";
+
+  const scrollToHref = (href: string) => {
+    const id = href.replace("#", "");
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    if (lenis) {
+      lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+    } else {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const navHref = (href: string) => {
+    if (href.startsWith("/")) return href;
+    return isHome ? href : `/${href}`;
+  };
+
+  const onHashNavClick =
+    (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+      if (!href.startsWith("#")) return;
+      event.preventDefault();
+      if (isHome) {
+        scrollToHref(href);
+        return;
+      }
+      void navigate({ to: "/", hash: href.slice(1), viewTransition: true });
+    };
 
   return (
     <footer
@@ -48,23 +81,21 @@ export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
           <p className="rj-footer__locale">Poland, Warsaw</p>
         </div>
 
-        <div className="rj-footer__col">
-          <ul className="rj-footer__list">
-            {SOLUTIONS.map((item) => (
-              <li key={item.title}>
-                <a href={solutionPath(item)} className="rj-link-active">
-                  {item.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <div className="rj-footer__col" />
 
         <div className="rj-footer__col">
           <ul className="rj-footer__list">
             {NAV.map((item) => (
               <li key={item.href}>
-                <a href={item.href} className="rj-link-active">
+                <a
+                  href={navHref(item.href)}
+                  className="rj-link-active"
+                  onClick={
+                    item.href.startsWith("#")
+                      ? onHashNavClick(item.href)
+                      : undefined
+                  }
+                >
                   {item.label}
                 </a>
               </li>
