@@ -5,8 +5,10 @@ import { SOLUTIONS } from "@/lib/solutions";
 export type ServiceHeroContent = {
   /** Accessible full headline */
   ariaLabel: string;
-  /** Visual lines for awards char reveal */
+  /** Visual lines for awards char reveal (desktop / tablet) */
   lines: readonly string[];
+  /** Optional narrower mobile line breaks when desktop `lines` differ */
+  linesMobile?: readonly string[];
   /** Supporting description — wraps naturally, not authored as line breaks */
   description: string;
   primaryCta: { label: string; href: string };
@@ -87,7 +89,8 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
   serviceType: "Product performance / CRO",
   hero: {
     ariaLabel: "Convert 2-3x more revenue with the same traffic.",
-    lines: ["Convert 2-3x", "more revenue with", "the same traffic."],
+    lines: ["Convert 2-3x more revenue", "with the same traffic."],
+    linesMobile: ["Convert 2-3x", "more revenue with", "the same traffic."],
     description:
       "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
     primaryCta: { label: "Let's talk", href: "#contact" },

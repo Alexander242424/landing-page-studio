@@ -1,4 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoStrip } from "@/components/home/LogoStrip";
@@ -16,10 +22,12 @@ const HERO_POSTER = "/video/hero-poster.jpg";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
 const HIDE_REEL_MQ = "(max-width: 767px)";
+const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
 
 const DEFAULT_HERO: ServiceHeroContent = {
   ariaLabel: "Convert 2-3x more revenue with the same traffic.",
-  lines: ["Convert 2-3x", "more revenue with", "the same traffic."],
+  lines: ["Convert 2-3x more revenue", "with the same traffic."],
+  linesMobile: ["Convert 2-3x", "more revenue with", "the same traffic."],
   description:
     "We help AI startups, product teams and DTC brands double revenue with CRO, user experience and AI engineering.",
   primaryCta: { label: "Let's talk", href: "#contact" },
@@ -36,11 +44,30 @@ const DEFAULT_HERO: ServiceHeroContent = {
  * - Taglines sit in normal hero flow on all breakpoints (no mobile bottom scrub —
  *   that desynced them from the showreel while the video scrolled)
  * - Mobile uses a lighter animation budget to avoid touch scroll jitter
+ * - Headline line breaks: optional `linesMobile` below 768px, `lines` on tablet+
  *
  * Load sequence (with playHomeEntrance): header → video → title → description
  */
+function useHeadlineLines(hero: ServiceHeroContent): readonly string[] {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia(HEADLINE_MOBILE_MQ).matches
+      : false,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
+    const sync = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return isMobile && hero.linesMobile ? hero.linesMobile : hero.lines;
+}
+
 export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const hero = content ?? DEFAULT_HERO;
+  const headlineLines = useHeadlineLines(hero);
   const { isRevealed, shouldPlay } = usePageReveal();
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -266,7 +293,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, [isRevealed, shouldPlay]);
+  }, [isRevealed, shouldPlay, headlineLines]);
 
   return (
     <section ref={rootRef} className="rj-hero-reel" id="hero" aria-label="Hero">
@@ -278,10 +305,10 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
               className="rj-hero__logo rj-hero__headline rj-awards-title"
               aria-label={hero.ariaLabel}
             >
-              {hero.lines.map((line, index) => (
-                <span key={line} className="rj-hero__line">
+              {headlineLines.map((line, index) => (
+                <span key={`${index}-${line}`} className="rj-hero__line">
                   {line}
-                  {index < hero.lines.length - 1 ? " " : null}
+                  {index < headlineLines.length - 1 ? " " : null}
                 </span>
               ))}
             </h1>
