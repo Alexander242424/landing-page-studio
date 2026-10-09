@@ -9,6 +9,10 @@ const WORD_CLASS = "rj-text-reveal__word";
 const LINE_CLASS = "rj-text-reveal__line";
 const CHAR_CLASS = "rj-text-reveal__char";
 
+/** Headline blocks we author as separate lines — split chars per block, not per word line. */
+const AWARDS_AUTHORED_LINE_SELECTOR =
+  ".rj-hero__line, .rj-compounding__problem-title-line, .rj-compounding__flywheel-title-line";
+
 export type TextRevealOptions = {
   trigger?: Element;
   start?: string;
@@ -239,24 +243,47 @@ export function createAwardsCharReveal(
   } = options;
 
   const originalHTML = element.innerHTML;
-  let split: SplitText | null = new SplitText(element, {
-    // words keep glyphs together so inline-block chars never wrap mid-word
-    type: "lines,words,chars",
-    linesClass: LINE_CLASS,
-    wordsClass: WORD_CLASS,
-    charsClass: CHAR_CLASS,
-  });
+  const authoredLines = element.querySelectorAll<HTMLElement>(
+    AWARDS_AUTHORED_LINE_SELECTOR,
+  );
+  const useAuthoredLines = authoredLines.length > 1;
 
-  // SplitText often stamps text-align:start / shrink widths — force true center.
-  split.lines.forEach((line) => {
-    const el = line as HTMLElement;
-    el.style.setProperty("text-align", "center", "important");
-    el.style.setProperty("display", "block", "important");
-    el.style.setProperty("width", "100%", "important");
-    el.style.removeProperty("max-width");
-    el.style.removeProperty("margin-left");
-    el.style.removeProperty("margin-right");
-  });
+  const splits: SplitText[] = [];
+  let split: SplitText | null = null;
+
+  if (useAuthoredLines) {
+    authoredLines.forEach((lineEl) => {
+      const lineSplit = new SplitText(lineEl, {
+        type: "words,chars",
+        wordsClass: WORD_CLASS,
+        charsClass: CHAR_CLASS,
+      });
+      splits.push(lineSplit);
+      lineEl.style.setProperty("text-align", "center", "important");
+      lineEl.style.setProperty("display", "block", "important");
+      lineEl.style.setProperty("width", "100%", "important");
+    });
+  } else {
+    split = new SplitText(element, {
+      // words keep glyphs together so inline-block chars never wrap mid-word
+      type: "lines,words,chars",
+      linesClass: LINE_CLASS,
+      wordsClass: WORD_CLASS,
+      charsClass: CHAR_CLASS,
+    });
+
+    // SplitText often stamps text-align:start / shrink widths — force true center.
+    split.lines.forEach((line) => {
+      const el = line as HTMLElement;
+      el.style.setProperty("text-align", "center", "important");
+      el.style.setProperty("display", "block", "important");
+      el.style.setProperty("width", "100%", "important");
+      el.style.removeProperty("max-width");
+      el.style.removeProperty("margin-left");
+      el.style.removeProperty("margin-right");
+    });
+  }
+
   let restored = false;
 
   const restore = (keepVisible = false) => {
@@ -264,10 +291,12 @@ export function createAwardsCharReveal(
     restored = true;
     try {
       split?.revert();
+      splits.forEach((s) => s.revert());
     } catch {
       /* already reverted by gsap.context */
     }
     split = null;
+    splits.length = 0;
     element.innerHTML = originalHTML;
     gsap.set(element, {
       clearProps: "perspective,transform,opacity,visibility",
@@ -277,7 +306,9 @@ export function createAwardsCharReveal(
     }
   };
 
-  const chars = split.chars;
+  const chars = useAuthoredLines
+    ? splits.flatMap((s) => s.chars)
+    : split!.chars;
   if (!chars.length) {
     // Never leave the title stuck at CSS opacity:0 (hero black void).
     restore(true);

@@ -1801,7 +1801,12 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   text-align: center;
   white-space: normal;
   overflow-wrap: break-word;
-  text-wrap: balance;
+}
+
+@media (max-width: 1023px) {
+  .rj-hero__line {
+    text-wrap: balance;
+  }
 }
 
 .rj-challenges__headline {
@@ -1811,7 +1816,6 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   max-width: 100%;
   padding-inline: max(0.8rem, var(--rj-grid-margin));
   box-sizing: border-box;
-  text-wrap: balance;
   overflow-wrap: break-word;
 }
 
@@ -1876,7 +1880,10 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   .rj-compare__headline .rj-hero__line,
   .rj-get-in-touch__headline .rj-text-reveal__line,
   .rj-partners__headline .rj-hero__line,
-  .rj-awards-title .rj-text-reveal__line {
+  .rj-awards-title .rj-text-reveal__line,
+  .rj-compounding__problem-title-line,
+  .rj-compounding__problem-title .rj-text-reveal__line,
+  .rj-compounding__flywheel-title-line {
     white-space: nowrap;
     text-wrap: wrap;
   }
@@ -1908,6 +1915,7 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   .rj-challenges__headline,
   .rj-solutions-stack__headline {
     font-size: clamp(5.6rem, 1.6rem + 7vw, 15.84rem);
+    text-wrap: wrap;
   }
 }
 
@@ -6410,7 +6418,6 @@ body.rj-scroll-dark .rj-page__main {
   font-weight: 300;
   letter-spacing: -0.04em;
   color: var(--rj-white);
-  opacity: 1;
 }
 
 .rj-compounding__flywheel-title-line {
@@ -6598,6 +6605,12 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-compounding__flywheel-title-line {
+    white-space: normal;
+    text-wrap: balance;
+  }
+
+  .rj-compounding__problem-title-line,
+  .rj-compounding__problem-title .rj-text-reveal__line {
     white-space: normal;
     text-wrap: balance;
   }
@@ -7655,17 +7668,36 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: -0.0456em;
   line-height: 0.82;
   color: var(--rj-fg);
-  text-wrap: balance;
   overflow-wrap: break-word;
 }
 
-.rj-content-hub__headline .rj-text-reveal__line,
-.rj-content-hub__headline .rj-hero__line {
-  display: block;
-  text-align: center !important;
-  white-space: normal;
-  overflow-wrap: break-word;
-  text-wrap: balance;
+@media (max-width: 1023px) {
+  .rj-challenges__headline {
+    text-wrap: balance;
+  }
+
+  .rj-content-hub__headline {
+    text-wrap: balance;
+  }
+
+  .rj-content-hub__headline .rj-text-reveal__line,
+  .rj-content-hub__headline .rj-hero__line {
+    display: block;
+    text-align: center !important;
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rj-content-hub__headline .rj-text-reveal__line,
+  .rj-content-hub__headline .rj-hero__line {
+    display: block;
+    text-align: center !important;
+    white-space: nowrap;
+    text-wrap: wrap;
+  }
 }
 
 .rj-content-hub__cards {

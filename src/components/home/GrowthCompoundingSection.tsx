@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { createAwardsCharReveal } from "@/lib/textReveal";
+import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -455,6 +455,8 @@ export function GrowthCompoundingSection({
   const pinHeightRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
   const problemTitleRef = useRef<HTMLHeadingElement>(null);
+  const flywheelTitleRef = useRef<HTMLHeadingElement>(null);
+  const flywheelLedeRef = useRef<HTMLParagraphElement>(null);
   const diagramClipRef = useRef<HTMLDivElement>(null);
   const diagramTrackRef = useRef<HTMLDivElement>(null);
   const flywheelRef = useRef<HTMLDivElement>(null);
@@ -464,6 +466,8 @@ export function GrowthCompoundingSection({
     const pinHeight = pinHeightRef.current;
     const pin = pinRef.current;
     const problemTitle = problemTitleRef.current;
+    const flywheelTitle = flywheelTitleRef.current;
+    const flywheelLede = flywheelLedeRef.current;
     const diagramClip = diagramClipRef.current;
     const diagramTrack = diagramTrackRef.current;
     const flywheel = flywheelRef.current;
@@ -472,6 +476,8 @@ export function GrowthCompoundingSection({
       !pinHeight ||
       !pin ||
       !problemTitle ||
+      !flywheelTitle ||
+      !flywheelLede ||
       !diagramClip ||
       !diagramTrack ||
       !flywheel
@@ -481,6 +487,19 @@ export function GrowthCompoundingSection({
 
     const cleanups: Array<() => void> = [];
     cleanups.push(createAwardsCharReveal(problemTitle, { start: "top 88%" }));
+    cleanups.push(
+      createAwardsCharReveal(flywheelTitle, {
+        start: "top 88%",
+        delay: 0.12,
+      }),
+    );
+    cleanups.push(
+      createTextReveal(flywheelLede, {
+        start: "top 88%",
+        delay: 0.55,
+        duration: 1,
+      }),
+    );
 
     const desktopMq = window.matchMedia(DESKTOP_MQ);
     const motionMq = window.matchMedia(MOTION_MQ);
@@ -758,7 +777,10 @@ export function GrowthCompoundingSection({
 
             <div ref={flywheelRef} className="rj-compounding__flywheel">
               <div className="rj-compounding__flywheel-copy">
-                <h2 className="rj-compounding__flywheel-title">
+                <h2
+                  ref={flywheelTitleRef}
+                  className="rj-compounding__flywheel-title rj-awards-title"
+                >
                   <span className="rj-compounding__flywheel-title-line">
                     The modern
                   </span>
@@ -766,7 +788,10 @@ export function GrowthCompoundingSection({
                     CRO flywheel
                   </span>
                 </h2>
-                <p className="rj-compounding__flywheel-lede">
+                <p
+                  ref={flywheelLedeRef}
+                  className="rj-compounding__flywheel-lede rj-text-reveal"
+                >
                   Finds leaks, tests fixes, and ships winners. Each round starts
                   from a better product.
                 </p>
