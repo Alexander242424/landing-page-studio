@@ -89,7 +89,7 @@ function NotFoundComponent() {
       {/* Minimal wordmark nav */}
       <header
         className="flex h-14 shrink-0 items-center px-[12px] lg:px-12"
-        style={{ borderBottom: "1px solid var(--rj-rule, rgba(0,0,0,.07))" }}
+        style={{ borderBottom: "1px solid var(--rj-border)" }}
       >
         <Link
           to="/"

@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useId, useState, type FormEvent } from "react";
-import { GetInTouchSection } from "@/components/home/GetInTouchSection";
 import {
   Accordion,
   AccordionContent,
@@ -94,12 +93,12 @@ function WorkflowLeadForm({ workflow }: { workflow: Workflow }) {
         {hasDownload ? (
           <button
             type="submit"
-            className={`rj-ask__btn rj-ask__btn--download${canSubmit ? " is-ready" : ""}`}
+            className="rj-hero__cta rj-hero__cta--talk rj-wf-detail__lead-form-submit"
             disabled={!canSubmit}
           >
-            <span className="rj-ask__btn-label">Download</span>
+            Download
             <svg
-              className="rj-ask__icon rj-ask__icon--download"
+              className="rj-wf-detail__lead-form-submit-icon"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
@@ -167,14 +166,18 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
                 </li>
                 <li>
                   <Link to="/workflows" viewTransition>
-                    Workflows
+                    Playbooks
                   </Link>
                 </li>
               </ol>
             </nav>
 
             <h1 className="rj-wf-detail__title">{workflow.title}</h1>
-            <p className="rj-wf-detail__lede">{workflow.description}</p>
+            <div className="rj-wf-detail__lede">
+              {workflow.description.split("\n\n").map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
           </header>
 
           <WorkflowLeadForm workflow={workflow} />
@@ -197,8 +200,8 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
                           <img
                             src={tool.logoSrc}
                             alt=""
-                            width={28}
-                            height={28}
+                            width={24}
+                            height={24}
                             decoding="async"
                           />
                         ) : (
@@ -228,12 +231,7 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
         <div className="rj-wf-detail__body">
           <section className="rj-wf-detail__steps" aria-label="How it works">
             <h2 className="rj-wf-detail__heading">How it works</h2>
-            <Accordion
-              type="single"
-              collapsible
-              defaultValue="step-0"
-              className="rj-wf-steps"
-            >
+            <Accordion type="single" collapsible className="rj-wf-steps">
               {workflow.steps.map((step, index) => (
                 <AccordionItem
                   key={step.title}
@@ -242,7 +240,7 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
                 >
                   <AccordionTrigger
                     hideChevron
-                    className="rj-wf-step__trigger hover:no-underline py-0 items-start font-normal text-inherit"
+                    className="rj-wf-step__trigger hover:no-underline py-0 items-center font-normal text-inherit"
                   >
                     <span className="rj-wf-step__trigger-grid">
                       <span className="rj-wf-step__index">
@@ -276,8 +274,12 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
               ))}
             </Accordion>
           </section>
+        </div>
+      </div>
 
-          {related.length > 0 ? (
+      {related.length > 0 ? (
+        <div className="rj-wf-grid-wrap rj-wf-detail__related-wrap">
+          <div className="rj-wf-grid-inner">
             <section className="rj-wf-detail__related" aria-label="More workflows">
               <h2 className="rj-wf-detail__heading">More playbooks</h2>
               <ul className="rj-wf-grid">
@@ -286,13 +288,9 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
                 ))}
               </ul>
             </section>
-          ) : null}
-
-          <div className="rj-wf-detail__touch">
-            <GetInTouchSection />
           </div>
         </div>
-      </div>
+      ) : null}
     </article>
   );
 }

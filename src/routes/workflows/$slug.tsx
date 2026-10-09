@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
+import { GetInTouchSection } from "@/components/home/GetInTouchSection";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { WorkflowView } from "@/components/workflows/WorkflowView";
 import { SITE, defaultLinks, defaultMeta, pageTitle } from "@/lib/site";
@@ -61,6 +62,7 @@ function WorkflowPage() {
       <AiPromptInput />
       <main className="rj-page__main rj-wf-page rj-wf-page--detail">
         <WorkflowView workflow={workflow} />
+        <GetInTouchSection />
       </main>
       <Suspense fallback={null}>
         <SiteFooter variant="dark" />

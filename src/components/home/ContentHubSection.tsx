@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 type HubCard = {
   title: string;
-  description: readonly [string, string];
+  description: string;
   status: "free" | "soon";
   statusLabel: string;
   previewSrc: string;
@@ -26,10 +26,8 @@ type HubCard = {
 const CARDS: HubCard[] = [
   {
     title: "CRO playbooks",
-    description: [
-      "Conversion playbooks, tests, and growth",
-      "notes from the UXLAB team.",
-    ],
+    description:
+      "Conversion playbooks, tests, and growth notes from the UXLAB team.",
     status: "free",
     statusLabel: "Free",
     previewSrc: "/challenges/testing-experimentation.jpg",
@@ -40,10 +38,8 @@ const CARDS: HubCard[] = [
   },
   {
     title: "Toolverse",
-    description: [
-      "A curated directory of tools we use",
-      "for research, design, and experimentation.",
-    ],
+    description:
+      "A curated directory of tools we use for research, design, and experimentation.",
     status: "free",
     statusLabel: "Free",
     previewSrc: "/challenges/ai-engineering.jpg",
@@ -55,10 +51,8 @@ const CARDS: HubCard[] = [
   },
   {
     title: "UXLAB Academy",
-    description: [
-      "Paid program on diagnosing leaks and",
-      "shipping revenue-winning UX.",
-    ],
+    description:
+      "Paid program on diagnosing leaks and shipping revenue-winning UX.",
     status: "soon",
     statusLabel: "Coming soon",
     previewSrc: "/challenges/product-metrics.jpg",
@@ -103,11 +97,7 @@ function HubCardSurface({ card }: { card: HubCard }) {
         <div className="rj-content-hub__card-body">
           <div className="rj-content-hub__card-copy">
             <h3 className="rj-content-hub__card-title">{card.title}</h3>
-            <p className="rj-content-hub__card-desc">
-              {card.description[0]}
-              <br />
-              {card.description[1]}
-            </p>
+            <p className="rj-content-hub__card-desc">{card.description}</p>
           </div>
           <span className="rj-content-hub__card-arrow" aria-hidden="true">
             <ArrowCue />

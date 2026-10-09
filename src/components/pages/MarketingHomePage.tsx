@@ -141,10 +141,10 @@ export function MarketingHomePage({
           <ContentHubSection />
         </Deferred>
         <Deferred>
-          <ApproachSection />
+          <GrowthCompoundingSection />
         </Deferred>
         <Deferred>
-          <GrowthCompoundingSection />
+          <ApproachSection />
         </Deferred>
         <Deferred>
           <HomeVideoSection />

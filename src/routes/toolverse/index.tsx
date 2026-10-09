@@ -1,9 +1,11 @@
-import { lazy, Suspense, useEffect, useMemo } from "react";
+import gsap from "gsap";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { GetInTouchSection } from "@/components/home/GetInTouchSection";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ToolverseDirectory } from "@/components/toolverse/ToolverseDirectory";
+import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 import {
   SITE,
   absoluteUrl,
@@ -21,6 +23,36 @@ const SiteFooter = lazy(() =>
 
 const DESCRIPTION =
   "A curated directory of tools UXLAB uses for UX, CRO, analytics, tracking, traffic, and user research.";
+
+const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
+
+const TOOLVERSE_HEADLINE_DESKTOP = [
+  "Tools for UX, CRO, and the",
+  "traffic you already have.",
+] as const;
+
+const TOOLVERSE_HEADLINE_MOBILE = [
+  "Tools for UX,",
+  "CRO, and the traffic",
+  "you already have.",
+] as const;
+
+function useToolverseHeadlineLines(): readonly string[] {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia(HEADLINE_MOBILE_MQ).matches
+      : false,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
+    const sync = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return isMobile ? TOOLVERSE_HEADLINE_MOBILE : TOOLVERSE_HEADLINE_DESKTOP;
+}
 
 export const Route = createFileRoute("/toolverse/")({
   head: () => ({
@@ -73,6 +105,39 @@ function buildJsonLd() {
 
 function ToolversePage() {
   const jsonLd = useMemo(() => buildJsonLd(), []);
+  const headlineLines = useToolverseHeadlineLines();
+  const pageRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const ledeRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const root = pageRef.current;
+    const title = titleRef.current;
+    const lede = ledeRef.current;
+    if (!root || !title || !lede) return;
+
+    const cleanups: Array<() => void> = [];
+    const ctx = gsap.context(() => {
+      cleanups.push(
+        createAwardsCharReveal(title, {
+          playOnLoad: true,
+          delay: 0.35,
+        }),
+      );
+      cleanups.push(
+        createTextReveal(lede, {
+          playOnLoad: true,
+          delay: 2.05,
+          duration: 1.1,
+        }),
+      );
+    }, root);
+
+    return () => {
+      cleanups.forEach((fn) => fn());
+      ctx.revert();
+    };
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.rjRoute = "toolverse";
@@ -96,7 +161,7 @@ function ToolversePage() {
       <SiteHeader variant="site" />
       <AiPromptInput />
 
-      <main className="rj-page__main rj-tv-page">
+      <main ref={pageRef} className="rj-page__main rj-tv-page">
         <header className="rj-wf-page__header">
           <nav className="rj-article__crumbs rj-work__crumbs" aria-label="Breadcrumb">
             <ol>
@@ -111,13 +176,18 @@ function ToolversePage() {
             </ol>
           </nav>
           <div className="rj-wf-page__copy">
-            <h1 className="rj-wf-page__title">
-              <span className="rj-wf-page__title-line">
-                Tools for UX, CRO, and the traffic
-              </span>
-              <span className="rj-wf-page__title-line">you already have.</span>
+            <h1 ref={titleRef} className="rj-hero__headline rj-awards-title">
+              {headlineLines.map((line, index) => (
+                <span key={`${index}-${line}`} className="rj-hero__line">
+                  {line}
+                  {index < headlineLines.length - 1 ? " " : null}
+                </span>
+              ))}
             </h1>
-            <p className="rj-wf-page__lede">
+            <p
+              ref={ledeRef}
+              className="rj-hero__tagline rj-hero__description rj-text-reveal"
+            >
               Analytics, tracking, testing, research, and vitals — the stack we
               actually use to find leaks and ship the fix.
             </p>

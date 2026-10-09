@@ -29,12 +29,12 @@ const PROOF_LOGOS = [
   { id: "oura", src: "/logos/oura.svg", alt: "Oura" },
   {
     id: "nespresso",
-    src: "/logos/nespresso.svg",
+    src: "/logos/nespresso-circle.svg",
     alt: "Nespresso",
     fill: true,
   },
   { id: "stan", src: "/logos/stan.svg", alt: "Stan" },
-  { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes", fill: true },
+  { id: "forbes", src: "/logos/forbes-mark.svg", alt: "Forbes" },
 ] as const;
 
 const DEFAULT_HERO: ServiceHeroContent = {
@@ -126,6 +126,8 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
           createAwardsCharReveal(logo, {
             playOnLoad: true,
             delay: 0.35,
+            duration: 1.6,
+            stagger: 0.05,
             onComplete: () => logo.classList.add("rj-hero__copy--visible"),
           }),
         );
@@ -134,7 +136,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
           revealCleanups.push(
             createTextReveal(description, {
               playOnLoad: true,
-              delay: 0.85,
+              delay: 2.05,
               duration: 1.35,
               wordsStagger: 0.012,
             }),
@@ -146,7 +148,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
         if (proof) gsap.set(proof, { autoAlpha: 0, y: 12 });
 
         const follow = gsap.timeline({
-          delay: 1.65,
+          delay: 2.85,
           defaults: { ease: "expo.out" },
         });
         if (actions) {
@@ -183,13 +185,13 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
           gsap.to(icon, {
             autoAlpha: 1,
             y: 0,
-            delay: 1.1,
+            delay: 2.05,
             duration: 1.2,
             ease: "expo.out",
           });
           gsap.to(icon, {
             y: 8,
-            delay: 2.4,
+            delay: 3.35,
             duration: 1.15,
             ease: "power1.inOut",
             yoyo: true,

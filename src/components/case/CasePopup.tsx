@@ -84,7 +84,7 @@ export function CasePopup({ slug, onClose }: CasePopupProps) {
           {copy ? (
             <div className="rj-case-popup__scroll" data-lenis-prevent>
               <div className="rj-case-popup__stack">
-                <header className="rj-case-popup__intro">
+                <header className="rj-case-popup__intro rj-case-popup__reveal">
                   <p className="rj-case-popup__eyebrow">{copy.eyebrow}</p>
                   <DialogPrimitive.Title className="rj-case-popup__title">
                     <img
@@ -102,7 +102,7 @@ export function CasePopup({ slug, onClose }: CasePopupProps) {
                 </header>
 
                 <dl
-                  className="rj-case-popup__metrics"
+                  className="rj-case-popup__metrics rj-case-popup__reveal"
                   aria-label="Impact metrics"
                 >
                   {copy.metrics.map((stat) => (
@@ -117,7 +117,7 @@ export function CasePopup({ slug, onClose }: CasePopupProps) {
                   ))}
                 </dl>
 
-                <figure className="rj-case-popup__figure">
+                <figure className="rj-case-popup__figure rj-case-popup__reveal">
                   <div className="rj-case-popup__fig-frame">
                     <img
                       src={copy.figureSrc}
@@ -129,17 +129,17 @@ export function CasePopup({ slug, onClose }: CasePopupProps) {
                   </div>
                 </figure>
 
-                <section className="rj-case-popup__block">
+                <section className="rj-case-popup__block rj-case-popup__reveal">
                   <h3 className="rj-case-popup__label">Our Approach</h3>
                   <p className="rj-case-popup__copy">{copy.approach}</p>
                 </section>
 
-                <section className="rj-case-popup__block">
+                <section className="rj-case-popup__block rj-case-popup__reveal">
                   <h3 className="rj-case-popup__label">The Outcome</h3>
                   <p className="rj-case-popup__copy">{copy.outcome}</p>
                 </section>
 
-                <footer className="rj-case-popup__footer">
+                <footer className="rj-case-popup__footer rj-case-popup__reveal">
                   <h3 className="rj-case-popup__footer-heading">
                     {copy.footerHeading}
                   </h3>

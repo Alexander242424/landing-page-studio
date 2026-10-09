@@ -126,7 +126,7 @@ export const WORKFLOWS: readonly Workflow[] = [
     title: "Experimentation loop",
     lede: "A weekly test system that ships winners, not a backlog of ideas.",
     description:
-      "How UXLAB runs diagnose → hypothesis → test → ship so conversion gains compound instead of resetting every quarter.",
+      "How UXLAB runs diagnose → hypothesis → test → ship so conversion gains compound instead of resetting every quarter. We start from a single leak in the journey, write the hypothesis in plain language, and ship the smallest live change we can measure — not a deck of options waiting for alignment.\n\nEach loop ends with a decision: promote, iterate, or kill. Winners become the new baseline in analytics and product; losers free the lane for the next test. That rhythm keeps teams out of quarterly reset mode and lets lifts stack across checkout, activation, and retention.",
     tags: ["CRO", "Testing", "Product"],
     coverSrc: "/challenges/product-metrics.jpg",
     coverAlt: "Abstract frames suggesting a testing loop",

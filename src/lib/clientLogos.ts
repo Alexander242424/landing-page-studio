@@ -77,8 +77,10 @@ export const CUSTOMER_LOGO_GRID_IDS = [
   "oura",
   "rivian",
   "zara",
-  "easy",
 ] as const;
+
+/** Total client engagements — grid “more” tile shows the remainder after featured marks. */
+export const CUSTOMER_ENGAGEMENT_TOTAL = 162;
 
 /** Logo ids that have a published case study. */
 const LOGO_CASE_SLUGS: Partial<Record<string, string>> = {
@@ -98,6 +100,15 @@ function logosByIds(ids: readonly string[]): ClientLogo[] {
 
 export function customerLogoGrid(): ClientLogo[] {
   return logosByIds(CUSTOMER_LOGO_GRID_IDS);
+}
+
+export function customerLogoGridMoreCount(): number {
+  return Math.max(0, CUSTOMER_ENGAGEMENT_TOTAL - CUSTOMER_LOGO_GRID_IDS.length);
+}
+
+export function customerLogoGridMoreLabel(): string {
+  const count = customerLogoGridMoreCount();
+  return `${count} more companies`;
 }
 
 export function partnerRailLogos(): ClientLogo[] {

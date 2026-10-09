@@ -96,7 +96,7 @@ export function AdminOverviewChart({ overview }: AdminOverviewChartProps) {
             <Tooltip
               contentStyle={{
                 borderRadius: 2,
-                border: "1px solid rgba(0,0,0,0.12)",
+                border: "1px solid var(--rj-border)",
                 fontFamily: "var(--rj-font-sans)",
                 fontSize: "1.3rem",
                 fontWeight: 300,

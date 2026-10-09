@@ -50,6 +50,29 @@ export const TOOL_DETAILS: Record<string, ToolDetailFields> = {
     ],
     useWhen: "You will instrument 15–40 named events and iterate weekly on activation.",
   },
+  boostra: {
+    review:
+      "Our pick when the bottleneck is not missing data but missing action — conversion signal needs to collapse into a sprint-sized list you can ship. We built and designed Boostra around that loop: find the stall, propose the fix, measure the lift. Keep Mixpanel or PostHog as the event layer; reach for VWO or Statsig when you need heavyweight client-side experiment stats on top.",
+    metrics: [
+      m("+2.1x", "Tests shipped (Boostra)"),
+      m("High", "CRO stack fit"),
+      m("$$", "Pricing band"),
+    ],
+    chart: chart("Days from insight to shipped test", " days", [
+      ["Signal review", 2],
+      ["Pick hypothesis", 3],
+      ["Design fix", 5],
+      ["Ship + measure", 4],
+      ["Readout", 3],
+    ]),
+    bestFor: "Squads that want CRO prioritisation, not another dashboard tab.",
+    watchouts: [
+      "Upstream funnel events still need discipline — vague inputs produce vague moves.",
+      "Not a substitute for formal stats on high-traffic pricing experiments.",
+      "Value shows up when teams actually ship the recommended interventions.",
+    ],
+    useWhen: "You need conversion analysis translated into fixes for this sprint.",
+  },
   amplitude: {
     review:
       "Strong when PMs want journey templates and experiment hooks without writing SQL. We reach for it on larger product orgs that already have governance. Mixpanel is leaner for pure conversion squads; PostHog wins when you want self-hosting or session replay bundled.",

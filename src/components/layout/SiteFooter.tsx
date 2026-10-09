@@ -4,8 +4,7 @@ import { Logo } from "@/components/brand/Logo";
 import { ArrowCue } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { openContactChat, openNewsletterChat } from "@/lib/askChat";
-import { solutionPath } from "@/lib/servicePages";
-import { SOLUTIONS } from "@/lib/solutions";
+import { SOLUTIONS, solutionChatContext } from "@/lib/solutions";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -88,7 +87,17 @@ export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
           <ul className="rj-footer__list">
             {SOLUTIONS.map((item) => (
               <li key={item.slug}>
-                <a href={solutionPath(item)} className="rj-link-active">
+                <a
+                  href="#contact"
+                  className="rj-link-active"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    openContactChat({
+                      service: solutionChatContext(item),
+                      source: "footer_solutions",
+                    });
+                  }}
+                >
                   {item.title}
                 </a>
               </li>

@@ -32,6 +32,8 @@ export type ToolCategory = {
   id: string;
   title: string;
   tools: readonly ToolEntry[];
+  /** Single-tool hero row: full-width cell, taller tile. */
+  featured?: boolean;
 };
 
 export const TOOLVERSE_PATH = "/toolverse";
@@ -47,6 +49,7 @@ const TOOL_LOGO_PNG = new Set([
 ]);
 
 const TOOL_LOGO_SLUGS: readonly string[] = [
+  "boostra",
   "ahrefs",
   "amplitude",
   "appcues",
@@ -101,6 +104,20 @@ function withLogo(tool: ToolEntry): ToolEntry {
 }
 
 export const TOOL_CATEGORIES: readonly ToolCategory[] = [
+  {
+    id: "cro",
+    title: "Conversion rate optimisation",
+    featured: true,
+    tools: [
+      {
+        slug: "boostra",
+        name: "Boostra",
+        blurb:
+          "Turn conversion leaks into a short list of fixes you can ship and measure this sprint.",
+        href: "https://getboostra.com",
+      },
+    ],
+  },
   {
     id: "analytics",
     title: "Product analytics",
@@ -395,6 +412,8 @@ const EXTRA_TOOLS: readonly ToolEntry[] = [
 ];
 
 const TOOL_NAME_ALIASES: Record<string, string> = {
+  boostra: "boostra",
+  getboostra: "boostra",
   gtm: "gtm",
   "google tag manager": "gtm",
   ga4: "ga4",

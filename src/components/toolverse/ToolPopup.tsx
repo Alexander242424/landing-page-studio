@@ -91,19 +91,21 @@ export function ToolPopup({ slug, onClose, onSelectTool }: ToolPopupProps) {
                     <p className="rj-case-popup__eyebrow">{category}</p>
                   ) : null}
                   <DialogPrimitive.Title className="rj-case-popup__title rj-tool-popup__title">
-                    <span className="rj-tool-popup__title-stack">
-                      {tool.logoSrc ? (
-                        <img
-                          className="rj-case-popup__logo rj-tool-popup__logo"
-                          src={tool.logoSrc}
-                          alt=""
-                          width={180}
-                          height={48}
-                          decoding="async"
-                        />
-                      ) : null}
+                    {tool.logoSrc ? (
+                      <img
+                        className="rj-case-popup__logo rj-tool-popup__logo"
+                        src={tool.logoSrc}
+                        alt=""
+                        width={180}
+                        height={48}
+                        decoding="async"
+                      />
+                    ) : (
                       <span className="rj-tool-popup__name">{tool.name}</span>
-                    </span>
+                    )}
+                    {tool.logoSrc ? (
+                      <span className="sr-only">{tool.name}</span>
+                    ) : null}
                   </DialogPrimitive.Title>
                   <p className="rj-case-popup__lead" id="rj-tool-popup-lead">
                     {tool.blurb}
@@ -112,7 +114,6 @@ export function ToolPopup({ slug, onClose, onSelectTool }: ToolPopupProps) {
 
                 {tool.review ? (
                   <section className="rj-case-popup__block">
-                    <h3 className="rj-case-popup__label">UXLAB take</h3>
                     <p className="rj-case-popup__copy">{tool.review}</p>
                   </section>
                 ) : null}
@@ -167,7 +168,7 @@ export function ToolPopup({ slug, onClose, onSelectTool }: ToolPopupProps) {
                 <div className="rj-tool-popup__actions">
                   <ArrowLink
                     href={tool.href}
-                    className="rj-link-active rj-hero__cta rj-hero__cta--talk"
+                    className="rj-link-active rj-hero__cta rj-hero__cta--process"
                     target="_blank"
                     rel="noreferrer"
                   >

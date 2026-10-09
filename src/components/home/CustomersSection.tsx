@@ -15,15 +15,17 @@ import { CasePopup } from "@/components/case/CasePopup";
 import { ArrowCue, ArrowLink } from "@/components/ui/ArrowLink";
 import {
   customerLogoGrid,
+  customerLogoGridMoreLabel,
   logoCaseSlug,
   type ClientLogo,
 } from "@/lib/clientLogos";
 import { DEFAULT_HOME_INTRO } from "@/components/home/HomeIntro";
-import { casePath, getCase, type CaseStudy } from "@/lib/cases";
+import { WORK_PATH, casePath, getCase, type CaseStudy } from "@/lib/cases";
 
 const SECTION_TAGLINE = DEFAULT_HOME_INTRO.taglineBefore;
 
 const LOGO_COLUMNS_DESKTOP = 4;
+const LOGO_GRID_ROWS = 4;
 const FEATURED_SLUG = "nespresso";
 const FEATURED_HEADLINE =
   "How Nespresso Generated a 9x Revenue Lift by Boosting Conversions";
@@ -58,6 +60,21 @@ function LogoCell({
         decoding="async"
         draggable={false}
       />
+      <ArrowCue className="rj-customers__logo-arrow" />
+    </a>
+  );
+}
+
+function MoreCompaniesCell() {
+  const label = customerLogoGridMoreLabel();
+
+  return (
+    <a
+      href={WORK_PATH}
+      className="rj-customers__logo-cell rj-customers__logo-cell--more"
+      aria-label={`${label} — view all work`}
+    >
+      <span className="rj-customers__logo-more">{label}</span>
       <ArrowCue className="rj-customers__logo-arrow" />
     </a>
   );
@@ -164,26 +181,45 @@ export function CustomersSection() {
         return;
       }
 
-      gsap.set(card, { autoAlpha: 0, y: 36, scale: 0.97 });
-      gsap.set(bits, { autoAlpha: 0, y: 18 });
-      if (cells.length) gsap.set(cells, { autoAlpha: 0, y: 14 });
+      // Shell: fade + gentle scale only (content carries vertical motion).
+      gsap.set(card, { autoAlpha: 0, scale: 0.988 });
+      gsap.set(bits, { autoAlpha: 0, y: 22 });
+      if (cells.length) {
+        gsap.set(cells, { autoAlpha: 0, y: 10, scale: 0.985 });
+      }
+
+      const logoRows = Math.max(
+        LOGO_GRID_ROWS,
+        Math.ceil(cells.length / LOGO_COLUMNS_DESKTOP),
+      );
 
       const tl = gsap.timeline({
         defaults: { ease: "expo.out" },
         scrollTrigger: {
           trigger: inner,
-          start: "top 82%",
+          // After tagline has had room to read — inner enters a beat later.
+          start: "top 74%",
           once: true,
           invalidateOnRefresh: true,
         },
         onComplete: reveal,
       });
 
-      tl.to(card, { autoAlpha: 1, y: 0, scale: 1, duration: 1.1 }, 0);
+      tl.to(
+        card,
+        { autoAlpha: 1, scale: 1, duration: 1.25, ease: "expo.out" },
+        0,
+      );
       tl.to(
         bits,
-        { autoAlpha: 1, y: 0, duration: 0.85, stagger: 0.1 },
-        0.22,
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.92,
+          stagger: 0.11,
+          ease: "power3.out",
+        },
+        0.5,
       );
       if (cells.length) {
         tl.to(
@@ -191,11 +227,17 @@ export function CustomersSection() {
           {
             autoAlpha: 1,
             y: 0,
-            duration: 0.7,
-            stagger: { each: 0.035, from: "start" },
+            scale: 1,
+            duration: 0.78,
             ease: "power3.out",
+            stagger: {
+              each: 0.042,
+              grid: [logoRows, LOGO_COLUMNS_DESKTOP],
+              from: "start",
+              axis: "x",
+            },
           },
-          0.28,
+          0.32,
         );
       }
     }, root);
@@ -257,6 +299,9 @@ export function CustomersSection() {
                 />
               </li>
             ))}
+            <li key="more-companies" className="rj-customers__logo-item">
+              <MoreCompaniesCell />
+            </li>
           </ul>
         </div>
       </div>

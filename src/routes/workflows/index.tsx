@@ -90,13 +90,13 @@ function WorkflowsIndexPage() {
       cleanups.push(
         createAwardsCharReveal(title, {
           playOnLoad: true,
-          delay: 0.15,
+          delay: 0.35,
         }),
       );
       cleanups.push(
         createTextReveal(lede, {
           playOnLoad: true,
-          delay: 0.55,
+          delay: 2.05,
           duration: 1.1,
         }),
       );
@@ -119,18 +119,6 @@ function WorkflowsIndexPage() {
       root.classList.add("rj-wf-page--grid-revealed");
     };
 
-    const frameTop = gridInner.querySelector<HTMLElement>(
-      ".rj-wf-grid__frame-line--top",
-    );
-    const frameRight = gridInner.querySelector<HTMLElement>(
-      ".rj-wf-grid__frame-line--right",
-    );
-    const frameBottom = gridInner.querySelector<HTMLElement>(
-      ".rj-wf-grid__frame-line--bottom",
-    );
-    const frameLeft = gridInner.querySelector<HTMLElement>(
-      ".rj-wf-grid__frame-line--left",
-    );
     const cards = grid.querySelectorAll<HTMLElement>(".rj-wf-card");
 
     const ctx = gsap.context(() => {
@@ -141,56 +129,13 @@ function WorkflowsIndexPage() {
       }
 
       gsap.set(cards, { autoAlpha: 0, y: 40 });
-      gsap.set(cards, {
-        "--rj-wf-line-scale-x": 0,
-        "--rj-wf-line-scale-y": 0,
-      });
 
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
-        delay: 0.72,
+        delay: 2.85,
         onComplete: reveal,
       });
 
-      if (frameTop && frameRight && frameBottom && frameLeft) {
-        tl.to(frameTop, { scaleX: 1, duration: 0.85, ease: "expo.out" }, 0);
-        tl.to(
-          frameLeft,
-          { scaleY: 1, duration: 0.85, ease: "expo.out" },
-          0.06,
-        );
-        tl.to(
-          frameRight,
-          { scaleY: 1, duration: 0.85, ease: "expo.out" },
-          0.1,
-        );
-        tl.to(
-          frameBottom,
-          { scaleX: 1, duration: 0.85, ease: "expo.out" },
-          0.14,
-        );
-      }
-
-      tl.to(
-        cards,
-        {
-          "--rj-wf-line-scale-x": 1,
-          duration: 0.75,
-          stagger: { each: 0.045, from: "start" },
-          ease: "expo.out",
-        },
-        0.12,
-      );
-      tl.to(
-        cards,
-        {
-          "--rj-wf-line-scale-y": 1,
-          duration: 0.75,
-          stagger: { each: 0.045, from: "start" },
-          ease: "expo.out",
-        },
-        0.18,
-      );
       tl.to(
         cards,
         {
@@ -199,7 +144,7 @@ function WorkflowsIndexPage() {
           duration: 0.95,
           stagger: 0.08,
         },
-        0.28,
+        0,
       );
     }, root);
 
@@ -241,18 +186,19 @@ function WorkflowsIndexPage() {
                 </Link>
               </li>
               <li aria-current="page">
-                <span>Workflows</span>
+                <span>Playbooks</span>
               </li>
             </ol>
           </nav>
           <div className="rj-wf-page__copy">
-            <h1 ref={titleRef} className="rj-wf-page__title">
-              <span className="rj-wf-page__title-line">Best playbooks for</span>
-              <span className="rj-wf-page__title-line">
-                conversion-led growth.
-              </span>
+            <h1 ref={titleRef} className="rj-hero__headline rj-awards-title">
+              <span className="rj-hero__line">Best playbooks for</span>
+              <span className="rj-hero__line">conversion-led growth.</span>
             </h1>
-            <p ref={ledeRef} className="rj-wf-page__lede">
+            <p
+              ref={ledeRef}
+              className="rj-hero__tagline rj-hero__description rj-text-reveal"
+            >
               Signals, tests, checkout, activation, and research — the loops we
               run with product teams, not decks.
             </p>
@@ -261,12 +207,6 @@ function WorkflowsIndexPage() {
 
         <div className="rj-wf-grid-wrap">
           <div ref={gridInnerRef} className="rj-wf-grid-inner">
-            <div className="rj-wf-grid__frame" aria-hidden="true">
-              <span className="rj-wf-grid__frame-line rj-wf-grid__frame-line--top" />
-              <span className="rj-wf-grid__frame-line rj-wf-grid__frame-line--right" />
-              <span className="rj-wf-grid__frame-line rj-wf-grid__frame-line--bottom" />
-              <span className="rj-wf-grid__frame-line rj-wf-grid__frame-line--left" />
-            </div>
             <ul ref={gridRef} className="rj-wf-grid" aria-label="Workflows">
               {WORKFLOWS.map((workflow) => (
                 <WorkflowCard key={workflow.slug} workflow={workflow} />

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowCue } from "@/components/ui/ArrowLink";
 import type { Workflow } from "@/lib/workflows";
 
 export function WorkflowCard({ workflow }: { workflow: Workflow }) {
@@ -22,7 +23,10 @@ export function WorkflowCard({ workflow }: { workflow: Workflow }) {
           />
         </div>
         <div className="rj-wf-card__body">
-          <h3 className="rj-wf-card__title">{workflow.title}</h3>
+          <h3 className="rj-wf-card__title">
+            <span className="rj-wf-card__title-text">{workflow.title}</span>
+            <ArrowCue className="rj-wf-card__arrow" />
+          </h3>
           <p className="rj-wf-card__lede">{workflow.lede}</p>
           <ul className="rj-wf-card__tags" aria-label="Topics">
             {workflow.tags.map((tag) => (

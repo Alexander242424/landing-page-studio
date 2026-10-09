@@ -12,11 +12,7 @@ import { Logo } from "@/components/brand/Logo";
 import { ArrowCue, ArrowIcon, ArrowLink } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { openContactChat, openLeadChat } from "@/lib/askChat";
-import { SOLUTIONS } from "@/lib/solutions";
-import {
-  solutionHasLanding,
-  solutionPath,
-} from "@/lib/servicePages";
+import { SOLUTIONS, solutionChatContext } from "@/lib/solutions";
 import { cn } from "@/lib/utils";
 
 type MegaKind = "solutions";
@@ -345,16 +341,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     }
   };
 
-  const goToHash = (hash: string) => {
-    closeMega();
-    setMobileOpen(false);
-    if (isHome) {
-      scrollToHref(`#${hash}`);
-      return;
-    }
-    void navigate({ to: "/", hash, viewTransition: true });
-  };
-
   const onNavClick = (event: MouseEvent<HTMLAnchorElement>, href: NavHref) => {
     event.preventDefault();
     setMobileOpen(false);
@@ -393,15 +379,11 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     setMobileOpen(false);
     closeMega();
     const item = SOLUTIONS.find((entry) => entry.slug === slug);
-    if (item && solutionHasLanding(slug)) {
-      void navigate({
-        to: "/solutions/$slug",
-        params: { slug },
-        viewTransition: true,
-      });
-      return;
-    }
-    goToHash(`solution-${slug}`);
+    if (!item) return;
+    openContactChat({
+      service: solutionChatContext(item),
+      source: "header_solutions_mega",
+    });
   };
 
   const logo = isHome ? (
@@ -558,11 +540,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                   {SOLUTIONS.map((item) => (
                     <li key={item.slug} className="rj-mega__item">
                       <a
-                        href={
-                          solutionHasLanding(item.slug)
-                            ? solutionPath(item)
-                            : `#solution-${item.slug}`
-                        }
+                        href="#contact"
                         className="rj-mega__row"
                         onClick={(event) => onSolutionClick(event, item.slug)}
                         onFocus={() => openMega("solutions")}
@@ -665,11 +643,7 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                             className="rj-mobile-menu__solution-item"
                           >
                             <a
-                              href={
-                                solutionHasLanding(solution.slug)
-                                  ? solutionPath(solution)
-                                  : `#solution-${solution.slug}`
-                              }
+                              href="#contact"
                               className="rj-mobile-menu__solution"
                               onClick={(event) =>
                                 onSolutionClick(event, solution.slug)
