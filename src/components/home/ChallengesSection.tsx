@@ -1,4 +1,5 @@
 import { useEffect, useRef, type MouseEvent } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLink } from "@/components/ui/ArrowLink";
@@ -7,6 +8,17 @@ import { SOLUTIONS, solutionChatContext } from "@/lib/solutions";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const CHALLENGES_HEADLINE_DESKTOP = [
+  "How we invent",
+  "your growth",
+] as const;
+
+const CHALLENGES_HEADLINE_MOBILE = [
+  "How we",
+  "invent your",
+  "growth",
+] as const;
 
 function CropMarks() {
   return (
@@ -29,6 +41,10 @@ function CropMarks() {
  * crop-mark media with hover video fade.
  */
 export function ChallengesSection() {
+  const headlineLines = useHeroHeadlineLines(
+    CHALLENGES_HEADLINE_DESKTOP,
+    CHALLENGES_HEADLINE_MOBILE,
+  );
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
 
@@ -122,7 +138,7 @@ export function ChallengesSection() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [headlineLines]);
 
   return (
     <section
@@ -134,10 +150,14 @@ export function ChallengesSection() {
         <h2
           ref={headlineRef}
           className="rj-challenges__headline rj-awards-title"
+          aria-label="How we invent your growth"
         >
-          How we invent
-          <br />
-          your growth
+          {headlineLines.map((line, index) => (
+            <span key={`${index}-${line}`} className="rj-hero__line">
+              {line}
+              {index < headlineLines.length - 1 ? " " : null}
+            </span>
+          ))}
         </h2>
       </div>
 

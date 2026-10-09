@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import { Link } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,6 +9,14 @@ import { createAwardsCharReveal } from "@/lib/textReveal";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const CONTENT_HUB_HEADLINE_DESKTOP = ["We share", "our expertise."] as const;
+
+const CONTENT_HUB_HEADLINE_MOBILE = [
+  "We share",
+  "our",
+  "expertise.",
+] as const;
 
 type HubCard = {
   title: string;
@@ -147,6 +156,10 @@ function HubCardSurface({ card }: { card: HubCard }) {
  * Reuses `#process` for header “Workflows” nav; `#toolverse` on the tools card.
  */
 export function ContentHubSection() {
+  const headlineLines = useHeroHeadlineLines(
+    CONTENT_HUB_HEADLINE_DESKTOP,
+    CONTENT_HUB_HEADLINE_MOBILE,
+  );
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
@@ -189,7 +202,7 @@ export function ContentHubSection() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [headlineLines]);
 
   return (
     <section
@@ -204,8 +217,12 @@ export function ContentHubSection() {
           className="rj-content-hub__headline rj-awards-title"
           aria-label="We share our expertise."
         >
-          <span className="rj-hero__line">We share</span>
-          <span className="rj-hero__line">our expertise.</span>
+          {headlineLines.map((line, index) => (
+            <span key={`${index}-${line}`} className="rj-hero__line">
+              {line}
+              {index < headlineLines.length - 1 ? " " : null}
+            </span>
+          ))}
         </h2>
       </div>
 

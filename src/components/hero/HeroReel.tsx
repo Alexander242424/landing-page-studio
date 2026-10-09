@@ -1,10 +1,5 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useSyncExternalStore,
-  type MouseEvent,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LazyVideo } from "@/components/media/LazyVideo";
@@ -20,7 +15,6 @@ gsap.registerPlugin(ScrollTrigger);
 /** 1:1 from https://www.rejouice.com/static/reel-short.mp4 */
 const HERO_VIDEO = "/video/hero.mp4";
 const HERO_POSTER = "/video/hero-poster.jpg";
-const HEADLINE_MOBILE_MQ = "(max-width: 1023px)";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
 
@@ -43,7 +37,8 @@ const DEFAULT_HERO: ServiceHeroContent = {
   linesMobile: [
     "Conversion rate",
     "optimisation",
-    "systems for revenue growth.",
+    "systems for",
+    "revenue growth.",
   ],
   description:
     "Without spending a single cent more on Google Ads, Facebook ads, SEO or content marketing.",
@@ -51,30 +46,9 @@ const DEFAULT_HERO: ServiceHeroContent = {
   logosStat: "Trusted by YCombinator \n& Speedrun founders",
 };
 
-function subscribeHeadlineMobile(onStoreChange: () => void) {
-  const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
-  mq.addEventListener("change", onStoreChange);
-  return () => mq.removeEventListener("change", onStoreChange);
-}
-
-function getHeadlineMobileSnapshot() {
-  return window.matchMedia(HEADLINE_MOBILE_MQ).matches;
-}
-
-/** Hero + showreel — H1 char flip + description word reveal on load. */
-function useHeadlineLines(hero: ServiceHeroContent): readonly string[] {
-  const isMobile = useSyncExternalStore(
-    subscribeHeadlineMobile,
-    getHeadlineMobileSnapshot,
-    () => true,
-  );
-
-  return isMobile && hero.linesMobile ? hero.linesMobile : hero.lines;
-}
-
 export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const hero = content ?? DEFAULT_HERO;
-  const headlineLines = useHeadlineLines(hero);
+  const headlineLines = useHeroHeadlineLines(hero.lines, hero.linesMobile);
   const isPhone = useIsMobile();
   const { isRevealed, shouldPlay } = usePageReveal();
   const loadVideoEager = shouldPlay || isPhone;
@@ -328,7 +302,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
                   <li
                     key={logo.id}
                     className={
-                      logo.fill
+                      "fill" in logo && logo.fill
                         ? "rj-hero__proof-face rj-hero__proof-face--fill"
                         : "rj-hero__proof-face"
                     }

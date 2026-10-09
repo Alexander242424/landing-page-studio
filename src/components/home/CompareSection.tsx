@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { createAwardsCharReveal } from "@/lib/textReveal";
@@ -147,10 +148,25 @@ function CellView({ cell }: { cell: CompareCell }) {
   return <span className="rj-compare__cell-text">{cell.value}</span>;
 }
 
+const COMPARE_HEADLINE_DESKTOP = [
+  "Complete solution",
+  "for your revenue growth.",
+] as const;
+
+const COMPARE_HEADLINE_MOBILE = [
+  "Complete",
+  "solution for your",
+  "revenue growth.",
+] as const;
+
 /**
  * Why UXLAB vs typical alternatives — light comparison table above partners.
  */
 export function CompareSection() {
+  const headlineLines = useHeroHeadlineLines(
+    COMPARE_HEADLINE_DESKTOP,
+    COMPARE_HEADLINE_MOBILE,
+  );
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
 
@@ -185,7 +201,7 @@ export function CompareSection() {
       cleanup();
       ctx.revert();
     };
-  }, []);
+  }, [headlineLines]);
 
   return (
     <section
@@ -198,10 +214,14 @@ export function CompareSection() {
         <h2
           ref={headlineRef}
           className="rj-compare__headline rj-awards-title"
-          aria-label="Complete solution for your revenue grow."
+          aria-label="Complete solution for your revenue growth."
         >
-          <span className="rj-hero__line">Complete solution</span>
-          <span className="rj-hero__line">for your revenue grow.</span>
+          {headlineLines.map((line, index) => (
+            <span key={`${index}-${line}`} className="rj-hero__line">
+              {line}
+              {index < headlineLines.length - 1 ? " " : null}
+            </span>
+          ))}
         </h2>
       </div>
 

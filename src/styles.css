@@ -1791,39 +1791,43 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   /* Optical balance: letter-spacing isn't applied after the last glyph */
   padding-inline: 1.2rem;
   padding-inline-start: max(1.2rem, 0.05em);
-  /* ≤1023px: three authored lines — scale to longest row (~21 chars) */
-  font-size: min(
-    clamp(34px, 10.2vw, 56px),
-    calc((100vw - 3.2rem) / 10.4)
-  );
+  /* Mobile/tablet: large type; authored extra lines prevent clip (see linesMobile). */
+  font-size: min(clamp(47px, 12.2vw, 82px), calc((100vw - 24px) * 47 / 360));
 }
 
-/* Authored headline lines — block on all breakpoints so breaks match copy rhythm. */
+/* Authored headline lines — wrap on narrow viewports; desktop locks each line. */
 .rj-hero__line {
   display: block;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .rj-challenges__headline {
   /* Same rem-trap as hero — keep mobile on vw */
   font-size: clamp(40px, 11vw, 72px);
   color: var(--rj-fg);
+  max-width: 100%;
+  padding-inline: max(0.8rem, var(--rj-grid-margin));
+  box-sizing: border-box;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .rj-solutions-stack__headline {
   font-size: clamp(40px, 11vw, 72px);
   color: var(--rj-white);
+  max-width: 100%;
+  padding-inline: max(0.8rem, var(--rj-grid-margin));
+  box-sizing: border-box;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 /* 10px root — rem clamps are safe again */
 @media (min-width: 768px) and (max-width: 1023px) {
   .rj-hero__headline {
-    font-size: min(
-      clamp(36px, 8.8vw, 52px),
-      calc((100vw - 4rem) / 10.4)
-    );
-    line-height: 1;
     padding-inline: 2rem;
   }
 }
@@ -1847,7 +1851,6 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 
   .rj-hero__headline .rj-hero__line {
     display: block;
-    white-space: nowrap;
   }
 
   .rj-challenges__headline,
@@ -1864,11 +1867,18 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   }
 }
 
-/* Lock the two authored lines only once width can hold them */
+/* Lock authored lines on one row once the viewport can hold them */
 @media (min-width: 1024px) {
   .rj-hero__line,
-  .rj-hero__headline .rj-text-reveal__line {
+  .rj-hero__headline .rj-text-reveal__line,
+  .rj-challenges__headline .rj-hero__line,
+  .rj-content-hub__headline .rj-hero__line,
+  .rj-compare__headline .rj-hero__line,
+  .rj-get-in-touch__headline .rj-text-reveal__line,
+  .rj-partners__headline .rj-hero__line,
+  .rj-awards-title .rj-text-reveal__line {
     white-space: nowrap;
+    text-wrap: wrap;
   }
 
   .rj-hero__copy {
@@ -1901,16 +1911,10 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   }
 }
 
-/* Short viewports: keep headline from colliding with header / bottom copy */
-@media (max-height: 720px) {
+/* Short viewports: desktop hero only — old rule blew up mobile H1 and clipped lines */
+@media (min-width: 1024px) and (max-height: 720px) {
   .rj-hero__headline {
     font-size: min(12.2vw, 9.2vh, 70px, calc((100vw - 24px) * 47 / 360));
-  }
-}
-
-@media (min-width: 768px) and (max-height: 720px) {
-  .rj-hero__headline {
-    font-size: min(5.6rem, 8vh);
   }
 }
 
@@ -1953,9 +1957,11 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
   text-align: center !important;
 }
 
-/* Keep SplitText line groups on one row — mobile was wrapping "more" alone */
+/* SplitText line groups — wrap on narrow screens to avoid horizontal clip */
 .rj-hero__headline .rj-text-reveal__line {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .rj-text-reveal__word {
@@ -5644,6 +5650,9 @@ body.rj-scroll-dark .rj-page__main {
 .rj-process__title {
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  padding-inline: max(0.4rem, var(--rj-grid-margin));
+  box-sizing: border-box;
   text-align: center;
   font-family: var(--rj-font-sans);
   font-weight: 300;
@@ -5652,6 +5661,8 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: -0.0456em;
   line-height: 0.82;
   color: var(--rj-fg);
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .rj-process__columns {
@@ -6131,7 +6142,9 @@ body.rj-scroll-dark .rj-page__main {
 
 .rj-compounding__problem-title-line {
   display: block;
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .rj-compounding__problem-title-line--lead,
@@ -6148,7 +6161,9 @@ body.rj-scroll-dark .rj-page__main {
   padding: 0.32em 0.22em 0.08em;
   margin: 0 -0.22em;
   text-align: center !important;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
   line-height: 1.2;
 }
 
@@ -6582,10 +6597,9 @@ body.rj-scroll-dark .rj-page__main {
     max-height: 39rem;
   }
 
-  .rj-compounding__problem-title-line,
-  .rj-compounding__problem-title .rj-text-reveal__line,
   .rj-compounding__flywheel-title-line {
-    white-space: nowrap;
+    white-space: normal;
+    text-wrap: balance;
   }
 
   .rj-compounding__problem-title-line--lead,
@@ -7162,6 +7176,9 @@ body.rj-scroll-dark .rj-page__main {
 .rj-partners__headline {
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  padding-inline: max(0.4rem, var(--rj-grid-margin));
+  box-sizing: border-box;
   text-align: center;
   font-family: var(--rj-font-sans);
   font-weight: 300;
@@ -7170,6 +7187,8 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: -0.045em;
   line-height: 1.05;
   color: var(--rj-fg);
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .rj-partners__headline .rj-text-reveal__line {
@@ -7303,6 +7322,9 @@ body.rj-scroll-dark .rj-page__main {
 .rj-faq__headline {
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  padding-inline: max(0.4rem, var(--rj-grid-margin));
+  box-sizing: border-box;
   text-align: center;
   font-family: var(--rj-font-sans);
   font-weight: 300;
@@ -7311,6 +7333,8 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: -0.0456em;
   line-height: 0.82;
   color: var(--rj-fg);
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 /* SplitText sets inline text-align:start on lines — keep FAQ centered */
@@ -7442,6 +7466,7 @@ body.rj-scroll-dark .rj-page__main {
 .rj-blog__headline {
   margin: 0 0 2rem;
   width: 100%;
+  max-width: 100%;
   text-align: left;
   font-family: var(--rj-font-sans);
   font-size: var(--rj-text-title);
@@ -7450,7 +7475,9 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: var(--rj-tracking-title);
   line-height: 1.05;
   color: var(--rj-fg);
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .rj-blog__grid {
@@ -7617,6 +7644,9 @@ body.rj-scroll-dark .rj-page__main {
 .rj-content-hub__headline {
   margin: 0;
   width: 100%;
+  max-width: 100%;
+  padding-inline: max(0.4rem, var(--rj-grid-margin));
+  box-sizing: border-box;
   text-align: center;
   font-family: var(--rj-font-sans);
   font-weight: 300;
@@ -7625,13 +7655,17 @@ body.rj-scroll-dark .rj-page__main {
   letter-spacing: -0.0456em;
   line-height: 0.82;
   color: var(--rj-fg);
+  text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .rj-content-hub__headline .rj-text-reveal__line,
 .rj-content-hub__headline .rj-hero__line {
   display: block;
   text-align: center !important;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .rj-content-hub__cards {
@@ -7918,7 +7952,9 @@ body.rj-scroll-dark .rj-page__main {
   margin-left: 0 !important;
   margin-right: 0 !important;
   text-align: center !important;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .rj-get-in-touch__actions {
@@ -11387,6 +11423,7 @@ html[data-rj-route="work"] body {
 /* ─── Workflows + Toolverse (dark directories) ─── */
 .rj-page--workflows,
 .rj-page--toolverse {
+  --rj-border: color-mix(in srgb, var(--rj-white) 16%, transparent);
   background: var(--rj-black);
   color: var(--rj-white);
 }
@@ -12484,6 +12521,10 @@ html[data-rj-route="work"] body {
   letter-spacing: -0.04em;
   line-height: 1;
   color: var(--rj-ink);
+}
+
+.rj-tool-popup .rj-case-popup__copy {
+  white-space: pre-line;
 }
 
 .rj-tool-popup__logo {

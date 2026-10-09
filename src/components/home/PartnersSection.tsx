@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { partnerRailLogos } from "@/lib/clientLogos";
@@ -6,10 +7,18 @@ import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const PARTNERS_HEADLINE_DESKTOP = ["Our official partners."] as const;
+
+const PARTNERS_HEADLINE_MOBILE = ["Our official", "partners."] as const;
+
 /**
  * Light partners rail above FAQ — hairline + nodes, no pill / chrome.
  */
 export function PartnersSection() {
+  const headlineLines = useHeroHeadlineLines(
+    PARTNERS_HEADLINE_DESKTOP,
+    PARTNERS_HEADLINE_MOBILE,
+  );
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
@@ -52,7 +61,7 @@ export function PartnersSection() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [headlineLines]);
 
   return (
     <section
@@ -67,7 +76,12 @@ export function PartnersSection() {
           className="rj-partners__headline rj-awards-title"
           aria-label="Our official partners."
         >
-          Our official partners.
+          {headlineLines.map((line, index) => (
+            <span key={`${index}-${line}`} className="rj-hero__line">
+              {line}
+              {index < headlineLines.length - 1 ? " " : null}
+            </span>
+          ))}
         </h2>
       </div>
 

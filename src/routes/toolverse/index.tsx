@@ -1,5 +1,6 @@
 import gsap from "gsap";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
 import { GetInTouchSection } from "@/components/home/GetInTouchSection";
@@ -24,8 +25,6 @@ const SiteFooter = lazy(() =>
 const DESCRIPTION =
   "A curated directory of tools UXLAB uses for UX, CRO, analytics, tracking, traffic, and user research.";
 
-const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
-
 const TOOLVERSE_HEADLINE_DESKTOP = [
   "Tools for UX, CRO, and the",
   "traffic you already have.",
@@ -33,26 +32,10 @@ const TOOLVERSE_HEADLINE_DESKTOP = [
 
 const TOOLVERSE_HEADLINE_MOBILE = [
   "Tools for UX,",
-  "CRO, and the traffic",
-  "you already have.",
+  "CRO, and the",
+  "traffic you",
+  "already have.",
 ] as const;
-
-function useToolverseHeadlineLines(): readonly string[] {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia(HEADLINE_MOBILE_MQ).matches
-      : false,
-  );
-
-  useEffect(() => {
-    const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
-    const sync = () => setIsMobile(mq.matches);
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  return isMobile ? TOOLVERSE_HEADLINE_MOBILE : TOOLVERSE_HEADLINE_DESKTOP;
-}
 
 export const Route = createFileRoute("/toolverse/")({
   head: () => ({
@@ -105,7 +88,10 @@ function buildJsonLd() {
 
 function ToolversePage() {
   const jsonLd = useMemo(() => buildJsonLd(), []);
-  const headlineLines = useToolverseHeadlineLines();
+  const headlineLines = useHeroHeadlineLines(
+    TOOLVERSE_HEADLINE_DESKTOP,
+    TOOLVERSE_HEADLINE_MOBILE,
+  );
   const pageRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const ledeRef = useRef<HTMLParagraphElement>(null);
@@ -137,7 +123,7 @@ function ToolversePage() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [headlineLines]);
 
   useEffect(() => {
     document.documentElement.dataset.rjRoute = "toolverse";

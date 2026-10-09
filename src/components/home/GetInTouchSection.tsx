@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowLink } from "@/components/ui/ArrowLink";
@@ -6,8 +7,6 @@ import { openContactChat } from "@/lib/askChat";
 import { createAwardsCharReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
 
 const GET_IN_TOUCH_HEADLINE = {
   ariaLabel:
@@ -17,36 +16,21 @@ const GET_IN_TOUCH_HEADLINE = {
     "strategy call with the UXLAB team.",
   ],
   linesMobile: [
-    "Schedule a 30-minute",
-    "strategy call with",
-    "the UXLAB team.",
+    "Schedule a",
+    "30-minute strategy",
+    "call with the",
+    "UXLAB team.",
   ],
 } as const;
-
-function useHeadlineLines(): readonly string[] {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia(HEADLINE_MOBILE_MQ).matches
-      : false,
-  );
-
-  useEffect(() => {
-    const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
-    const sync = () => setIsMobile(mq.matches);
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  return isMobile
-    ? GET_IN_TOUCH_HEADLINE.linesMobile
-    : GET_IN_TOUCH_HEADLINE.lines;
-}
 
 /**
  * End-of-page CTA — strategy-call headline + Let’s talk, wired to ask chat.
  */
 export function GetInTouchSection() {
-  const headlineLines = useHeadlineLines();
+  const headlineLines = useHeroHeadlineLines(
+    GET_IN_TOUCH_HEADLINE.lines,
+    GET_IN_TOUCH_HEADLINE.linesMobile,
+  );
   const rootRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);

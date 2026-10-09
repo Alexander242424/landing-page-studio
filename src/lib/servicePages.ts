@@ -92,7 +92,12 @@ export const PRODUCT_PERFORMANCE: ServicePageContent = {
   hero: {
     ariaLabel: "Convert 2-3x more revenue with the same traffic.",
     lines: ["Convert 2-3x more revenue", "with the same traffic."],
-    linesMobile: ["Convert 2-3x", "more revenue with", "the same traffic."],
+    linesMobile: [
+      "Convert 2-3x",
+      "more revenue",
+      "with the same",
+      "traffic.",
+    ],
     description:
       "We help the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.",
     primaryCta: { label: "Let's talk", href: "#contact" },
@@ -225,6 +230,11 @@ export const PRODUCT_DESIGN: ServicePageContent = {
   hero: {
     ariaLabel: "Product design for fast-moving product teams.",
     lines: ["Product design for", "fast-moving product teams."],
+    linesMobile: [
+      "Product design for",
+      "fast-moving",
+      "product teams.",
+    ],
     description:
       "We design product experiences that make complex workflows clear, easy to use, and ready to build.",
     ...SHARED_CTAS,
@@ -350,6 +360,12 @@ export const WEBSITES: ServicePageContent = {
   hero: {
     ariaLabel: "Sites and funnels that turn visitors into qualified demand.",
     lines: ["Sites and funnels that turn", "visitors into qualified demand."],
+    linesMobile: [
+      "Sites and funnels",
+      "that turn visitors",
+      "into qualified",
+      "demand.",
+    ],
     description:
       "A good site makes the next step feel obvious. We build the positioning, structure, and conversion paths that turn visits into pipeline.",
     ...SHARED_CTAS,
@@ -473,6 +489,11 @@ export const TESTING: ServicePageContent = {
   hero: {
     ariaLabel: "Ship what actually moves conversion, not opinions.",
     lines: ["Ship what actually moves", "conversion, not opinions."],
+    linesMobile: [
+      "Ship what actually",
+      "moves conversion,",
+      "not opinions.",
+    ],
     description:
       "User research and experiments that validate your bets — so you stop shipping features that don't move metrics.",
     ...SHARED_CTAS,
@@ -591,6 +612,11 @@ export const AI_ENGINEERING: ServicePageContent = {
   hero: {
     ariaLabel: "Ship your backlog 3× faster at production quality.",
     lines: ["Ship your backlog 3× faster", "at production quality."],
+    linesMobile: [
+      "Ship your backlog",
+      "3× faster at",
+      "production quality.",
+    ],
     description:
       "AI-native builds turn a scoped brief into a live product in days — your roadmap ships faster without the quality trade-off.",
     ...SHARED_CTAS,

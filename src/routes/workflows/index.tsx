@@ -6,6 +6,7 @@ import { GetInTouchSection } from "@/components/home/GetInTouchSection";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { WorkflowCard } from "@/components/workflows/WorkflowCard";
 import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
+import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
 import {
   SITE,
   absoluteUrl,
@@ -23,6 +24,17 @@ const SiteFooter = lazy(() =>
 
 const DESCRIPTION =
   "Conversion playbooks from UXLAB — signals, experiments, checkout, activation, and research ops you can ship.";
+
+const PLAYBOOKS_HEADLINE_DESKTOP = [
+  "Best playbooks for",
+  "conversion-led growth.",
+] as const;
+
+const PLAYBOOKS_HEADLINE_MOBILE = [
+  "Best playbooks",
+  "for conversion-led",
+  "growth.",
+] as const;
 
 export const Route = createFileRoute("/workflows/")({
   head: () => ({
@@ -73,6 +85,10 @@ function buildJsonLd() {
 
 function WorkflowsIndexPage() {
   const jsonLd = useMemo(() => buildJsonLd(), []);
+  const headlineLines = useHeroHeadlineLines(
+    PLAYBOOKS_HEADLINE_DESKTOP,
+    PLAYBOOKS_HEADLINE_MOBILE,
+  );
   const pageRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const ledeRef = useRef<HTMLParagraphElement>(null);
@@ -106,7 +122,7 @@ function WorkflowsIndexPage() {
       cleanups.forEach((fn) => fn());
       ctx.revert();
     };
-  }, []);
+  }, [headlineLines]);
 
   useLayoutEffect(() => {
     const root = pageRef.current;
@@ -192,8 +208,12 @@ function WorkflowsIndexPage() {
           </nav>
           <div className="rj-wf-page__copy">
             <h1 ref={titleRef} className="rj-hero__headline rj-awards-title">
-              <span className="rj-hero__line">Best playbooks for</span>
-              <span className="rj-hero__line">conversion-led growth.</span>
+              {headlineLines.map((line, index) => (
+                <span key={`${index}-${line}`} className="rj-hero__line">
+                  {line}
+                  {index < headlineLines.length - 1 ? " " : null}
+                </span>
+              ))}
             </h1>
             <p
               ref={ledeRef}
