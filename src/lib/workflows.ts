@@ -17,6 +17,10 @@ export type Workflow = {
   author: string;
   tools: readonly string[];
   steps: readonly WorkflowStep[];
+  /** Public URL path for playbook PDF download (e.g. /playbooks/foo.pdf). */
+  downloadSrc?: string;
+  /** Suggested filename when saving the download. */
+  downloadFilename?: string;
 };
 
 export const WORKFLOWS_PATH = "/workflows";
@@ -38,6 +42,8 @@ export const WORKFLOWS: readonly Workflow[] = [
     date: "October 9, 2026",
     datePublished: "2026-10-09",
     author: "UXLAB",
+    downloadSrc: "/playbooks/the-signal-playbook.pdf",
+    downloadFilename: "signal-playbook.pdf",
     tools: [
       "Mixpanel",
       "Amplitude",

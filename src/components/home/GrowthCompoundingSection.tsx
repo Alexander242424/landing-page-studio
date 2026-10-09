@@ -366,18 +366,18 @@ export function GrowthCompoundingSection({
       className="rj-compounding"
       aria-label={ariaLabel}
     >
-      <div className="rj-compounding__heading">
-        <h2 ref={headlineRef} className="rj-compounding__headline rj-awards-title">
-          {headline}
-        </h2>
-        <p className="rj-compounding__lede">
-          Measured against your baseline — conversion, activation, and revenue per visitor
-          on the same chart, sprint after sprint.
-        </p>
-      </div>
-
       <div ref={pinHeightRef} className="rj-compounding__pin-height">
         <div ref={pinRef} className="rj-compounding__pin">
+          <div className="rj-compounding__heading">
+            <h2 ref={headlineRef} className="rj-compounding__headline rj-awards-title">
+              {headline}
+            </h2>
+            <p className="rj-compounding__lede">
+              Measured against your baseline — conversion, activation, and revenue per visitor
+              on the same chart, sprint after sprint.
+            </p>
+          </div>
+
           <div className="rj-compounding__layout">
             <div className="rj-compounding__copy" aria-live="polite">
               {STEPS.map((step, index) => (
