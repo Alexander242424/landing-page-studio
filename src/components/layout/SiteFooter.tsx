@@ -10,8 +10,9 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Case studies", href: "/work" },
+  { label: "Playbooks", href: "/workflows" },
+  { label: "Toolverse", href: "/toolverse" },
   { label: "Solutions", href: "#solutions" },
-  { label: "Process", href: "#process" },
 ] as const;
 
 const SOCIALS = [

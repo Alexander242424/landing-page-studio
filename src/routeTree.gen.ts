@@ -15,9 +15,12 @@ import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkflowsIndexRouteImport } from './routes/workflows/index'
 import { Route as WorkIndexRouteImport } from './routes/work/index'
+import { Route as ToolverseIndexRouteImport } from './routes/toolverse/index'
 import { Route as ResourcesIndexRouteImport } from './routes/resources/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as WorkflowsSlugRouteImport } from './routes/workflows/$slug'
 import { Route as WorkSlugRouteImport } from './routes/work/$slug'
 import { Route as SolutionsSlugRouteImport } from './routes/solutions/$slug'
 import { Route as ResourcesSlugRouteImport } from './routes/resources/$slug'
@@ -55,9 +58,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkflowsIndexRoute = WorkflowsIndexRouteImport.update({
+  id: '/workflows/',
+  path: '/workflows/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkIndexRoute = WorkIndexRouteImport.update({
   id: '/work/',
   path: '/work/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolverseIndexRoute = ToolverseIndexRouteImport.update({
+  id: '/toolverse/',
+  path: '/toolverse/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResourcesIndexRoute = ResourcesIndexRouteImport.update({
@@ -69,6 +82,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const WorkflowsSlugRoute = WorkflowsSlugRouteImport.update({
+  id: '/workflows/$slug',
+  path: '/workflows/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
   id: '/work/$slug',
@@ -113,9 +131,12 @@ export interface FileRoutesByFullPath {
   '/resources/$slug': typeof ResourcesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/work/$slug': typeof WorkSlugRoute
+  '/workflows/$slug': typeof WorkflowsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/resources/': typeof ResourcesIndexRoute
+  '/toolverse/': typeof ToolverseIndexRoute
   '/work/': typeof WorkIndexRoute
+  '/workflows/': typeof WorkflowsIndexRoute
   '/api/cron/daily-digest': typeof ApiCronDailyDigestRoute
 }
 export interface FileRoutesByTo {
@@ -129,9 +150,12 @@ export interface FileRoutesByTo {
   '/resources/$slug': typeof ResourcesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/work/$slug': typeof WorkSlugRoute
+  '/workflows/$slug': typeof WorkflowsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/resources': typeof ResourcesIndexRoute
+  '/toolverse': typeof ToolverseIndexRoute
   '/work': typeof WorkIndexRoute
+  '/workflows': typeof WorkflowsIndexRoute
   '/api/cron/daily-digest': typeof ApiCronDailyDigestRoute
 }
 export interface FileRoutesById {
@@ -147,9 +171,12 @@ export interface FileRoutesById {
   '/resources/$slug': typeof ResourcesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/work/$slug': typeof WorkSlugRoute
+  '/workflows/$slug': typeof WorkflowsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/resources/': typeof ResourcesIndexRoute
+  '/toolverse/': typeof ToolverseIndexRoute
   '/work/': typeof WorkIndexRoute
+  '/workflows/': typeof WorkflowsIndexRoute
   '/api/cron/daily-digest': typeof ApiCronDailyDigestRoute
 }
 export interface FileRouteTypes {
@@ -166,9 +193,12 @@ export interface FileRouteTypes {
     | '/resources/$slug'
     | '/solutions/$slug'
     | '/work/$slug'
+    | '/workflows/$slug'
     | '/admin/'
     | '/resources/'
+    | '/toolverse/'
     | '/work/'
+    | '/workflows/'
     | '/api/cron/daily-digest'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -182,9 +212,12 @@ export interface FileRouteTypes {
     | '/resources/$slug'
     | '/solutions/$slug'
     | '/work/$slug'
+    | '/workflows/$slug'
     | '/admin'
     | '/resources'
+    | '/toolverse'
     | '/work'
+    | '/workflows'
     | '/api/cron/daily-digest'
   id:
     | '__root__'
@@ -199,9 +232,12 @@ export interface FileRouteTypes {
     | '/resources/$slug'
     | '/solutions/$slug'
     | '/work/$slug'
+    | '/workflows/$slug'
     | '/admin/'
     | '/resources/'
+    | '/toolverse/'
     | '/work/'
+    | '/workflows/'
     | '/api/cron/daily-digest'
   fileRoutesById: FileRoutesById
 }
@@ -216,8 +252,11 @@ export interface RootRouteChildren {
   ResourcesSlugRoute: typeof ResourcesSlugRoute
   SolutionsSlugRoute: typeof SolutionsSlugRoute
   WorkSlugRoute: typeof WorkSlugRoute
+  WorkflowsSlugRoute: typeof WorkflowsSlugRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
+  ToolverseIndexRoute: typeof ToolverseIndexRoute
   WorkIndexRoute: typeof WorkIndexRoute
+  WorkflowsIndexRoute: typeof WorkflowsIndexRoute
   ApiCronDailyDigestRoute: typeof ApiCronDailyDigestRoute
 }
 
@@ -265,11 +304,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflows/': {
+      id: '/workflows/'
+      path: '/workflows'
+      fullPath: '/workflows/'
+      preLoaderRoute: typeof WorkflowsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/work/': {
       id: '/work/'
       path: '/work'
       fullPath: '/work/'
       preLoaderRoute: typeof WorkIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/toolverse/': {
+      id: '/toolverse/'
+      path: '/toolverse'
+      fullPath: '/toolverse/'
+      preLoaderRoute: typeof ToolverseIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources/': {
@@ -285,6 +338,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/workflows/$slug': {
+      id: '/workflows/$slug'
+      path: '/workflows/$slug'
+      fullPath: '/workflows/$slug'
+      preLoaderRoute: typeof WorkflowsSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/work/$slug': {
       id: '/work/$slug'
@@ -356,8 +416,11 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesSlugRoute: ResourcesSlugRoute,
   SolutionsSlugRoute: SolutionsSlugRoute,
   WorkSlugRoute: WorkSlugRoute,
+  WorkflowsSlugRoute: WorkflowsSlugRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,
+  ToolverseIndexRoute: ToolverseIndexRoute,
   WorkIndexRoute: WorkIndexRoute,
+  WorkflowsIndexRoute: WorkflowsIndexRoute,
   ApiCronDailyDigestRoute: ApiCronDailyDigestRoute,
 }
 export const routeTree = rootRouteImport

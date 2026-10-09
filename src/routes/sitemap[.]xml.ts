@@ -6,6 +6,7 @@ import { WORK_PATH, getListedCases } from "@/lib/cases";
 import { resolveWorkCatalog } from "@/lib/workCatalog.functions";
 import { getAllServicePages } from "@/lib/servicePages";
 import { SITE, absoluteUrl } from "@/lib/site";
+import { WORKFLOWS, workflowPath } from "@/lib/workflows";
 
 interface SitemapEntry {
   path: string;
@@ -79,6 +80,25 @@ export const Route = createFileRoute("/sitemap.xml")({
             changefreq: "weekly",
             priority: "0.9",
           },
+          {
+            path: "/workflows",
+            lastmod: latestMod,
+            changefreq: "weekly",
+            priority: "0.85",
+          },
+          {
+            path: "/toolverse",
+            lastmod: latestMod,
+            changefreq: "weekly",
+            priority: "0.85",
+          },
+          ...WORKFLOWS.map((item) => ({
+            path: workflowPath(item.slug),
+            lastmod: item.datePublished,
+            changefreq: "monthly" as const,
+            priority: "0.75",
+            image: { loc: item.coverSrc, title: item.title },
+          })),
           {
             path: "/feed.xml",
             lastmod: latestMod,

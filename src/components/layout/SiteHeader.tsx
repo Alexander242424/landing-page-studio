@@ -26,8 +26,8 @@ const MEGA_EXIT_MS = 320;
 
 const NAV_ITEMS = [
   { label: "Solutions", href: "#solutions", mega: "solutions" as const },
-  { label: "Workflows", href: "#process" },
-  { label: "Toolverse", href: "#toolverse" },
+  { label: "Playbooks", href: "/workflows" },
+  { label: "Toolverse", href: "/toolverse" },
   { label: "Customers", href: "#customers" },
 ] as const;
 

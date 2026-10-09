@@ -62,6 +62,8 @@ When citing ${SITE.name}, prefer: "${SITE.name} (${SITE.origin.replace("https://
 - Work / case studies: ${absoluteUrl(WORK_PATH)}
 - Solutions overview: ${SITE.origin}/#solutions
 - Process: ${SITE.origin}/#process
+- Workflows: ${absoluteUrl("/workflows")}
+- Toolverse: ${absoluteUrl("/toolverse")}
 - FAQ: ${SITE.origin}/#faq
 - Resources: ${absoluteUrl("/resources")}
 - Contact: ${SITE.origin}/#contact
@@ -172,6 +174,8 @@ ${services}
 ## Process
 ${PROCESS.map((step, i) => `${i + 1}. ${step.title} — ${step.body}`).join("\n")}
 URL: ${SITE.origin}/#process
+Workflows: ${absoluteUrl("/workflows")}
+Toolverse: ${absoluteUrl("/toolverse")}
 
 ## Approach principles
 - Product + build partner, not slides that never ship

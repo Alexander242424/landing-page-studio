@@ -27,9 +27,14 @@ const DESKTOP_MQ = "(min-width: 1024px)";
 /** Overlapping client logos beside the proof caption. */
 const PROOF_LOGOS = [
   { id: "oura", src: "/logos/oura.svg", alt: "Oura" },
-  { id: "nespresso", src: "/logos/nespresso.svg", alt: "Nespresso" },
+  {
+    id: "nespresso",
+    src: "/logos/nespresso.svg",
+    alt: "Nespresso",
+    fill: true,
+  },
   { id: "stan", src: "/logos/stan.svg", alt: "Stan" },
-  { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes" },
+  { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes", fill: true },
 ] as const;
 
 const DEFAULT_HERO: ServiceHeroContent = {
@@ -315,7 +320,14 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
             <div className="rj-hero__proof-bundle">
               <ul className="rj-hero__proof-faces" aria-hidden="true">
                 {PROOF_LOGOS.map((logo) => (
-                  <li key={logo.id} className="rj-hero__proof-face">
+                  <li
+                    key={logo.id}
+                    className={
+                      logo.fill
+                        ? "rj-hero__proof-face rj-hero__proof-face--fill"
+                        : "rj-hero__proof-face"
+                    }
+                  >
                     <img
                       src={logo.src}
                       alt=""

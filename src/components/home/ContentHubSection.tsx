@@ -16,7 +16,7 @@ type HubCard = {
   statusLabel: string;
   previewSrc: string;
   previewAlt: string;
-  href?: string;
+  href?: "/workflows" | "/toolverse" | "/resources";
   route?: boolean;
   locked?: boolean;
   anchorId?: string;
@@ -34,7 +34,7 @@ const CARDS: HubCard[] = [
     statusLabel: "Free",
     previewSrc: "/challenges/testing-experimentation.jpg",
     previewAlt: "Abstract preview of experimentation and testing workflows",
-    href: "/resources",
+    href: "/workflows",
     route: true,
     fan: "left",
   },
@@ -48,7 +48,7 @@ const CARDS: HubCard[] = [
     statusLabel: "Free",
     previewSrc: "/challenges/ai-engineering.jpg",
     previewAlt: "Abstract preview of tools and integrations",
-    href: "/resources",
+    href: "/toolverse",
     route: true,
     anchorId: "toolverse",
     fan: "center",

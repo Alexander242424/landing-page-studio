@@ -25,6 +25,11 @@ const ApproachSection = lazy(() =>
     default: m.ApproachSection,
   })),
 );
+const GrowthCompoundingSection = lazy(() =>
+  import("@/components/home/GrowthCompoundingSection").then((m) => ({
+    default: m.GrowthCompoundingSection,
+  })),
+);
 const HomeVideoSection = lazy(() =>
   import("@/components/home/HomeVideoSection").then((m) => ({
     default: m.HomeVideoSection,
@@ -137,6 +142,9 @@ export function MarketingHomePage({
         </Deferred>
         <Deferred>
           <ApproachSection />
+        </Deferred>
+        <Deferred>
+          <GrowthCompoundingSection />
         </Deferred>
         <Deferred>
           <HomeVideoSection />
