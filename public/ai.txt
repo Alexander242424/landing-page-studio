@@ -16,7 +16,9 @@ Preferred-Source: https://uxlab.digital/sitemap.xml
 
 # Canonical facts
 Organization: UXLAB
-Description: Product + build partner for high-growth startups. Helps innovative AI startups and product teams grow revenue and scale through conversions, design and AI engineering.
+Description: UXLAB helps mobile apps, SaaS, e-commerce, and web funnels grow revenue through CRO, product design, experimentation, and AI-native engineering — without buying more traffic.
+Workflows: https://uxlab.digital/workflows
+Toolverse: https://uxlab.digital/toolverse
 Contact: alex@uxlab.digital
 Location: Warsaw, Poland
 Sitemap: https://uxlab.digital/sitemap.xml

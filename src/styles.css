@@ -3366,8 +3366,12 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 .rj-customers .rj-intro__content .rj-customers__tagline {
+  margin: 0;
   opacity: 1;
   visibility: visible;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
 }
 
 .rj-customers__inner {

@@ -5,6 +5,8 @@ export type HomeIntroContent = {
   id?: string;
   ariaLabel?: string;
   taglineBefore: string;
+  /** Optional second paragraph (homepage customers lead). */
+  taglineSecond?: string;
   taglineLinkLabel: string;
   taglineLinkHref: string;
   taglineAfter?: string;
@@ -16,7 +18,7 @@ export const DEFAULT_HOME_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Results",
   taglineBefore:
-    "Real growth for mobile apps, SaaS, e-commerce and web funnels, measured in boosted revenue and higher conversion, not just redesigns.",
+    "We read user behaviour, find where your mobile app, SaaS, store or funnel loses money, and ship the fix that wins it back. Tested. Live. Paying for itself.",
   taglineLinkLabel: "",
   taglineLinkHref: "#glance",
   taglineAfter: "",

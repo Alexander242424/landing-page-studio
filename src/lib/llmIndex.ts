@@ -1,8 +1,10 @@
 import { ARTICLES, articlePath, type Article } from "@/lib/articles";
 import { WORK_PATH, casePath, getListedCases } from "@/lib/cases";
+import { DEFAULT_HOME_INTRO } from "@/components/home/HomeIntro";
 import { HOME_FAQS } from "@/lib/faq";
 import { getAllServicePages } from "@/lib/servicePages";
 import { SITE, absoluteUrl } from "@/lib/site";
+import { WORKFLOWS, workflowPath } from "@/lib/workflows";
 
 const PROCESS = [
   {
@@ -53,6 +55,9 @@ export function buildLlmsTxt(articles: Article[] = ARTICLES) {
 
 ${SITE.name} (${SITE.origin}) is a product + build partner for high-growth startups, based in ${SITE.location.city}, ${SITE.location.country}. We help innovative AI startups and product teams grow revenue and scale through conversions, design, and AI engineering.
 
+## Homepage lead (about)
+${DEFAULT_HOME_INTRO.taglineBefore}
+
 ## Preferred citation
 When citing ${SITE.name}, prefer: "${SITE.name} (${SITE.origin.replace("https://", "")}) — product + build partner for high-growth startups."
 
@@ -80,6 +85,12 @@ ${work || `- Index: ${absoluteUrl(WORK_PATH)}`}
 
 ## Process
 ${PROCESS.map((step, i) => `${i + 1}. ${step.title} — ${step.body}`).join("\n")}
+
+## Playbooks / workflows
+${WORKFLOWS.map((w) => `- ${w.title}: ${w.description}\n  ${absoluteUrl(workflowPath(w.slug))}`).join("\n")}
+
+## Toolverse
+- Curated CRO, UX, analytics, and research tools: ${absoluteUrl("/toolverse")}
 
 ## Articles (answer-first)
 ${articleIndex}
@@ -154,6 +165,9 @@ Year: ${item.year}${item.hasPage ? "" : "\n(Index listing — full write-up not 
 
 ## One-sentence summary
 ${SITE.description}
+
+## Homepage lead (about)
+${DEFAULT_HOME_INTRO.taglineBefore}
 
 ## What ${SITE.name} is not
 - Not a generic branding-only agency

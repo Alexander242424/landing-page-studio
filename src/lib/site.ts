@@ -10,20 +10,26 @@ export const SITE = {
   title: "UXLAB — Conversion rate optimisation systems for revenue growth",
   titleTemplate: "%s — UXLAB",
   description:
-    "Without spending a single cent more on Google Ads, Facebook ads, SEO or content marketing.",
+    "UXLAB helps mobile apps, SaaS, e-commerce, and web funnels grow revenue through CRO, product design, experimentation, and AI-native engineering — without buying more traffic.",
   keywords: [
     "UXLAB",
+    "uxlab.digital",
     "product partner",
     "high-growth startups",
     "AI startups",
     "conversion rate optimisation",
     "CRO",
+    "conversion-centered design",
     "product design",
     "websites",
     "landing pages",
     "testing and experimentation",
+    "A/B testing",
     "AI native engineering",
+    "analytics",
     "Warsaw",
+    "workflows",
+    "toolverse",
   ],
   author: "Alex Tyshchenko",
   email: "alex@uxlab.digital",
@@ -52,6 +58,7 @@ export type SiteMetaLink = {
   rel: string;
   href: string;
   type?: string;
+  title?: string;
 };
 
 export type SiteMetaTag =
@@ -127,7 +134,11 @@ export function defaultMeta(options: DefaultMetaOptions = {}): SiteMetaTag[] {
     { name: "robots", content: robots },
     { name: "googlebot", content: robots },
     { name: "bingbot", content: robots },
+    { name: "application-name", content: SITE.name },
+    { name: "apple-mobile-web-app-title", content: SITE.name },
+    { name: "referrer", content: "strict-origin-when-cross-origin" },
     { name: "theme-color", content: themeColor },
+    { name: "color-scheme", content: "dark light" },
     { name: "geo.region", content: SITE.location.countryCode },
     { name: "geo.placename", content: SITE.location.city },
     { name: "language", content: SITE.language },
@@ -143,7 +154,10 @@ export function defaultMeta(options: DefaultMetaOptions = {}): SiteMetaTag[] {
     { property: "og:image:width", content: imageWidth },
     { property: "og:image:height", content: imageHeight },
     { property: "og:image:alt", content: imageAlt },
+    { property: "og:image:secure_url", content: image },
     { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:domain", content: "uxlab.digital" },
+    { name: "twitter:url", content: url },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
     { name: "twitter:image", content: image },
@@ -196,6 +210,24 @@ export function defaultLinks(path = "/"): SiteMetaLink[] {
     },
     {
       rel: "alternate",
+      type: "text/plain",
+      href: absoluteUrl("/llm.txt"),
+      title: "LLM index alias",
+    },
+    {
+      rel: "alternate",
+      type: "text/plain",
+      href: absoluteUrl("/ai.txt"),
+      title: "AI crawler policy",
+    },
+    {
+      rel: "alternate",
+      type: "text/plain",
+      href: absoluteUrl("/.well-known/llms.txt"),
+      title: "LLM index (well-known)",
+    },
+    {
+      rel: "alternate",
       type: "application/rss+xml",
       href: absoluteUrl("/feed.xml"),
     },
@@ -206,6 +238,7 @@ export function defaultLinks(path = "/"): SiteMetaLink[] {
     },
     { rel: "author", href: absoluteUrl("/humans.txt") },
     { rel: "describedby", href: absoluteUrl("/llms.txt") },
+    { rel: "manifest", href: absoluteUrl("/site.webmanifest") },
   ];
 }
 

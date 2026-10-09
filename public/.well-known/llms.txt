@@ -3,7 +3,7 @@
 # Full retrieval index: https://uxlab.digital/llms-full.txt
 # AI policy: https://uxlab.digital/ai.txt
 
-> Product + build partner for high-growth startups. UXLAB helps the most innovative AI startups and product teams grow revenue and scale business through conversions, design and AI engineering.
+> UXLAB helps mobile apps, SaaS, e-commerce, and web funnels grow revenue through CRO, product design, experimentation, and AI-native engineering.
 
 ## Canonical indexes
 - https://uxlab.digital/llms.txt
@@ -18,6 +18,8 @@
 - Process: https://uxlab.digital/#process
 - FAQ: https://uxlab.digital/#faq
 - Work / case studies: https://uxlab.digital/work
+- Workflows / playbooks: https://uxlab.digital/workflows
+- Toolverse: https://uxlab.digital/toolverse
 - Resources: https://uxlab.digital/resources
 - Contact: https://uxlab.digital/#contact
 
