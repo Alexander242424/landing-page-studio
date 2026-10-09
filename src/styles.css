@@ -1781,16 +1781,21 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 .rj-hero__headline {
   min-width: 0;
   line-height: 0.98;
-  /* Mobile: scale so three authored lines stay on one row each (longest: "more revenue with") */
-  font-size: min(clamp(47px, 12.2vw, 82px), calc((100vw - 24px) * 47 / 360));
   color: var(--rj-white);
   overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
   max-width: 100%;
   text-align: center;
+  box-sizing: border-box;
   /* Optical balance: letter-spacing isn't applied after the last glyph */
-  padding-inline-start: 0.05em;
+  padding-inline: 1.2rem;
+  padding-inline-start: max(1.2rem, 0.05em);
+  /* ≤1023px: three authored lines — scale to longest row (~21 chars) */
+  font-size: min(
+    clamp(34px, 10.2vw, 56px),
+    calc((100vw - 3.2rem) / 10.4)
+  );
 }
 
 /* Authored headline lines — block on all breakpoints so breaks match copy rhythm. */
@@ -1812,11 +1817,30 @@ body.rj-scroll-dark .rj-header__menu-item a:not(.rj-header__link--active) {
 }
 
 /* 10px root — rem clamps are safe again */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .rj-hero__headline {
+    font-size: min(
+      clamp(36px, 8.8vw, 52px),
+      calc((100vw - 4rem) / 10.4)
+    );
+    line-height: 1;
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rj-hero__headline {
+    /* Desktop: two authored lines */
+    font-size: clamp(5.4rem, 2.8rem + 3.4vw, 6rem);
+    line-height: 1.02;
+    text-wrap: wrap;
+    padding-inline: 0;
+    padding-inline-start: 0.05em;
+  }
+}
+
 @media (min-width: 768px) {
   .rj-hero__headline {
-    /* Tablet: keep 2 authored lines, scale toward the 1024 desktop size (~57px).
-       The old `clamp(...) - 18px` crushed H1 to ~32–45px — smaller than phone. */
-    font-size: clamp(5.4rem, 2.8rem + 3.4vw, 6rem);
     line-height: 1.02;
     text-wrap: wrap;
   }
@@ -6549,6 +6573,15 @@ body.rj-scroll-dark .rj-page__main {
 }
 
 @media (max-width: 767px) {
+  .rj-compounding__flywheel {
+    padding-top: 4.8rem;
+  }
+
+  .rj-compounding__diagram-svg {
+    height: clamp(20.8rem, 54.6vw, 39rem);
+    max-height: 39rem;
+  }
+
   .rj-compounding__problem-title-line,
   .rj-compounding__problem-title .rj-text-reveal__line,
   .rj-compounding__flywheel-title-line {
@@ -6556,12 +6589,15 @@ body.rj-scroll-dark .rj-page__main {
   }
 
   .rj-compounding__problem-title-line--lead,
-  .rj-compounding__problem-title-line--punch {
-    font-size: clamp(2rem, 5.4vw, 2.4rem);
-  }
-
-  .rj-compounding__flywheel-title {
-    font-size: clamp(2rem, 5.4vw, 2.4rem);
+  .rj-compounding__problem-title-line--punch,
+  .rj-compounding__problem-title .rj-text-reveal__line,
+  .rj-compounding__flywheel-title,
+  .rj-compounding__flywheel-title-line {
+    font-size: min(
+      clamp(2.8rem, 8.4vw, 3.6rem),
+      calc((100vw - 3.2rem) / 11.2)
+    );
+    line-height: 1.12;
   }
 
   .rj-compounding__problem-card {
@@ -11475,7 +11511,9 @@ html[data-rj-route="work"] body {
   background: var(--rj-black);
 }
 
-.rj-wf-page:not(.rj-wf-page--grid-revealed) .rj-wf-grid-wrap .rj-wf-card {
+.rj-wf-page:not(.rj-wf-page--detail):not(.rj-wf-page--grid-revealed)
+  .rj-wf-grid-wrap
+  .rj-wf-card {
   opacity: 0;
   visibility: hidden;
 }
@@ -11491,7 +11529,9 @@ html[data-rj-route="work"] body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rj-wf-page:not(.rj-wf-page--grid-revealed) .rj-wf-grid-wrap .rj-wf-card,
+  .rj-wf-page:not(.rj-wf-page--detail):not(.rj-wf-page--grid-revealed)
+    .rj-wf-grid-wrap
+    .rj-wf-card,
   .rj-wf-card {
     opacity: 1;
     visibility: visible;
@@ -11648,7 +11688,6 @@ html[data-rj-route="work"] body {
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     "copy"
-    "cover"
     "body";
   gap: 2.4rem;
   padding: calc(var(--rj-header-height) + var(--rj-hero-edge))
@@ -11661,8 +11700,21 @@ html[data-rj-route="work"] body {
   grid-area: copy;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  gap: 2.4rem;
+  min-width: 0;
+}
+
+.rj-wf-detail__crumbs {
+  width: 100%;
+}
+
+.rj-wf-detail__hero-meta {
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
   gap: 2.4rem;
+  width: 100%;
   min-width: 0;
 }
 
@@ -11686,17 +11738,19 @@ html[data-rj-route="work"] body {
   width: 100%;
 }
 
+.rj-wf-detail__crumbs,
 .rj-wf-detail__header .rj-article__crumbs {
   width: 100%;
   margin: 0;
 }
 
+.rj-wf-detail__crumbs ol,
 .rj-wf-detail__header .rj-article__crumbs ol {
   justify-content: flex-start;
 }
 
 .rj-wf-detail__title {
-  margin: calc(2.4rem + 12px) 0 0;
+  margin: 0;
   font-size: clamp(3.2rem, 5.2vw, 5.2rem);
   font-weight: 300;
   letter-spacing: -0.045em;
@@ -12640,7 +12694,21 @@ html[data-rj-route="work"] body {
     align-items: start;
   }
 
+  .rj-wf-detail__hero-copy {
+    display: contents;
+  }
+
+  .rj-wf-detail__crumbs,
+  .rj-wf-detail__hero-meta {
+    grid-area: copy;
+  }
+
+  .rj-wf-detail__title {
+    margin: calc(2.4rem + 12px) 0 0;
+  }
+
   .rj-wf-detail__cover {
+    grid-area: cover;
     position: sticky;
     top: calc(var(--rj-header-height) + 1.6rem);
     align-self: start;
@@ -12702,6 +12770,32 @@ html[data-rj-route="work"] body {
 
   .rj-wf-detail__body {
     padding-bottom: 3.2rem;
+  }
+
+  .rj-wf-detail__lead-form {
+    --rj-ask-bar-h: 52px;
+  }
+
+  .rj-wf-detail__lead-form-bar {
+    padding: 4px 4px 4px 16px;
+  }
+
+  .rj-wf-detail__lead-form-bar .rj-ask__input {
+    font-size: 1.4rem;
+  }
+
+  .rj-wf-detail__lead-form-bar .rj-wf-detail__lead-form-submit.rj-hero__cta {
+    font-size: 1.35rem;
+    padding: 0 1.25rem 0 1.35rem;
+  }
+
+  .rj-wf-detail__lead-form-submit-icon {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .rj-wf-detail__cover {
+    margin-top: 0.8rem;
   }
 }
 

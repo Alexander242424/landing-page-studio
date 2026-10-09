@@ -2,7 +2,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
+  useSyncExternalStore,
   type MouseEvent,
 } from "react";
 import gsap from "gsap";
@@ -20,7 +20,7 @@ gsap.registerPlugin(ScrollTrigger);
 /** 1:1 from https://www.rejouice.com/static/reel-short.mp4 */
 const HERO_VIDEO = "/video/hero.mp4";
 const HERO_POSTER = "/video/hero-poster.jpg";
-const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
+const HEADLINE_MOBILE_MQ = "(max-width: 1023px)";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
 
@@ -42,8 +42,8 @@ const DEFAULT_HERO: ServiceHeroContent = {
   lines: ["Conversion rate optimisation", "systems for revenue growth."],
   linesMobile: [
     "Conversion rate",
-    "optimisation systems",
-    "for revenue growth.",
+    "optimisation",
+    "systems for revenue growth.",
   ],
   description:
     "Without spending a single cent more on Google Ads, Facebook ads, SEO or content marketing.",
@@ -51,20 +51,23 @@ const DEFAULT_HERO: ServiceHeroContent = {
   logosStat: "Trusted by YCombinator \n& Speedrun founders",
 };
 
+function subscribeHeadlineMobile(onStoreChange: () => void) {
+  const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
+
+function getHeadlineMobileSnapshot() {
+  return window.matchMedia(HEADLINE_MOBILE_MQ).matches;
+}
+
 /** Hero + showreel — H1 char flip + description word reveal on load. */
 function useHeadlineLines(hero: ServiceHeroContent): readonly string[] {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia(HEADLINE_MOBILE_MQ).matches
-      : false,
+  const isMobile = useSyncExternalStore(
+    subscribeHeadlineMobile,
+    getHeadlineMobileSnapshot,
+    () => true,
   );
-
-  useEffect(() => {
-    const mq = window.matchMedia(HEADLINE_MOBILE_MQ);
-    const sync = () => setIsMobile(mq.matches);
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   return isMobile && hero.linesMobile ? hero.linesMobile : hero.lines;
 }

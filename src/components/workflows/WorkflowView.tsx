@@ -156,77 +156,82 @@ export function WorkflowView({ workflow }: { workflow: Workflow }) {
     <article className="rj-wf-detail">
       <div className="rj-wf-detail__layout">
         <div className="rj-wf-detail__hero-copy">
-          <header className="rj-wf-detail__header">
-            <nav className="rj-article__crumbs rj-work__crumbs" aria-label="Breadcrumb">
-              <ol>
-                <li>
-                  <Link to="/" viewTransition>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/workflows" viewTransition>
-                    Playbooks
-                  </Link>
-                </li>
-              </ol>
-            </nav>
+          <nav
+            className="rj-article__crumbs rj-work__crumbs rj-wf-detail__crumbs"
+            aria-label="Breadcrumb"
+          >
+            <ol>
+              <li>
+                <Link to="/" viewTransition>
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/workflows" viewTransition>
+                  Playbooks
+                </Link>
+              </li>
+            </ol>
+          </nav>
 
-            <h1 className="rj-wf-detail__title">{workflow.title}</h1>
-            <div className="rj-wf-detail__lede">
-              {workflow.description.split("\n\n").map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
-          </header>
+          <figure className="rj-wf-detail__cover">
+            <img
+              src={workflow.coverSrc}
+              alt={workflow.coverAlt}
+              width={1600}
+              height={1000}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </figure>
 
-          <WorkflowLeadForm workflow={workflow} />
+          <div className="rj-wf-detail__hero-meta">
+            <header className="rj-wf-detail__header">
+              <h1 className="rj-wf-detail__title">{workflow.title}</h1>
+              <div className="rj-wf-detail__lede">
+                {workflow.description.split("\n\n").map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
+            </header>
 
-          <section className="rj-wf-detail__tools" aria-label="Tools used">
-            <h2 className="rj-wf-detail__label">Tools used</h2>
-            <ul className="rj-wf-detail__tool-list">
-              {workflow.tools.map((name) => {
-                const tool = resolveTool(name);
-                return (
-                  <li key={tool.slug}>
-                    <a
-                      className="rj-wf-tool"
-                      href={tool.href}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span className="rj-wf-tool__logo" aria-hidden="true">
-                        {tool.logoSrc ? (
-                          <img
-                            src={tool.logoSrc}
-                            alt=""
-                            width={24}
-                            height={24}
-                            decoding="async"
-                          />
-                        ) : (
-                          tool.name.slice(0, 1)
-                        )}
-                      </span>
-                      <span className="rj-wf-tool__name">{tool.name}</span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+            <WorkflowLeadForm workflow={workflow} />
+
+            <section className="rj-wf-detail__tools" aria-label="Tools used">
+              <h2 className="rj-wf-detail__label">Tools used</h2>
+              <ul className="rj-wf-detail__tool-list">
+                {workflow.tools.map((name) => {
+                  const tool = resolveTool(name);
+                  return (
+                    <li key={tool.slug}>
+                      <a
+                        className="rj-wf-tool"
+                        href={tool.href}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <span className="rj-wf-tool__logo" aria-hidden="true">
+                          {tool.logoSrc ? (
+                            <img
+                              src={tool.logoSrc}
+                              alt=""
+                              width={24}
+                              height={24}
+                              decoding="async"
+                            />
+                          ) : (
+                            tool.name.slice(0, 1)
+                          )}
+                        </span>
+                        <span className="rj-wf-tool__name">{tool.name}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          </div>
         </div>
-
-        <figure className="rj-wf-detail__cover">
-          <img
-            src={workflow.coverSrc}
-            alt={workflow.coverAlt}
-            width={1600}
-            height={1000}
-            decoding="async"
-            fetchPriority="high"
-          />
-        </figure>
 
         <div className="rj-wf-detail__body">
           <section className="rj-wf-detail__steps" aria-label="How it works">
