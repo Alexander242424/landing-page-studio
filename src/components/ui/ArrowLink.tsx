@@ -12,7 +12,7 @@ type ArrowLinkProps = {
  * Safari often paints U+2197 as a color emoji, which disappears under
  * header `mix-blend-mode: difference`. SVG with currentColor stays visible.
  */
-function ArrowIcon() {
+export function ArrowIcon() {
   return (
     <svg
       className="rj-arrow__svg"

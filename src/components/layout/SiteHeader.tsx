@@ -1,5 +1,7 @@
 import {
   useEffect,
+  useId,
+  useLayoutEffect,
   useRef,
   useState,
   type MouseEvent,
@@ -7,21 +9,37 @@ import {
 import gsap from "gsap";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
-import { ArrowLink } from "@/components/ui/ArrowLink";
+import { ArrowCue, ArrowIcon, ArrowLink } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
-import { openLeadChat } from "@/lib/askChat";
+import { openContactChat, openLeadChat } from "@/lib/askChat";
+import { SOLUTIONS } from "@/lib/solutions";
+import {
+  solutionHasLanding,
+  solutionPath,
+} from "@/lib/servicePages";
 import { cn } from "@/lib/utils";
 
+type MegaKind = "solutions";
+
+/** Keep panel mounted through CSS close (opacity + slight y). */
+const MEGA_EXIT_MS = 320;
+
 const NAV_ITEMS = [
-  { label: "Case studies", href: "/work" },
-  { label: "Solutions", href: "#solutions" },
-  { label: "Process", href: "#process" },
+  { label: "Solutions", href: "#solutions", mega: "solutions" as const },
+  { label: "Workflows", href: "#process" },
+  { label: "Toolverse", href: "#toolverse" },
+  { label: "Customers", href: "#customers" },
 ] as const;
 
 type NavHref = (typeof NAV_ITEMS)[number]["href"];
+type NavItem = (typeof NAV_ITEMS)[number];
 
 function isPathHref(href: string): href is `/${string}` {
   return href.startsWith("/");
+}
+
+function navMega(item: NavItem): MegaKind | null {
+  return "mega" in item ? item.mega : null;
 }
 
 type SiteHeaderProps = {
@@ -30,23 +48,138 @@ type SiteHeaderProps = {
 };
 
 /**
- * Fixed mix-blend header: scroll-spy nav and mobile burger.
+ * Fixed mix-blend header: scroll-spy nav, Solutions desktop mega, mobile burger.
  */
 export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   const [activeHref, setActiveHref] = useState<NavHref | null>(null);
+  const [megaKind, setMegaKind] = useState<MegaKind | null>(null);
+  const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
+  const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const megaRef = useRef<HTMLDivElement>(null);
+  const megaTlRef = useRef<gsap.core.Timeline | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileTlRef = useRef<gsap.core.Timeline | null>(null);
+  const megaId = useId();
   const { lenis } = useSmoothScroll();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = variant === "home" || pathname === "/";
 
+  const clearMegaClose = () => {
+    if (megaCloseTimer.current) {
+      clearTimeout(megaCloseTimer.current);
+      megaCloseTimer.current = null;
+    }
+  };
+
+  const openMega = (kind: MegaKind) => {
+    clearMegaClose();
+    setMegaKind(kind);
+    setMegaOpen(true);
+  };
+
+  const closeMega = () => {
+    clearMegaClose();
+    setMegaOpen(false);
+  };
+
+  const scheduleMegaClose = () => {
+    clearMegaClose();
+    megaCloseTimer.current = setTimeout(() => setMegaOpen(false), 160);
+  };
+
+  useEffect(() => {
+    if (megaOpen || !megaKind) return;
+    const id = window.setTimeout(() => setMegaKind(null), MEGA_EXIT_MS);
+    return () => window.clearTimeout(id);
+  }, [megaOpen, megaKind]);
+
   useEffect(() => {
     return () => {
+      clearMegaClose();
+      megaTlRef.current?.kill();
       mobileTlRef.current?.kill();
     };
   }, []);
+
+  useLayoutEffect(() => {
+    const root = megaRef.current;
+    if (!root) return;
+
+    megaTlRef.current?.kill();
+    megaTlRef.current = null;
+
+    const rows = root.querySelectorAll<HTMLElement>(".rj-mega__row");
+    const banner = root.querySelector<HTMLElement>(".rj-mega__banner");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const clearMotion = () => {
+      rows.forEach((row) => {
+        const parts = row.querySelectorAll<HTMLElement>(
+          ".rj-mega__row-title, .rj-mega__row-blurb",
+        );
+        gsap.set(parts, { clearProps: "opacity,transform" });
+      });
+      if (banner) gsap.set(banner, { clearProps: "opacity,transform" });
+    };
+
+    if (!megaKind) {
+      clearMotion();
+      return;
+    }
+
+    if (reduced) {
+      clearMotion();
+      return;
+    }
+
+    const tl = gsap.timeline({
+      defaults: { ease: "expo.out" },
+      onComplete: clearMotion,
+    });
+    megaTlRef.current = tl;
+
+    if (banner) gsap.set(banner, { opacity: 0, y: 12 });
+
+    if (banner) {
+      tl.to(
+        banner,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+        },
+        0.12,
+      );
+    }
+
+    rows.forEach((row, index) => {
+      const title = row.querySelector<HTMLElement>(".rj-mega__row-title");
+      const blurb = row.querySelector<HTMLElement>(".rj-mega__row-blurb");
+      const parts = [title, blurb].filter(
+        (el): el is HTMLElement => Boolean(el),
+      );
+      if (parts.length === 0) return;
+
+      gsap.set(parts, { opacity: 0, y: 12 });
+      tl.to(
+        parts,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.04,
+        },
+        0.14 + index * 0.045,
+      );
+    });
+
+    return () => {
+      tl.kill();
+    };
+  }, [megaKind]);
 
   useEffect(() => {
     const root = mobileMenuRef.current;
@@ -75,7 +208,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     }
 
     if (panel) {
-      // Overshoot slightly, then settle into the inset rounded frame.
       gsap.set(panel, { scale: 1.045, y: -10, transformOrigin: "50% 0%" });
     }
     gsap.set(links, { opacity: 0, y: 28 });
@@ -83,7 +215,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     const tl = gsap.timeline({
       defaults: { ease: "expo.out" },
       onComplete: () => {
-        // Hand opacity back to CSS (active vs muted links).
         gsap.set(links, { clearProps: "opacity" });
         if (panel) gsap.set(panel, { clearProps: "transform" });
       },
@@ -130,7 +261,10 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   }, [mobileOpen]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen) {
+      setMobileSolutionsOpen(false);
+      return;
+    }
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setMobileOpen(false);
     };
@@ -141,6 +275,15 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
       window.removeEventListener("keydown", onKey);
     };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!megaOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMega();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [megaOpen]);
 
   useEffect(() => {
     if (!isHome) {
@@ -167,7 +310,6 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
       const marker =
         (Number.isFinite(headerRem) ? headerRem : 6.2) * rootPx + 24;
 
-      // No hash section active in the hero — only once a section crosses the header.
       let next: NavHref | null = null;
       for (const section of sections) {
         if (section.el.getBoundingClientRect().top <= marker) {
@@ -203,9 +345,20 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
     }
   };
 
+  const goToHash = (hash: string) => {
+    closeMega();
+    setMobileOpen(false);
+    if (isHome) {
+      scrollToHref(`#${hash}`);
+      return;
+    }
+    void navigate({ to: "/", hash, viewTransition: true });
+  };
+
   const onNavClick = (event: MouseEvent<HTMLAnchorElement>, href: NavHref) => {
     event.preventDefault();
     setMobileOpen(false);
+    closeMega();
     if (isPathHref(href)) {
       void navigate({ to: href, viewTransition: true });
       return;
@@ -221,7 +374,34 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
   const onConnectClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     setMobileOpen(false);
+    closeMega();
     openLeadChat();
+  };
+
+  const onStrategyCallClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    setMobileOpen(false);
+    closeMega();
+    openContactChat({ source: "header_strategy_call" });
+  };
+
+  const onSolutionClick = (
+    event: MouseEvent<HTMLAnchorElement>,
+    slug: string,
+  ) => {
+    event.preventDefault();
+    setMobileOpen(false);
+    closeMega();
+    const item = SOLUTIONS.find((entry) => entry.slug === slug);
+    if (item && solutionHasLanding(slug)) {
+      void navigate({
+        to: "/solutions/$slug",
+        params: { slug },
+        viewTransition: true,
+      });
+      return;
+    }
+    goToHash(`solution-${slug}`);
   };
 
   const logo = isHome ? (
@@ -263,7 +443,10 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                   aria-label={mobileOpen ? "Close menu" : "Open menu"}
                   aria-expanded={mobileOpen}
                   aria-controls="rj-mobile-menu"
-                  onClick={() => setMobileOpen((open) => !open)}
+                  onClick={() => {
+                    closeMega();
+                    setMobileOpen((open) => !open);
+                  }}
                 >
                   <span className="rj-header__burger-lines" aria-hidden="true">
                     <span />
@@ -287,16 +470,36 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                       : isHome
                         ? item.href
                         : `/${item.href}`;
+                    const kind = navMega(item);
+                    const megaActive =
+                      kind !== null && megaOpen && megaKind === kind;
+
                     return (
-                      <li key={item.href} className="rj-header__menu-item">
+                      <li
+                        key={item.href}
+                        className={cn(
+                          "rj-header__menu-item",
+                          kind && "rj-header__menu-item--mega",
+                        )}
+                        onMouseEnter={
+                          kind ? () => openMega(kind) : undefined
+                        }
+                        onMouseLeave={
+                          kind ? scheduleMegaClose : undefined
+                        }
+                      >
                         <a
                           href={hrefAttr}
                           aria-current={isActive ? "true" : undefined}
+                          aria-expanded={kind ? megaActive : undefined}
+                          aria-controls={kind ? megaId : undefined}
                           className={cn(
                             "rj-link-active",
                             isActive && "rj-header__link--active",
+                            megaActive && "rj-header__link--mega-open",
                           )}
                           onClick={(event) => onNavClick(event, item.href)}
+                          onFocus={kind ? () => openMega(kind) : undefined}
                         >
                           {item.label}
                         </a>
@@ -331,6 +534,85 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
       </div>
 
       <div
+        id={megaId}
+        ref={megaRef}
+        className={cn(
+          "rj-mega",
+          megaOpen && "is-open",
+          megaKind && `rj-mega--${megaKind}`,
+        )}
+        role="region"
+        aria-hidden={!megaOpen}
+        inert={!megaOpen}
+        aria-label="Solutions"
+        onMouseEnter={
+          megaOpen && megaKind ? () => openMega(megaKind) : undefined
+        }
+        onMouseLeave={scheduleMegaClose}
+      >
+        <div className="rj-mega__panel">
+          {megaKind === "solutions" ? (
+            <div className="rj-mega__layout">
+              <div className="rj-mega__list-col">
+                <ul className="rj-mega__list">
+                  {SOLUTIONS.map((item) => (
+                    <li key={item.slug} className="rj-mega__item">
+                      <a
+                        href={
+                          solutionHasLanding(item.slug)
+                            ? solutionPath(item)
+                            : `#solution-${item.slug}`
+                        }
+                        className="rj-mega__row"
+                        onClick={(event) => onSolutionClick(event, item.slug)}
+                        onFocus={() => openMega("solutions")}
+                      >
+                        <span className="rj-mega__row-copy">
+                          <span className="rj-mega__row-title">
+                            <span className="rj-mega__row-title-text">
+                              {item.title}
+                            </span>
+                            <span
+                              className="rj-mega__row-arrow"
+                              aria-hidden="true"
+                            >
+                              <ArrowIcon />
+                            </span>
+                          </span>
+                          <span className="rj-mega__row-blurb">
+                            {item.blurb}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <a
+                href="#contact"
+                className="rj-mega__banner"
+                onClick={onStrategyCallClick}
+                onFocus={() => openMega("solutions")}
+              >
+                <span className="rj-mega__banner-copy">
+                  <span className="rj-mega__banner-title">
+                    Get a 30-min strategy call
+                  </span>
+                  <span className="rj-mega__banner-blurb">
+                    We&apos;ll find revenue leaks on the traffic you already
+                    have — conversion, pricing, and the journeys that stall.
+                  </span>
+                </span>
+                <ArrowCue className="rj-link-active rj-mega__banner-arrow rj-hero__cta rj-hero__cta--talk">
+                  Let&apos;s talk
+                </ArrowCue>
+              </a>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div
         id="rj-mobile-menu"
         ref={mobileMenuRef}
         className={cn("rj-mobile-menu", mobileOpen && "rj-mobile-menu--open")}
@@ -349,6 +631,60 @@ export function SiteHeader({ variant = "home" }: SiteHeaderProps) {
                 : isHome
                   ? item.href
                   : `/${item.href}`;
+              const isSolutions = navMega(item) === "solutions";
+
+              if (isSolutions) {
+                return (
+                  <div key={item.href} className="rj-mobile-menu__group">
+                    <button
+                      type="button"
+                      className={cn(
+                        "rj-mobile-menu__link",
+                        mobileSolutionsOpen && "rj-mobile-menu__link--active",
+                      )}
+                      aria-expanded={mobileSolutionsOpen}
+                      aria-controls="rj-mobile-solutions"
+                      onClick={() =>
+                        setMobileSolutionsOpen((open) => !open)
+                      }
+                    >
+                      {item.label}
+                    </button>
+                    <div
+                      id="rj-mobile-solutions"
+                      className={cn(
+                        "rj-mobile-menu__accordion",
+                        mobileSolutionsOpen &&
+                          "rj-mobile-menu__accordion--open",
+                      )}
+                    >
+                      <ul className="rj-mobile-menu__solutions-list">
+                        {SOLUTIONS.map((solution) => (
+                          <li
+                            key={solution.slug}
+                            className="rj-mobile-menu__solution-item"
+                          >
+                            <a
+                              href={
+                                solutionHasLanding(solution.slug)
+                                  ? solutionPath(solution)
+                                  : `#solution-${solution.slug}`
+                              }
+                              className="rj-mobile-menu__solution"
+                              onClick={(event) =>
+                                onSolutionClick(event, solution.slug)
+                              }
+                            >
+                              <span>{solution.title}</span>
+                              <ArrowCue className="rj-link-active" />
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              }
 
               return (
                 <a

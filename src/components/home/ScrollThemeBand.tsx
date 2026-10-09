@@ -28,17 +28,22 @@ function setDarkProgress(progress: number) {
   document.documentElement.style.setProperty("--rj-dark-progress", t.toFixed(4));
 }
 
+function topBlackHold(): HTMLElement | null {
+  return document.getElementById("customers");
+}
+
 function resolveHeroLight(hero: HTMLElement): Band {
-  const heroBottom = hero.getBoundingClientRect().bottom;
-  if (heroBottom > window.innerHeight * 0.15) return "hero";
+  const hold = topBlackHold() ?? hero;
+  if (hold.getBoundingClientRect().bottom > window.innerHeight * 0.15) {
+    return "hero";
+  }
   return "light";
 }
 
 /**
  * Body bands:
- * - hero (first section): black
- * - mid page (intro / glance): light
- * - approach to dark trigger: scrub white → black (same soft ease as theme flip)
+ * - hero + customers: black (no white jump after the reel)
+ * - approach to dark trigger: latch dark (opening is already black)
  * - past dark trigger top: full dark (process+ stay dark)
  * FAQ / blog keep their own theme-light scope.
  *
@@ -118,6 +123,17 @@ export function ScrollThemeBand({
       syncHero = () => {
         const darkTop = solutions.getBoundingClientRect().top;
         if (darkTop <= window.innerHeight) return;
+        const hold = topBlackHold() ?? hero;
+        const holdBottom = hold.getBoundingClientRect().bottom;
+        const heroBottom = hero.getBoundingClientRect().bottom;
+        // Customers block stays black; don't drop to a white page behind it.
+        if (holdBottom > window.innerHeight * 0.15) {
+          setDarkProgress(
+            heroBottom > window.innerHeight * 0.15 ? 0 : 1,
+          );
+          setBand("hero");
+          return;
+        }
         setDarkProgress(0);
         setBand(resolveHeroLight(hero));
       };
@@ -140,8 +156,14 @@ export function ScrollThemeBand({
         end: "top 18%",
         scrub: true,
         onUpdate: (self) => {
-          setDarkProgress(self.progress);
-          if (self.progress >= 0.45) setBand("dark");
+          const hold = topBlackHold();
+          const openingBlack =
+            hold != null &&
+            hold.getBoundingClientRect().bottom > window.innerHeight * 0.15;
+          // Opening run is already black — don't scrub through white.
+          const progress = openingBlack ? 1 : self.progress;
+          setDarkProgress(progress);
+          if (progress >= 0.45) setBand("dark");
           else setBand("light");
         },
         onLeave: () => {
@@ -152,7 +174,10 @@ export function ScrollThemeBand({
           // Re-enter scrub from below — onUpdate will resume.
         },
         onLeaveBack: () => {
-          setDarkProgress(0);
+          const hold = topBlackHold() ?? hero;
+          const openingBlack =
+            hold.getBoundingClientRect().bottom > window.innerHeight * 0.15;
+          setDarkProgress(openingBlack ? 1 : 0);
           setBand(resolveHeroLight(hero));
         },
       });

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { AiPromptInput } from "@/components/home/AiPromptInput";
-import { HomeIntro } from "@/components/home/HomeIntro";
+import { CustomersSection } from "@/components/home/CustomersSection";
 import { ScrollThemeBand } from "@/components/home/ScrollThemeBand";
 import { HeroReel } from "@/components/hero/HeroReel";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -10,19 +10,14 @@ import { playHomeEntrance } from "@/lib/homeEntrance";
 import { usePageReveal } from "@/lib/pageReveal";
 import { homeJsonLd } from "@/lib/site";
 
-const GlanceSection = lazy(() =>
-  import("@/components/home/GlanceSection").then((m) => ({
-    default: m.GlanceSection,
-  })),
-);
 const SolutionsStackSection = lazy(() =>
   import("@/components/home/SolutionsStackSection").then((m) => ({
     default: m.SolutionsStackSection,
   })),
 );
-const OurProcessSection = lazy(() =>
-  import("@/components/home/OurProcessSection").then((m) => ({
-    default: m.OurProcessSection,
+const ContentHubSection = lazy(() =>
+  import("@/components/home/ContentHubSection").then((m) => ({
+    default: m.ContentHubSection,
   })),
 );
 const ApproachSection = lazy(() =>
@@ -33,6 +28,11 @@ const ApproachSection = lazy(() =>
 const HomeVideoSection = lazy(() =>
   import("@/components/home/HomeVideoSection").then((m) => ({
     default: m.HomeVideoSection,
+  })),
+);
+const CompareSection = lazy(() =>
+  import("@/components/home/CompareSection").then((m) => ({
+    default: m.CompareSection,
   })),
 );
 const FaqSection = lazy(() =>
@@ -128,21 +128,21 @@ export function MarketingHomePage({
 
       <main className="rj-page__main">
         <HeroReel />
-        <HomeIntro />
-        <Deferred>
-          <GlanceSection />
-        </Deferred>
+        <CustomersSection />
         <Deferred>
           <SolutionsStackSection />
         </Deferred>
         <Deferred>
-          <OurProcessSection />
+          <ContentHubSection />
         </Deferred>
         <Deferred>
           <ApproachSection />
         </Deferred>
         <Deferred>
           <HomeVideoSection />
+        </Deferred>
+        <Deferred>
+          <CompareSection />
         </Deferred>
         <Deferred>
           <FaqSection />

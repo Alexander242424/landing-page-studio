@@ -47,3 +47,70 @@ export const LOGO_STRIP_SEED_IDS = [
   "polymarket",
   "easy",
 ] as const;
+
+/** Homepage partners rail (light band above FAQ). */
+export const PARTNER_RAIL_IDS = [
+  "calendly",
+  "softr",
+  "pipedrive",
+  "polymarket",
+  "stan",
+  "oura",
+  "tradevision",
+  "hyperframe",
+] as const;
+
+/** Customers section logo table (monochrome marks on dark). */
+export const CUSTOMER_LOGO_GRID_IDS = [
+  "forbes-travel-guide",
+  "awwwards",
+  "rappi",
+  "hyperframe",
+  "stan",
+  "nespresso",
+  "calendly",
+  "forbes",
+  "tradevision",
+  "softr",
+  "polymarket",
+  "pipedrive",
+  "oura",
+  "rivian",
+  "zara",
+  "easy",
+] as const;
+
+/** Logo ids that have a published case study. */
+const LOGO_CASE_SLUGS: Partial<Record<string, string>> = {
+  oura: "oura",
+  nespresso: "nespresso",
+  stan: "stan",
+  forbes: "forbes",
+  "forbes-travel-guide": "forbes",
+  tradevision: "tradevision",
+};
+
+function logosByIds(ids: readonly string[]): ClientLogo[] {
+  return ids.map(
+    (id) => CLIENT_LOGOS.find((logo) => logo.id === id) ?? CLIENT_LOGOS[0]!,
+  );
+}
+
+export function customerLogoGrid(): ClientLogo[] {
+  return logosByIds(CUSTOMER_LOGO_GRID_IDS);
+}
+
+export function partnerRailLogos(): ClientLogo[] {
+  return logosByIds(PARTNER_RAIL_IDS);
+}
+
+/** Published case slug for a logo id, when we have a matching case study. */
+export function logoCaseSlug(id: string): string | undefined {
+  return LOGO_CASE_SLUGS[id];
+}
+
+/** Case page when we have one; otherwise the work index. */
+export function logoWorkHref(id: string): string {
+  const slug = logoCaseSlug(id);
+  return slug ? `/work/${slug}` : "/work";
+}

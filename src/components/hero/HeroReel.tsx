@@ -7,47 +7,46 @@ import {
 } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { LogoStrip } from "@/components/home/LogoStrip";
 import { LazyVideo } from "@/components/media/LazyVideo";
-import { ArrowLink } from "@/components/ui/ArrowLink";
-import { openContactChat, openCroAuditChat } from "@/lib/askChat";
+import { ArrowIcon, ArrowLink } from "@/components/ui/ArrowLink";
+import { openContactChat } from "@/lib/askChat";
 import type { ServiceHeroContent } from "@/lib/servicePages";
-import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageReveal } from "@/lib/pageReveal";
+import { createAwardsCharReveal, createTextReveal } from "@/lib/textReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** 1:1 from https://www.rejouice.com/static/reel-short.mp4 */
 const HERO_VIDEO = "/video/hero.mp4";
 const HERO_POSTER = "/video/hero-poster.jpg";
+const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
 const MOBILE_MQ = "(max-width: 1023px)";
 const DESKTOP_MQ = "(min-width: 1024px)";
-const HIDE_REEL_MQ = "(max-width: 767px)";
-const HEADLINE_MOBILE_MQ = "(max-width: 767px)";
+
+/** Overlapping client logos beside the proof caption. */
+const PROOF_LOGOS = [
+  { id: "oura", src: "/logos/oura.svg", alt: "Oura" },
+  { id: "nespresso", src: "/logos/nespresso.svg", alt: "Nespresso" },
+  { id: "stan", src: "/logos/stan.svg", alt: "Stan" },
+  { id: "forbes", src: "/logos/forbes.svg", alt: "Forbes" },
+] as const;
 
 const DEFAULT_HERO: ServiceHeroContent = {
-  ariaLabel: "Convert 2-3x more revenue with the same traffic.",
-  lines: ["Convert 2-3x more revenue", "with the same traffic."],
-  linesMobile: ["Convert 2-3x", "more revenue with", "the same traffic."],
+  ariaLabel: "Conversion rate optimisation systems for revenue growth.",
+  lines: ["Conversion rate optimisation", "systems for revenue growth."],
+  linesMobile: [
+    "Conversion rate",
+    "optimisation systems",
+    "for revenue growth.",
+  ],
   description:
-    "We help AI startups, product teams and DTC brands double revenue with CRO, user experience and AI engineering.",
+    "Without spending a single cent more on Google Ads, Facebook ads, SEO or content marketing.",
   primaryCta: { label: "Let's talk", href: "#contact" },
-  secondaryCta: { label: "Free CRO audit", href: "#contact" },
   logosStat: "Trusted by YCombinator \n& Speedrun founders",
 };
 
-/**
- * Rejouice-matched hero + showreel:
- * - Awards char reveal on authored headline lines
- * - Description via createTextReveal (same masked word reveal as HomeIntro / approach)
- * - Scrubbed title+description parallax; showreel stays full-bleed (no clip grow)
- * - Logo bar sits outside the copy unit so it rides up with the video
- * - Taglines sit in normal hero flow on all breakpoints (no mobile bottom scrub —
- *   that desynced them from the showreel while the video scrolled)
- * - Mobile uses a lighter animation budget to avoid touch scroll jitter
- * - Headline line breaks: optional `linesMobile` below 768px, `lines` on tablet+
- *
- * Load sequence (with playHomeEntrance): header → video → title → description
- */
+/** Hero + showreel — H1 char flip + description word reveal on load. */
 function useHeadlineLines(hero: ServiceHeroContent): readonly string[] {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined"
@@ -68,159 +67,144 @@ function useHeadlineLines(hero: ServiceHeroContent): readonly string[] {
 export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const hero = content ?? DEFAULT_HERO;
   const headlineLines = useHeadlineLines(hero);
+  const isPhone = useIsMobile();
   const { isRevealed, shouldPlay } = usePageReveal();
+  const loadVideoEager = shouldPlay || isPhone;
   const rootRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLHeadingElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
-  const logosRef = useRef<HTMLDivElement>(null);
+  const proofRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const videoWrapRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const onResultsClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (hero.secondaryCta.label === "Free CRO audit") {
-      event.preventDefault();
-      openCroAuditChat();
-      return;
-    }
-
-    const href = hero.secondaryCta.href;
-    if (href.startsWith("#")) {
-      event.preventDefault();
-      const target = document.getElementById(href.slice(1));
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  };
-
   const onTalkClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     openContactChat();
   };
 
-  // Pause showreel when hidden on mobile so it does not decode/play off-screen.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const mq = window.matchMedia(HIDE_REEL_MQ);
-    const syncPlayback = () => {
-      if (mq.matches) {
-        video.pause();
-      }
-    };
-
-    syncPlayback();
-    mq.addEventListener("change", syncPlayback);
-    return () => mq.removeEventListener("change", syncPlayback);
-  }, []);
-
   useLayoutEffect(() => {
-    const hero = heroRef.current;
+    const heroEl = heroRef.current;
     const logo = logoRef.current;
     const copy = copyRef.current;
     const description = descriptionRef.current;
     const actions = actionsRef.current;
-    const logos = logosRef.current;
+    const proof = proofRef.current;
     const icon = iconRef.current;
     const reel = reelRef.current;
     const videoWrap = videoWrapRef.current;
     const frame = frameRef.current;
     if (!isRevealed) return;
-    if (!hero || !logo || !copy || !reel || !videoWrap || !frame) return;
+    if (!heroEl || !logo || !copy || !reel || !videoWrap || !frame) return;
 
-    // Headline + description + CTAs share one scroll-linked y.
-    // Logos sit on the reel and scroll with it (Rejouice: bar + video go up together).
     const copyUnit = copy;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const cleanups: Array<() => void> = [];
-
-    // DOM-mutating splits outside gsap.context so ctx.revert() cannot double-revert.
-    // Title after video starts (~0.22s in playHomeEntrance); description as title settles.
-    cleanups.push(
-      createAwardsCharReveal(logo, {
-        playOnLoad: true,
-        delay: 0.52,
-        duration: 1.5,
-        stagger: 0.05,
-        yStagger: 0.016,
-      }),
-    );
-
-    if (description) {
-      cleanups.push(
-        createTextReveal(description, {
-          playOnLoad: true,
-          delay: 1.7,
-        }),
-      );
-    }
+    const revealCleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
-      if (actions) {
-        gsap.set(actions, { autoAlpha: 0, y: 14 });
-        gsap.to(actions, {
-          autoAlpha: 1,
-          y: 0,
-          delay: 2.55,
-          duration: 1,
-          ease: "expo.out",
+      if (reduced) {
+        logo.classList.add("rj-hero__copy--visible");
+        description?.classList.add("rj-hero__copy--visible");
+        actions?.classList.add("rj-hero__copy--visible");
+        proof?.classList.add("rj-hero__copy--visible");
+        gsap.set([logo, description, actions, proof].filter(Boolean), {
+          clearProps: "opacity,visibility,transform",
         });
-      }
+      } else {
+        revealCleanups.push(
+          createAwardsCharReveal(logo, {
+            playOnLoad: true,
+            delay: 0.35,
+            onComplete: () => logo.classList.add("rj-hero__copy--visible"),
+          }),
+        );
 
-      if (logos) {
-        gsap.set(logos, { autoAlpha: 1 });
+        if (description) {
+          revealCleanups.push(
+            createTextReveal(description, {
+              playOnLoad: true,
+              delay: 0.85,
+              duration: 1.35,
+              wordsStagger: 0.012,
+            }),
+          );
+          description.classList.add("rj-hero__copy--visible");
+        }
 
-        const logosStat = logos.querySelector<HTMLElement>(".rj-hero__logos-stat");
-        if (logosStat) {
-          gsap.set(logosStat, { autoAlpha: 0, y: 14 });
-          gsap.to(logosStat, {
-            autoAlpha: 1,
-            y: 0,
-            delay: 2.55,
-            duration: 1,
-            ease: "expo.out",
-          });
+        if (actions) gsap.set(actions, { autoAlpha: 0, y: 14 });
+        if (proof) gsap.set(proof, { autoAlpha: 0, y: 12 });
+
+        const follow = gsap.timeline({
+          delay: 1.65,
+          defaults: { ease: "expo.out" },
+        });
+        if (actions) {
+          follow.to(
+            actions,
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.9,
+              onComplete: () => actions.classList.add("rj-hero__copy--visible"),
+            },
+            0,
+          );
+        }
+        if (proof) {
+          follow.to(
+            proof,
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.85,
+              onComplete: () => proof.classList.add("rj-hero__copy--visible"),
+            },
+            actions ? 0.2 : 0,
+          );
         }
       }
 
       if (icon) {
-        gsap.set(icon, { autoAlpha: 0, y: -14 });
-        gsap.to(icon, {
-          autoAlpha: 1,
-          y: 0,
-          delay: 1.35,
-          duration: 1.2,
-          ease: "expo.out",
-        });
-        gsap.to(icon, {
-          y: 8,
-          delay: 2.7,
-          duration: 1.15,
-          ease: "power1.inOut",
-          yoyo: true,
-          repeat: -1,
-        });
+        if (reduced) {
+          gsap.set(icon, { clearProps: "opacity,visibility,transform" });
+        } else {
+          gsap.set(icon, { autoAlpha: 0, y: -14 });
+          gsap.to(icon, {
+            autoAlpha: 1,
+            y: 0,
+            delay: 1.1,
+            duration: 1.2,
+            ease: "expo.out",
+          });
+          gsap.to(icon, {
+            y: 8,
+            delay: 2.4,
+            duration: 1.15,
+            ease: "power1.inOut",
+            yoyo: true,
+            repeat: -1,
+          });
+        }
 
-        // Fixed to viewport bottom — hide once the hero band leaves the screen.
         ScrollTrigger.create({
-          trigger: hero,
+          trigger: heroEl,
           start: "bottom bottom",
           end: "bottom top",
-          onEnter: () => gsap.to(icon, { autoAlpha: 0, duration: 0.25, overwrite: "auto" }),
-          onLeaveBack: () => gsap.to(icon, { autoAlpha: 1, duration: 0.25, overwrite: "auto" }),
+          onEnter: () =>
+            gsap.to(icon, { autoAlpha: 0, duration: 0.25, overwrite: "auto" }),
+          onLeaveBack: () =>
+            gsap.to(icon, { autoAlpha: 1, duration: 0.25, overwrite: "auto" }),
         });
       }
 
       const mm = gsap.matchMedia();
 
-      // Mobile: no copy/video parallax — video must not scrub up over the hero text.
       mm.add(MOBILE_MQ, () => {
         gsap.set(frame, {
           clearProps: "--rj-reel-clip,--rj-reel-radius",
@@ -230,16 +214,13 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
         gsap.set(videoWrap, { clearProps: "transform" });
 
         return () => {
-          gsap.set([copyUnit, videoWrap], {
-            clearProps: "transform",
-          });
+          gsap.set([copyUnit, videoWrap], { clearProps: "transform" });
           gsap.set(frame, {
             clearProps: "transform,clipPath,--rj-reel-clip,--rj-reel-radius",
           });
         };
       });
 
-      // Desktop: copy drifts; logos + full-bleed reel stay glued and scroll away together.
       mm.add(DESKTOP_MQ, () => {
         gsap.set(frame, {
           "--rj-reel-clip": "0%",
@@ -247,41 +228,18 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
           clipPath: "inset(0% round 0rem)",
         });
         gsap.set(videoWrap, { clearProps: "transform" });
-
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: hero,
-              scrub: true,
-              start: "top top",
-              end: "bottom top",
-              invalidateOnRefresh: true,
-            },
-          })
-          .fromTo(
-            copyUnit,
-            { y: 0 },
-            {
-              // A bit faster off the top than the original 0.5 hold — keep it mild.
-              y: () => hero.offsetHeight * 0.32,
-              duration: 1,
-              ease: "none",
-            },
-          );
+        gsap.set(copyUnit, { clearProps: "transform" });
 
         return () => {
           gsap.set(frame, {
             clearProps: "--rj-reel-clip,--rj-reel-radius,clipPath",
           });
           gsap.set(videoWrap, { clearProps: "transform" });
+          gsap.set(copyUnit, { clearProps: "transform" });
         };
       });
-
-      cleanups.push(() => mm.revert());
     }, rootRef);
 
-    // Avoid ScrollTrigger.refresh on mobile address-bar resize (layout thrash).
-    // First-load: playHomeEntrance / preloader already refresh after the wipe.
     const onOrientation = () => ScrollTrigger.refresh();
     window.addEventListener("orientationchange", onOrientation);
     if (!shouldPlay) {
@@ -290,8 +248,17 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
 
     return () => {
       window.removeEventListener("orientationchange", onOrientation);
-      cleanups.forEach((fn) => fn());
+      for (const dispose of revealCleanups) dispose();
       ctx.revert();
+      gsap.set([logo, description, actions, proof].filter(Boolean), {
+        autoAlpha: 1,
+        y: 0,
+        clearProps: "transform",
+      });
+      logo.classList.add("rj-hero__copy--visible");
+      description?.classList.add("rj-hero__copy--visible");
+      actions?.classList.add("rj-hero__copy--visible");
+      proof?.classList.add("rj-hero__copy--visible");
     };
   }, [isRevealed, shouldPlay, headlineLines]);
 
@@ -300,18 +267,20 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
       <div ref={heroRef} className="rj-hero">
         <div ref={copyRef} className="rj-hero__motion">
           <div className="rj-hero__copy">
-            <h1
-              ref={logoRef}
-              className="rj-hero__logo rj-hero__headline rj-awards-title"
-              aria-label={hero.ariaLabel}
-            >
-              {headlineLines.map((line, index) => (
-                <span key={`${index}-${line}`} className="rj-hero__line">
-                  {line}
-                  {index < headlineLines.length - 1 ? " " : null}
-                </span>
-              ))}
-            </h1>
+            <div className="rj-hero__title-block">
+              <h1
+                ref={logoRef}
+                className="rj-hero__logo rj-hero__headline rj-awards-title"
+                aria-label={hero.ariaLabel}
+              >
+                {headlineLines.map((line, index) => (
+                  <span key={`${index}-${line}`} className="rj-hero__line">
+                    {line}
+                    {index < headlineLines.length - 1 ? " " : null}
+                  </span>
+                ))}
+              </h1>
+            </div>
             <div className="rj-hero__taglines">
               <p
                 ref={descriptionRef}
@@ -331,29 +300,36 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
                 >
                   {hero.primaryCta.label}
                 </ArrowLink>
-                <ArrowLink
-                  href={hero.secondaryCta.href}
-                  className="rj-link-active rj-hero__cta rj-hero__cta--process"
-                  onClick={onResultsClick}
-                >
-                  {hero.secondaryCta.label}
-                </ArrowLink>
               </div>
             </div>
           </div>
         </div>
 
-        <div ref={logosRef} className="rj-hero__logos">
-          <div className="rj-hero__logos-bar">
-            <p className="rj-hero__logos-stat">
-              {hero.logosStat.split("\n").map((line, index, arr) => (
-                <span key={line}>
-                  {line}
-                  {index < arr.length - 1 ? <br /> : null}
-                </span>
-              ))}
-            </p>
-            <LogoStrip variant="hero" />
+        <div
+          ref={proofRef}
+          className="rj-hero__proof"
+          aria-label="For Tech and DTC brands"
+        >
+          <p className="rj-hero__proof-label">For Tech and DTC brands</p>
+          <div className="rj-hero__proof-aside">
+            <div className="rj-hero__proof-bundle">
+              <ul className="rj-hero__proof-faces" aria-hidden="true">
+                {PROOF_LOGOS.map((logo) => (
+                  <li key={logo.id} className="rj-hero__proof-face">
+                    <img
+                      src={logo.src}
+                      alt=""
+                      width={32}
+                      height={32}
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <p className="rj-hero__proof-aside-text">{hero.logosStat}</p>
+            </div>
           </div>
         </div>
 
@@ -380,9 +356,7 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
         ref={reelRef}
         id="home-reel"
         className="rj-reel"
-        role="button"
-        tabIndex={0}
-        aria-label="Play showreel"
+        aria-label="Showreel"
       >
         <div ref={videoWrapRef} className="rj-reel__videos">
           <div ref={frameRef} className="rj-reel__video-frame">
@@ -394,32 +368,28 @@ export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
               muted
               loop
               playsInline
-              preload={shouldPlay ? "auto" : "metadata"}
-              eager={shouldPlay}
+              preload={loadVideoEager ? "auto" : "metadata"}
+              eager={loadVideoEager}
               autoPlayWhenVisible
-              // Warm shortly before the showreel enters view — not on first paint.
               rootMargin="240px 0px"
             />
           </div>
         </div>
-        <p className="rj-reel__mobile-label">
+        <div className="rj-reel__mobile-label" aria-hidden="true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="110"
-            height="135"
+            width="12"
+            height="12"
             fill="none"
-            viewBox="0 0 110 135"
-            aria-hidden="true"
+            viewBox="0 0 12 12"
           >
             <path
               fill="currentColor"
-              fillRule="evenodd"
-              d="M21 35.12c0-5.566 6.121-8.964 10.871-6.058l53.727 32.875c4.535 2.778 4.535 9.348 0 12.125l-53.727 32.875c-4.75 2.906-10.871-.492-10.871-6.058z"
-              clipRule="evenodd"
+              d="m5.796 9.246-2.97-2.97-.762.782 4.356 4.356 4.356-4.356-.782-.782-2.96 2.96V1.039H5.806z"
             />
           </svg>
-          <span>Play Reel</span>
-        </p>
+          Scroll
+        </div>
       </div>
     </section>
   );

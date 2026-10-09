@@ -4,6 +4,8 @@ import { Logo } from "@/components/brand/Logo";
 import { ArrowCue } from "@/components/ui/ArrowLink";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import { openContactChat, openNewsletterChat } from "@/lib/askChat";
+import { solutionPath } from "@/lib/servicePages";
+import { SOLUTIONS } from "@/lib/solutions";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -76,12 +78,22 @@ export function SiteFooter({ variant = "inherit" }: SiteFooterProps) {
         <div className="rj-footer__col rj-footer__col--brand">
           <Logo className="rj-footer__logo" markClassName="rj-footer__logo-mark" />
           <p className="rj-footer__tagline">
-            Growth through product performance.
+            Convert more with confidence.
           </p>
           <p className="rj-footer__locale">Poland, Warsaw</p>
         </div>
 
-        <div className="rj-footer__col" />
+        <div className="rj-footer__col">
+          <ul className="rj-footer__list">
+            {SOLUTIONS.map((item) => (
+              <li key={item.slug}>
+                <a href={solutionPath(item)} className="rj-link-active">
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div className="rj-footer__col">
           <ul className="rj-footer__list">

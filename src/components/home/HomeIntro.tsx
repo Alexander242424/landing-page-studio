@@ -1,10 +1,5 @@
-import { useEffect, useRef, type MouseEvent, type ReactNode } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { type MouseEvent } from "react";
 import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
-import { createTextReveal } from "@/lib/textReveal";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export type HomeIntroContent = {
   id?: string;
@@ -15,11 +10,9 @@ export type HomeIntroContent = {
   taglineAfter?: string;
   taglineSecondLinkLabel?: string;
   taglineSecondLinkHref?: string;
-  title: string;
-  paragraphs: (string | ReactNode)[];
 };
 
-const DEFAULT_INTRO: HomeIntroContent = {
+export const DEFAULT_HOME_INTRO: HomeIntroContent = {
   id: "about",
   ariaLabel: "Results",
   taglineBefore:
@@ -29,25 +22,16 @@ const DEFAULT_INTRO: HomeIntroContent = {
   taglineAfter: "",
   taglineSecondLinkLabel: undefined,
   taglineSecondLinkHref: undefined,
-  title: "Our results speak for themselves.",
-  paragraphs: [],
 };
 
-/**
- * Rejouice post-reel intro: word-reveal tagline + key-value row with split reveal.
- */
+/** Post-hero value-prop tagline (service landings). Homepage copy lives in CustomersSection. */
 export function HomeIntro({
   content,
 }: {
   content?: HomeIntroContent;
 } = {}) {
-  const intro = content ?? DEFAULT_INTRO;
+  const intro = content ?? DEFAULT_HOME_INTRO;
   const { lenis } = useSmoothScroll();
-  const rootRef = useRef<HTMLElement>(null);
-  const taglineRef = useRef<HTMLParagraphElement>(null);
-  const splitRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const bodyTextRef = useRef<HTMLDivElement>(null);
 
   const scrollToHref = (href: string) => {
     const id = href.replace("#", "");
@@ -68,62 +52,17 @@ export function HomeIntro({
       scrollToHref(href);
     };
 
-  useEffect(() => {
-    const root = rootRef.current;
-    const tagline = taglineRef.current;
-    const split = splitRef.current;
-    const title = titleRef.current;
-    const bodyText = bodyTextRef.current;
-    if (!root || !tagline || !split || !title || !bodyText) return;
-
-    const cleanups: Array<() => void> = [];
-
-    const ctx = gsap.context(() => {
-      cleanups.push(
-        createTextReveal(tagline, {
-          trigger: tagline.closest(".rj-intro__content") ?? tagline,
-          animateLinkScale: true,
-        }),
-      );
-
-      cleanups.push(
-        createTextReveal(title, {
-          start: "top 92%",
-        }),
-      );
-
-      cleanups.push(
-        createTextReveal(bodyText, {
-          start: "top 92%",
-        }),
-      );
-
-      ScrollTrigger.create({
-        trigger: split,
-        start: "top 90%",
-        once: true,
-        onEnter: () => split.classList.add("is-shown"),
-      });
-    }, root);
-
-    return () => {
-      cleanups.forEach((cleanup) => cleanup());
-      ctx.revert();
-    };
-  }, []);
-
   return (
     <section
-      ref={rootRef}
-      className="rj-intro"
+      className="rj-intro theme-dark"
       id={intro.id ?? "about"}
       aria-label={intro.ariaLabel ?? "Introduction"}
     >
       <div className="rj-intro__tagline">
         <div className="rj-intro__tagline-inner">
           <div className="rj-intro__space" aria-hidden="true" />
-          <div className="rj-intro__content">
-            <p ref={taglineRef}>
+          <div className="rj-intro__content rj-intro__content--static">
+            <p>
               {intro.taglineBefore}
               {intro.taglineLinkLabel ? (
                 <>
@@ -150,31 +89,6 @@ export function HomeIntro({
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="rj-intro__key-value">
-        <ul className="rj-intro__list">
-          <li className="rj-intro__item">
-            <div ref={splitRef} className="rj-split" />
-            <div className="rj-intro__title">
-              <h2 ref={titleRef} className="rj-text-reveal">
-                {intro.title}
-              </h2>
-            </div>
-            <div className="rj-intro__body">
-              <div className="rj-intro__body-inner">
-                <div ref={bodyTextRef} className="rj-text-reveal">
-                  {intro.paragraphs.map((paragraph, index) => (
-                    <p key={index}>
-                      {index > 0 ? <br /> : null}
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </li>
-        </ul>
       </div>
     </section>
   );

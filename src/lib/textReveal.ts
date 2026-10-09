@@ -279,7 +279,9 @@ export function createAwardsCharReveal(
 
   const chars = split.chars;
   if (!chars.length) {
-    restore(false);
+    // Never leave the title stuck at CSS opacity:0 (hero black void).
+    restore(true);
+    onComplete?.();
     return () => undefined;
   }
 

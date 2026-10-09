@@ -13,8 +13,6 @@ const PRELOADER_MESSAGE = {
 
 const MIN_VISIBLE_MS = 1800;
 const MAX_WAIT_MS = 4500;
-const MEDIA_GIVE_UP_MS = 3800;
-const NO_HERO_MS = 360;
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -25,49 +23,10 @@ function waitForFonts() {
   return document.fonts.ready.then(() => undefined).catch(() => undefined);
 }
 
-function waitForHeroMedia() {
-  return new Promise<void>((resolve) => {
-    const giveUp = window.setTimeout(resolve, MEDIA_GIVE_UP_MS);
-    let frames = 0;
-    const maxFrames = Math.ceil(NO_HERO_MS / 16);
-
-    const finish = () => {
-      window.clearTimeout(giveUp);
-      resolve();
-    };
-
-    const bind = (video: HTMLVideoElement) => {
-      if (video.readyState >= 2) {
-        finish();
-        return;
-      }
-      const done = () => finish();
-      video.addEventListener("loadeddata", done, { once: true });
-      video.addEventListener("canplay", done, { once: true });
-      video.addEventListener("error", done, { once: true });
-    };
-
-    const tick = () => {
-      const video = document.querySelector<HTMLVideoElement>(".rj-reel__video");
-      if (video) {
-        bind(video);
-        return;
-      }
-      if (frames++ >= maxFrames) {
-        finish();
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-
-    tick();
-  });
-}
-
 async function waitUntilReady() {
   const started = performance.now();
   await Promise.race([
-    Promise.all([waitForFonts(), waitForHeroMedia()]),
+    waitForFonts(),
     new Promise<void>((resolve) => {
       window.setTimeout(resolve, MAX_WAIT_MS);
     }),
@@ -85,7 +44,7 @@ function preloaderWords(title: HTMLElement) {
 }
 
 /**
- * Rejouice-style first-load gate: lock scroll, wait for fonts + hero media,
+ * Rejouice-style first-load gate: lock scroll, wait for fonts,
  * then wipe away so entrance / ScrollTrigger / Lenis start on a settled page.
  */
 export function Preloader() {

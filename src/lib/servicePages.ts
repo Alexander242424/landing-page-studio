@@ -3,6 +3,8 @@ import type { Solution } from "@/lib/solutions";
 import { SOLUTIONS } from "@/lib/solutions";
 
 export type ServiceHeroContent = {
+  /** Optional pill label above the headline */
+  eyebrow?: string;
   /** Accessible full headline */
   ariaLabel: string;
   /** Visual lines for awards char reveal (desktop / tablet) */
@@ -12,7 +14,7 @@ export type ServiceHeroContent = {
   /** Supporting description — wraps naturally, not authored as line breaks */
   description: string;
   primaryCta: { label: string; href: string };
-  secondaryCta: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
   logosStat: string;
 };
 

@@ -13,8 +13,16 @@ export type AskChatServiceContext = {
   description?: string;
 };
 
+export type LeadCapturePrefill = {
+  email: string;
+  name?: string;
+};
+
 export type OpenLeadChatDetail = {
   service?: AskChatServiceContext;
+  /** Homepage / inline form — skips the email step when valid. */
+  prefill?: LeadCapturePrefill;
+  source?: string;
 };
 
 export function openLeadChat(detail?: OpenLeadChatDetail) {

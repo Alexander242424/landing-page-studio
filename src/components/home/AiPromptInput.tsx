@@ -1,5 +1,6 @@
 import {
   FormEvent,
+  FocusEvent,
   useEffect,
   useId,
   useMemo,
@@ -10,7 +11,6 @@ import { useRouterState } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Logo } from "@/components/brand/Logo";
-import { useSmoothScroll } from "@/components/scroll/SmoothScrollProvider";
 import {
   OPEN_LEAD_CHAT_EVENT,
   OPEN_NEWSLETTER_CHAT_EVENT,
@@ -60,8 +60,11 @@ import { absoluteUrl } from "@/lib/site";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/** Show dock around the middle of the showreel (#home-reel). */
-const DOCK_REEL_PROGRESS = 0.45;
+/**
+ * Scroll progress through #home-reel / .rj-hero before the dock appears.
+ * ~0.45 fired near first paint (hero already mid-trigger at scroll 0).
+ */
+const DOCK_REEL_PROGRESS = 0.78;
 
 /** Home + solution heroes keep the mid-showreel gate. Other pages show the dock immediately. */
 function isReelGatedAskPath(pathname: string) {
@@ -389,7 +392,6 @@ function useRotatingPlaceholderIndex(paused: boolean) {
  * Call / “Book a call” opens an inline Cal.com calendar in the chat.
  */
 export function AiPromptInput() {
-  const { lenis } = useSmoothScroll();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const articleCatalog = useArticleCatalog();
   const reelGated = isReelGatedAskPath(pathname);
@@ -412,7 +414,12 @@ export function AiPromptInput() {
   const calRef = useRef<HTMLDivElement>(null);
   const revealRef = useRef({ cancelled: false });
   const leadStepRef = useRef<LeadStep | null>(null);
-  const leadAnswersRef = useRef({ email: "", goal: "", company: "" });
+  const leadAnswersRef = useRef({
+    email: "",
+    goal: "",
+    company: "",
+    name: "",
+  });
   const newsletterStepRef = useRef<NewsletterStep | null>(null);
   const newsletterEmailRef = useRef("");
   const croStepRef = useRef<CroAuditStep | null>(null);
@@ -425,8 +432,9 @@ export function AiPromptInput() {
   const scanRafRef = useRef<number | null>(null);
   const dockShownPrevRef = useRef(false);
   const dockTlRef = useRef<gsap.core.Timeline | null>(null);
-  const inFirstSectionRef = useRef(reelGated);
   const openRef = useRef(false);
+  const dockHoveredRef = useRef(false);
+  const dockFocusedRef = useRef(false);
   /** CTA strip already shown once in this general thread. */
   const actionsShownRef = useRef(false);
   /** Cal / lead / CRO capture already in play this session. */
@@ -437,10 +445,11 @@ export function AiPromptInput() {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [open, setOpen] = useState(false);
-  /** Past ~mid showreel — toggles dock visibility. Inner pages start shown. */
+  /** Past late showreel / hero gate (bidirectional). Inner pages start shown. */
   const [pastDockGate, setPastDockGate] = useState(!reelGated);
-  /** First-section (hero copy) is in view — hide tip chips, keep the input. */
-  const [inFirstSection, setInFirstSection] = useState(reelGated);
+  /** Tip chips: only while the dock is hovered or focus is inside it. */
+  const [dockHovered, setDockHovered] = useState(false);
+  const [dockFocused, setDockFocused] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pending, setPending] = useState(false);
   const [leadStep, setLeadStep] = useState<LeadStep | null>(null);
@@ -452,8 +461,9 @@ export function AiPromptInput() {
   const [chatActions, setChatActions] = useState<ChatAction[]>([]);
   const [showCal, setShowCal] = useState(false);
   const [inputHint, setInputHint] = useState<string | null>(null);
-  inFirstSectionRef.current = inFirstSection;
   openRef.current = open;
+  dockHoveredRef.current = dockHovered;
+  dockFocusedRef.current = dockFocused;
 
   function clearChatActions() {
     setChatActions([]);
@@ -508,9 +518,8 @@ export function AiPromptInput() {
     croStepRef.current = croStep;
   }, [croStep]);
 
-  // Dock: appear once around mid-showreel, then stay (no hide on scroll back).
+  // Dock: show past late showreel / hero progress; hide again when scrolling back.
   // Also visible while chat is open (e.g. Let's talk from the hero).
-  // Article / work / resources have no #home-reel — show immediately (do not rAF-wait).
   useEffect(() => {
     if (!reelGated) {
       setPastDockGate(true);
@@ -521,32 +530,32 @@ export function AiPromptInput() {
     let raf = 0;
     let trigger: ScrollTrigger | null = null;
 
-    const latch = () => {
-      setPastDockGate(true);
-      trigger?.kill();
-      trigger = null;
+    const syncGate = (progress: number) => {
+      setPastDockGate(progress >= DOCK_REEL_PROGRESS);
     };
 
     const attach = () => {
       if (cancelled) return;
       const reel = document.getElementById("home-reel");
-      if (!reel) {
+      const hero = document.querySelector<HTMLElement>(".rj-hero");
+      const triggerEl = reel ?? hero;
+      if (!triggerEl) {
         raf = requestAnimationFrame(attach);
         return;
       }
 
       trigger = ScrollTrigger.create({
-        trigger: reel,
+        trigger: triggerEl,
         start: "top bottom",
         end: "bottom top",
         onUpdate: (self) => {
-          if (self.progress >= DOCK_REEL_PROGRESS) latch();
+          syncGate(self.progress);
         },
         onRefresh: (self) => {
-          if (self.progress >= DOCK_REEL_PROGRESS) latch();
+          syncGate(self.progress);
         },
       });
-      if (trigger.progress >= DOCK_REEL_PROGRESS) latch();
+      syncGate(trigger.progress);
     };
 
     attach();
@@ -558,78 +567,35 @@ export function AiPromptInput() {
     };
   }, [reelGated]);
 
-  // Tip chips collapse while the hero copy band is on screen; input stays.
-  // start must be "top bottom" — "top top" goes inactive via onLeaveBack when
-  // the user scrolls back to the hero (hero top == viewport top), which is
-  // exactly when chips should stay hidden over the logos bar.
-  useEffect(() => {
-    if (!reelGated) {
-      setInFirstSection(false);
-      return;
-    }
-
-    let cancelled = false;
-    let raf = 0;
-    let trigger: ScrollTrigger | null = null;
-    let io: IntersectionObserver | null = null;
-    let sync: (() => void) | null = null;
-
-    const attach = () => {
-      if (cancelled) return;
-      const hero = document.querySelector<HTMLElement>(".rj-hero");
-      if (!hero) {
-        raf = requestAnimationFrame(attach);
-        return;
-      }
-
-      sync = () => {
-        if (cancelled) return;
-        const rect = hero.getBoundingClientRect();
-        const inView = rect.bottom > 0 && rect.top < window.innerHeight;
-        setInFirstSection((prev) => (prev === inView ? prev : inView));
-      };
-
-      io = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (!entry || cancelled) return;
-          setInFirstSection(entry.isIntersecting);
-        },
-        { threshold: 0 },
-      );
-      io.observe(hero);
-
-      trigger = ScrollTrigger.create({
-        trigger: hero,
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: sync,
-        onRefresh: sync,
-      });
-      sync();
-      window.addEventListener("scroll", sync, { passive: true });
-      lenis?.on("scroll", sync);
-    };
-
-    attach();
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      trigger?.kill();
-      io?.disconnect();
-      if (sync) {
-        window.removeEventListener("scroll", sync);
-        lenis?.off("scroll", sync);
-      }
-    };
-  }, [lenis, reelGated]);
-
   const dockShown = pastDockGate || open;
-  const tipsCollapsed = inFirstSection && !open;
+  /** Chips stay collapsed until hover or keyboard focus inside the dock. */
+  const tipsCollapsed = open || !(dockHovered || dockFocused);
 
   function hideTipsNow() {
-    return inFirstSectionRef.current || openRef.current;
+    return (
+      openRef.current ||
+      !(dockHoveredRef.current || dockFocusedRef.current)
+    );
+  }
+
+  function onDockPointerEnter() {
+    setDockHovered(true);
+  }
+
+  function onDockPointerLeave() {
+    setDockHovered(false);
+  }
+
+  function onDockFocusIn() {
+    setDockFocused(true);
+  }
+
+  function onDockFocusOut(event: FocusEvent<HTMLDivElement>) {
+    const root = rootRef.current;
+    const next = event.relatedTarget;
+    if (root && next instanceof Node && root.contains(next)) return;
+    setDockFocused(false);
+    setFocused(false);
   }
 
   function applyTipsHidden(hidden: boolean, animate: boolean) {
@@ -687,8 +653,8 @@ export function AiPromptInput() {
     gsap.set(bar, { autoAlpha: 1, y: 0, scale: 1, clearProps: "transform" });
   }
 
-  // Entrance: narrow bar rises (opacity + scale) → stretch to full → chips stagger in.
-  // When the hero is on screen, skip the chip stagger — input only.
+  // Entrance: narrow bar rises (opacity + scale) → stretch to full.
+  // Tip chips stay hidden until hover/focus — never auto-stagger on entrance.
   // Let's talk / open chat must NOT play this morph — jump to final dock + panel size.
   useEffect(() => {
     const root = rootRef.current;
@@ -702,7 +668,6 @@ export function AiPromptInput() {
     const tips = tipsRef.current;
     const chips = chipRefs.current.filter(Boolean) as HTMLButtonElement[];
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const skipChips = hideTipsNow();
     // Chat opening (Let's talk, etc.) while the dock was hidden — no width/scale morph.
     const skipEntranceMorph = openRef.current;
 
@@ -757,7 +722,7 @@ export function AiPromptInput() {
       if (reduced || skipEntranceMorph) {
         gsap.set(root, { width: fullWidth, clearProps: "transform" });
         gsap.set(bar, { autoAlpha: 1, y: 0, scale: 1, clearProps: "transform" });
-        applyTipsHidden(skipChips, false);
+        applyTipsHidden(hideTipsNow(), false);
 
         if (skipEntranceMorph && !reduced) {
           gsap.fromTo(
@@ -828,26 +793,6 @@ export function AiPromptInput() {
         },
         0.32,
       );
-      // 3) Tip buttons one-by-one — never while the hero band is on screen
-      if (tips && !skipChips) {
-        tl.to(
-          tips,
-          { autoAlpha: 1, gridTemplateRows: "1fr", duration: 0.28 },
-          0.68,
-        );
-        tl.to(
-          chips,
-          {
-            autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.38,
-            stagger: 0.09,
-          },
-          0.72,
-        );
-      }
-
       return () => {
         tl.kill();
         dockShownPrevRef.current = false;
@@ -910,7 +855,7 @@ export function AiPromptInput() {
       snapDockToFinalSize();
     }
     if (dockTlRef.current?.isActive()) return;
-    applyTipsHidden(tipsCollapsed || open, true);
+    applyTipsHidden(tipsCollapsed, true);
     // applyTipsHidden / snapDockToFinalSize read latest refs; do not re-run on identity
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipsCollapsed, open, dockShown]);
@@ -1015,7 +960,10 @@ export function AiPromptInput() {
     }
   }
 
-  async function startLeadFlow(service?: AskChatServiceContext | null) {
+  async function startLeadFlow(
+    service?: AskChatServiceContext | null,
+    openDetail?: OpenLeadChatDetail,
+  ) {
     revealRef.current.cancelled = true;
     await sleep(0);
     revealRef.current = { cancelled: false };
@@ -1029,6 +977,7 @@ export function AiPromptInput() {
         ? leadGoalForService(leadServiceRef.current)
         : "",
       company: "",
+      name: openDetail?.prefill?.name?.trim() ?? "",
     };
     setLeadStep("email");
     commercialStartedRef.current = true;
@@ -1049,7 +998,7 @@ export function AiPromptInput() {
       eventType: "intent_open",
       intent: "contact",
       metadata: {
-        source: "open_lead_chat",
+        source: openDetail?.source ?? "open_lead_chat",
         ...(leadServiceRef.current
           ? {
               service: leadServiceRef.current.slug,
@@ -1069,6 +1018,11 @@ export function AiPromptInput() {
       leadIntroForService(leadServiceRef.current),
       "contact",
     );
+
+    const prefillEmail = openDetail?.prefill?.email?.trim();
+    if (prefillEmail && looksLikeEmail(prefillEmail)) {
+      await handleLeadReply(prefillEmail);
+    }
   }
 
   async function startProjectLeadFromChat() {
@@ -1079,7 +1033,7 @@ export function AiPromptInput() {
     resetCroFlow();
     resetNewsletterFlow();
     leadServiceRef.current = null;
-    leadAnswersRef.current = { email: "", goal: "", company: "" };
+    leadAnswersRef.current = { email: "", goal: "", company: "", name: "" };
     setLeadStep("email");
     commercialStartedRef.current = true;
     clearChatActions();
@@ -1116,7 +1070,7 @@ export function AiPromptInput() {
     leadServiceRef.current = null;
     setLeadStep(null);
     leadStepRef.current = null;
-    leadAnswersRef.current = { email: "", goal: "", company: "" };
+    leadAnswersRef.current = { email: "", goal: "", company: "", name: "" };
     newsletterEmailRef.current = "";
     setNewsletterStep("email");
     newsletterStepRef.current = "email";
@@ -1529,7 +1483,7 @@ export function AiPromptInput() {
   useEffect(() => {
     const onOpenLead = (event: Event) => {
       const detail = (event as CustomEvent<OpenLeadChatDetail>).detail;
-      void startLeadFlow(detail?.service ?? null);
+      void startLeadFlow(detail?.service ?? null, detail);
     };
     const onOpenNewsletter = () => {
       void startNewsletterFlow();
@@ -1841,11 +1795,22 @@ export function AiPromptInput() {
       aria-label="Ask UXLAB"
       aria-hidden={dockShown ? undefined : true}
       inert={dockShown ? undefined : true}
+      onMouseEnter={onDockPointerEnter}
+      onMouseLeave={onDockPointerLeave}
+      onFocusCapture={onDockFocusIn}
+      onBlurCapture={onDockFocusOut}
+      onKeyDown={(e) => {
+        if (e.key !== "Escape" || open) return;
+        const active = document.activeElement;
+        if (active instanceof HTMLElement && rootRef.current?.contains(active)) {
+          active.blur();
+        }
+      }}
     >
       <div
         ref={tipsRef}
         className="rj-ask__tips"
-        aria-hidden={open || tipsCollapsed}
+        aria-hidden={tipsCollapsed}
         data-lenis-prevent
       >
         <div className="rj-ask__row" data-lenis-prevent>
@@ -1857,7 +1822,7 @@ export function AiPromptInput() {
               }}
               type="button"
               className="rj-ask__chip"
-              tabIndex={open || tipsCollapsed ? -1 : 0}
+              tabIndex={tipsCollapsed ? -1 : 0}
               onClick={() => onTip(tip)}
             >
               {tip}

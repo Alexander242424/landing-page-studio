@@ -9,11 +9,6 @@ import { usePageReveal } from "@/lib/pageReveal";
 import type { ServicePageContent } from "@/lib/servicePages";
 import { absoluteUrl, organizationJsonLd, SITE } from "@/lib/site";
 
-const GlanceSection = lazy(() =>
-  import("@/components/home/GlanceSection").then((m) => ({
-    default: m.GlanceSection,
-  })),
-);
 const ServiceOutcomesSection = lazy(() =>
   import("@/components/home/ServiceOutcomesSection").then((m) => ({
     default: m.ServiceOutcomesSection,
@@ -67,7 +62,7 @@ function buildJsonLd(page: ServicePageContent, canonicalPath: string) {
         breadcrumb: { "@id": `${url}#breadcrumb` },
         speakable: {
           "@type": "SpeakableSpecification",
-          cssSelector: [".rj-intro__tagline", ".rj-intro__title"],
+          cssSelector: [".rj-intro__tagline"],
         },
       },
       {
@@ -164,13 +159,8 @@ export function ServiceLandingPage({
             taglineLinkLabel: page.valueProp.taglineLinkLabel,
             taglineLinkHref: page.valueProp.taglineLinkHref,
             taglineAfter: page.valueProp.taglineAfter,
-            title: page.valueProp.title,
-            paragraphs: page.valueProp.paragraphs,
           }}
         />
-        <Deferred>
-          <GlanceSection />
-        </Deferred>
         <Deferred>
           <ServiceOutcomesSection
             id={page.outcomes.id}

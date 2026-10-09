@@ -6,11 +6,11 @@ export const SITE = {
   origin: "https://uxlab.digital",
   name: "UXLAB",
   legalName: "UXLAB",
-  tagline: "Convert 2-3x more revenue with the same traffic",
-  title: "UXLAB — Convert 2-3x more revenue with the same traffic",
+  tagline: "Conversion rate optimisation systems for revenue growth",
+  title: "UXLAB — Conversion rate optimisation systems for revenue growth",
   titleTemplate: "%s — UXLAB",
   description:
-    "We help AI startups, product teams and DTC brands double revenue with CRO, user experience and AI engineering.",
+    "Without spending a single cent more on Google Ads, Facebook ads, SEO or content marketing.",
   keywords: [
     "UXLAB",
     "product partner",
@@ -304,7 +304,12 @@ export function homeWebPageJsonLd(path = "/") {
     },
     speakable: {
       "@type": "SpeakableSpecification",
-      cssSelector: [".rj-intro__title", ".rj-hero__headline", ".rj-faq"],
+      cssSelector: [
+        ".rj-customers__tagline",
+        ".rj-intro__tagline",
+        ".rj-hero__headline",
+        ".rj-faq",
+      ],
     },
   };
 }
