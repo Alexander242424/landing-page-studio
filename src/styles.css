@@ -11546,6 +11546,14 @@ html[data-rj-route="work"] body {
   margin-inline: auto;
 }
 
+@media (min-width: 768px) {
+  .rj-page--workflows .rj-wf-page__copy .rj-hero__line,
+  .rj-page--toolverse .rj-wf-page__copy .rj-hero__line {
+    white-space: nowrap;
+    text-wrap: wrap;
+  }
+}
+
 .rj-wf-page__copy .rj-hero__description {
   margin-inline: auto;
 }

@@ -1,5 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
-import { useHeroHeadlineLines } from "@/hooks/useHeroHeadlineLines";
+import {
+  HERO_HEADLINE_MOBILE_MQ,
+  useHeroHeadlineLines,
+} from "@/hooks/useHeroHeadlineLines";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LazyVideo } from "@/components/media/LazyVideo";
@@ -48,7 +51,11 @@ const DEFAULT_HERO: ServiceHeroContent = {
 
 export function HeroReel({ content }: { content?: ServiceHeroContent } = {}) {
   const hero = content ?? DEFAULT_HERO;
-  const headlineLines = useHeroHeadlineLines(hero.lines, hero.linesMobile);
+  const headlineLines = useHeroHeadlineLines(
+    hero.lines,
+    hero.linesMobile,
+    HERO_HEADLINE_MOBILE_MQ,
+  );
   const isPhone = useIsMobile();
   const { isRevealed, shouldPlay } = usePageReveal();
   const loadVideoEager = shouldPlay || isPhone;
